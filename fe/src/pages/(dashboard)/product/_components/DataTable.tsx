@@ -15,7 +15,7 @@ const DataTable = ({ table, columns }: any) => {
         <>
             <Table>
                 <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup: any) => (
+                    {table.getHeaderGroups().map?.((headerGroup: any) => (
                         <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map((header: any) => {
                                 return (
@@ -53,7 +53,7 @@ const DataTable = ({ table, columns }: any) => {
                     ) : (
                         <TableRow>
                             <TableCell
-                                colSpan={columns.length}
+                                colSpan={columns?.length}
                                 className="h-24 text-center"
                             >
                                 No results.
