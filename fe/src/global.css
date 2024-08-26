@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    scroll-behavior: smooth;
+}
+body {
+    @apply font-roboto;
+}
+.container {
+    max-width: 940px;
+    padding: 0 15px;
+    margin: 0 auto !important;
+}
+.padding {
+    @apply px-[10px] sm:px-[30px] md:px-[40px] lg:px-[50px] xl:px-[50px] 2xl:px-[60px];
+}
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+}
+
+.slider-container {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.slick-slide img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+}
