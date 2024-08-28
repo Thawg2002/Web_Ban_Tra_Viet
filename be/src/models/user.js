@@ -25,6 +25,13 @@ const userSchema = new Schema(
       type: String,
       default: "../upload/default-avatar.jpeg",
     },
+    blocked_at: {
+      type: Boolean,
+      default: false,
+    },
+    phone: {
+      type: Number,
+    }
   },
   { timestamps: true, versionKey: false }
 );
