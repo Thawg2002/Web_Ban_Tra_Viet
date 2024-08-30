@@ -9,12 +9,12 @@ const productSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
     },
-    category: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
-      },
-    ],
+    // category: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Category",
+    //   },
+    // ],
     slug: {
       type: String,
       unique: true,

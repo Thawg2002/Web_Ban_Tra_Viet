@@ -7,6 +7,8 @@ import ProductEditPage from "@/pages/(dashboard)/product/edit/page";
 import ProductManagement from "@/pages/(dashboard)/product/page";
 import NotFound from "@/pages/(website)/404/page";
 import AboutPage from "@/pages/(website)/about/page";
+import ShoppingCart from "@/pages/(website)/cart/page";
+import CartPage from "@/pages/(website)/cart/page";
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
 import LoginPage from "@/pages/(website)/login/page";
@@ -26,6 +28,7 @@ const Router = () => {
                     <Route path="products/:id" element={<ProductDetail />} />
                     <Route path="about" element={<AboutPage />} />
                     <Route path="login" element={<LoginPage />} />
+                    <Route path="cart" element={<ShoppingCart />} />
                     <Route path="order-success" element={<OrderSuccess />} />
                     <Route path="checkout" element={<CheckoutPage />} />
                 </Route>

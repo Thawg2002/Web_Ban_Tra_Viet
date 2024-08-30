@@ -106,13 +106,18 @@ const ProductAddPage = () => {
     if (isError) return <div>{error.message}</div>;
     return (
         <>
-            <div className="flex justify-between">
-                <h2 className="font-medium text-xl my-2">Thêm sản phẩm</h2>
+            <div className="flex justify-between items-center py-4 border-b mb-6">
+                <h2 className="font-semibold text-2xl text-gray-800">
+                    Thêm sản phẩm
+                </h2>
 
                 <Link to={"/admin/products"}>
-                    <Button>Quay lại</Button>
+                    <Button className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg">
+                        Quay lại
+                    </Button>
                 </Link>
             </div>
+
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -431,8 +436,15 @@ const ProductAddPage = () => {
                             )}
                         />
                     </div>
-                    <Button type="submit" className="">
-                        {isPending ? <Loader2Icon /> : "Submit"}
+                    <Button
+                        type="submit"
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center"
+                    >
+                        {isPending ? (
+                            <Loader2Icon className="animate-spin mr-2" />
+                        ) : (
+                            "Submit"
+                        )}
                     </Button>
                 </form>
             </Form>

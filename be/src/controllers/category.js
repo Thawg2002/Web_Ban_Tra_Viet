@@ -1,12 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import Category from "../models/category";
-
+import Product from "../models/product";
 import slugify from "slugify";
 
 export const createCategory = async (req, res) => {
   try {
     const category = await Category.create({
       name: req.body.name,
+      description: req.body.description,
       slug: slugify(req.body.name, "-"),
     });
 
@@ -40,7 +41,7 @@ export const getAll = async (req, res) => {
 export const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params; // Sử dụng destructuring để lấy id
-    // const products = await Product.find({ category: id });
+    const products = await Product.find({ category: id });
     const category = await Category.findById(id);
 
     if (!category) {
@@ -51,7 +52,7 @@ export const getCategoryById = async (req, res) => {
     }
     return res.status(StatusCodes.OK).json({
       category,
-      // products,
+      products,
     });
   } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });

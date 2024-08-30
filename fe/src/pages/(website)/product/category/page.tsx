@@ -1,189 +1,197 @@
-import React, { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { banner_banh_trung_thu_5, banner_qua_tet_scaled } from "@/assets/img";
 import { useQuery } from "@tanstack/react-query";
-import instance from "@/configs/axios";
+
+import { getAllCategories } from "@/services/categories";
+import CategoryFilter from "../_components/categoryFilter";
+import { getAllProducts } from "@/services/product";
+import Breadcrumbs from "../_components/breadcrumbs";
 
 const ProductCategory = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [price, setPrice] = useState(0);
+    const [categorifilter, setCategorifilter] = useState<string | null>(null);
+    const productListRef = useRef<HTMLDivElement>(null);
+    const [sortOption, setSortOption] = useState<string>("default");
+    const [categoryName, setCategoryName] = useState<string>("Trà Xanh");
+    const [categoryDescription, setCategoryDescription] = useState<string>("");
 
     // Hàm xử lý khi giá trị của thanh trượt thay đổi
-    const handleRangeChange = (event) => {
-        setPrice(event.target.value);
-    };
+    // const handleRangeChange = (event: any) => {
+    //     setPrice(event.target.value);
+    // };
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
 
-    const { data } = useQuery({
+    const handleSortOptionChange = (option: string) => {
+        setSortOption(option);
+        setIsOpen(false); // Đóng dropdown sau khi chọn
+    };
+
+    const {
+        data: products,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
         queryKey: ["products"],
-        queryFn: async () => {
-            try {
-                const response = await instance.get("products");
-                return response.data;
-                // Trả về dữ liệu từ API
-            } catch (error) {
-                throw new Error("LỖI API");
-            }
-        },
+        queryFn: async () => getAllProducts(),
     });
-
-    const { data: categories } = useQuery({
+    const {
+        data: category,
+        isLoading: isLoadingCategory,
+        isError: isErrorCategory,
+        error: errorCategory,
+    } = useQuery({
         queryKey: ["categories"],
-        queryFn: async () => {
-            try {
-                return await instance.get("categories");
-                // Trả về dữ liệu từ API
-            } catch (error) {
-                throw new Error("LỖI API");
-            }
-        },
+        queryFn: getAllCategories,
     });
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
-    console.log(categories);
+    const onhandleCategories = (
+        valueCategory: string | null,
+        inputValue: number,
+        categoryDisplayName: string,
+        categoryDisplayDescription: string, // Thêm tham số cho mô tả
+    ) => {
+        setCategorifilter(valueCategory);
+        setPrice(inputValue);
+        setCategoryName(categoryDisplayName || "Trà Xanh");
+        setCategoryDescription(categoryDisplayDescription || ""); // Cập nhật mô tả
+    };
+
+    const handleScrollToProductList = () => {
+        if (productListRef.current) {
+            productListRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+    const filteredProducts = products?.data
+        .filter((product: any) => {
+            return (
+                (!categorifilter ||
+                    product.category.includes(categorifilter)) &&
+                (price === 0 || product.regular_price <= price)
+            );
+        })
+        .sort((a: any, b: any) => {
+            if (sortOption === "newest") {
+                return (
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime()
+                );
+            } else if (sortOption === "lowToHigh") {
+                return a.regular_price - b.regular_price;
+            } else if (sortOption === "highToLow") {
+                return b.regular_price - a.regular_price;
+            } else if (sortOption === "bestRating") {
+                return b.rating - a.rating; // Giả sử có trường 'rating'
+            } else {
+                return 0; // Mặc định không sắp xếp
+            }
+        });
+
+    if (isLoadingCategory) return <div>LoadingCategory...</div>;
+    if (isErrorCategory) return <div>{errorCategory.message}</div>;
+    if (isLoading) return <div>Loading...</div>;
+    if (isError) return <div>{error.message}</div>;
 
     return (
         <div>
             <div className="text-center mt-10">
-                <h1 className="text-2xl md:text-4xl font-semibold">Trà Xanh</h1>
-
+                <h1 className="text-2xl md:text-4xl font-semibold">
+                    {categoryName}
+                </h1>
                 <p className="text-gray-600 text-sm md:text-lg mt-4 mx-4 md:mx-96">
-                    Các chuyên gia của Trà Việt đi khắp các vùng trà từ Tây Bắc,
-                    Thái Nguyên đến Bảo Lộc để lựa chọn ra 12 loại trà xanh cao
-                    cấp nhất Việt Nam.
+                    {categoryDescription ||
+                        "Các chuyên gia của Trà Việt đi khắp các vùng trà từ Tây Bắc, Thái Nguyên đến Bảo Lộc để lựa chọn ra 12 loại trà xanh cao cấp nhất Việt Nam."}
                 </p>
+
                 <p className="text-sm md:text-xl text-gray-600 mt-4">
                     Tham khảo:
                     <a className="text-red-600 mx-2 inline-block">TRÀ TẾT</a>
                 </p>
             </div>
             <div className="flex flex-col md:flex-row mx-4 md:mx-10 mt-5">
-                <div className="md:w-1/6 p-4">
-                    <h2 className="font-semibold text-lg">DANH MỤC SẢN PHẨM</h2>
-                    <ul className="mt-4 space-y-2">
-                        {categories?.data?.categories.map((category: any) => (
-                            <li
-                                key={category.id}
-                                className="flex items-center justify-between"
-                            >
-                                <label className="flex items-center">
-                                    <input
-                                        type="radio"
-                                        name="category"
-                                        className="mr-2"
-                                        value={category.id} // Gán giá trị cho radio button
-                                    />
-                                    <span>{category.name}</span>
-                                </label>
-                                <span className="text-gray-600">
-                                    {category.count}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                    <div className="mt-8">
-                        <h3 className="font-semibold text-lg">
-                            KHOẢNG GIÁ TUỲ CHỌN
-                        </h3>
-                        <div className="mt-4">
-                            {/* Thanh trượt */}
-                            <input
-                                type="range"
-                                min="0"
-                                max="9999000"
-                                step="1000"
-                                value={price}
-                                onChange={handleRangeChange}
-                                className="w-full"
-                            />
-                            {/* Hiển thị giá */}
-                            <div className="flex justify-between mt-2 text-xs md:text-sm text-gray-600">
-                                <span>{price.toLocaleString()} đ</span>
-                                <span>9.999.000 đ</span>
-                            </div>
-                            <button className="mt-4 bg-red-600 text-white py-2 px-4 rounded text-xs md:text-base">
-                                LỌC
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
+                <CategoryFilter
+                    category={category?.categories}
+                    onchangeCategories={onhandleCategories}
+                    onScrollToProductList={handleScrollToProductList}
+                />
                 <div className="md:w-5/6 p-4">
                     <div className="flex flex-col md:flex-row">
-                        <div className="flex-grow">
-                            <nav className="text-gray-500 text-xs">
-                                <a href="#" className="hover:text-gray-700">
-                                    TRANG CHỦ
-                                </a>{" "}
-                                /
-                                <a
-                                    href="#"
-                                    className="mx-2 hover:text-gray-700"
-                                >
-                                    CỬA HÀNG
-                                </a>{" "}
-                                /
-                                <a
-                                    href="#"
-                                    className="mx-2 hover:text-gray-700"
-                                >
-                                    TRÀ
-                                </a>{" "}
-                                /
-                                <a
-                                    href="#"
-                                    className="mx-2 hover:text-gray-700"
-                                >
-                                    TRÀ XANH
-                                </a>
-                            </nav>
-                        </div>
-
+                        <Breadcrumbs />
                         <div className="w-full md:w-1/6 text-right mt-4 md:mt-0">
                             <div className="relative">
                                 <button
                                     onClick={toggleDropdown}
                                     className="text-gray-700 font-medium"
                                 >
-                                    THỨ TỰ MẶC ĐỊNH
+                                    {sortOption === "default"
+                                        ? "THỨ TỰ MẶC ĐỊNH"
+                                        : sortOption === "newest"
+                                          ? "Mới nhất"
+                                          : sortOption === "lowToHigh"
+                                            ? "Giá: Thấp đến Cao"
+                                            : sortOption === "highToLow"
+                                              ? "Giá: Cao đến Thấp"
+                                              : "Đánh giá tốt nhất"}
                                     <span className="ml-1">&#9662;</span>
                                 </button>
                                 {isOpen && (
                                     <div className="absolute right-0 mt-2 w-full md:w-48 bg-white border border-gray-200 rounded shadow-lg z-50">
                                         <ul className="py-2 text-sm text-gray-700">
                                             <li>
-                                                <a
-                                                    href="#"
-                                                    className="block px-4 py-2 text-left hover:bg-red-500 hover:text-white"
+                                                <button
+                                                    onClick={() =>
+                                                        handleSortOptionChange(
+                                                            "newest",
+                                                        )
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left hover:bg-red-500 hover:text-white"
                                                 >
                                                     Mới nhất
-                                                </a>
+                                                </button>
                                             </li>
                                             <li>
-                                                <a
-                                                    href="#"
-                                                    className="block px-4 py-2 text-left hover:bg-red-500 hover:text-white"
+                                                <button
+                                                    onClick={() =>
+                                                        handleSortOptionChange(
+                                                            "lowToHigh",
+                                                        )
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left hover:bg-red-500 hover:text-white"
                                                 >
                                                     Giá: Thấp đến Cao
-                                                </a>
+                                                </button>
                                             </li>
                                             <li>
-                                                <a
-                                                    href="#"
-                                                    className="block px-4 py-2 text-left hover:bg-red-500 hover:text-white"
+                                                <button
+                                                    onClick={() =>
+                                                        handleSortOptionChange(
+                                                            "highToLow",
+                                                        )
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left hover:bg-red-500 hover:text-white"
                                                 >
                                                     Giá: Cao đến Thấp
-                                                </a>
+                                                </button>
                                             </li>
                                             <li>
-                                                <a
-                                                    href="#"
-                                                    className="block px-4 py-2 text-left hover:bg-red-500 hover:text-white"
+                                                <button
+                                                    onClick={() =>
+                                                        handleSortOptionChange(
+                                                            "bestRating",
+                                                        )
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left hover:bg-red-500 hover:text-white"
                                                 >
                                                     Đánh giá tốt nhất
-                                                </a>
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>
@@ -192,22 +200,24 @@ const ProductCategory = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-5 mb-5">
-                        {data?.data.map((product: any) => (
+                    <div
+                        ref={productListRef}
+                        className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-5 mb-5"
+                    >
+                        {filteredProducts?.map((product: any) => (
                             <div key={product._id} className="text-center">
                                 <div className="relative cursor-pointer">
                                     <a
                                         href={`products/${product._id}`}
                                         className="text-red-600 text-sm font-medium"
                                     >
-                                        {" "}
                                         <img
                                             src={product.image}
                                             alt={product.name}
                                             className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
                                         />
                                         <img
-                                            src={product.gallery[0]} // Hình ảnh thứ hai khi hover
+                                            src={product.gallery[0]}
                                             alt={`${product.name} Hover`}
                                             className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
                                         />

@@ -1,20 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoStar } from "react-icons/io5";
 import { cn } from "@/common/lib/utils";
+import { useParams } from "react-router-dom";
+import { getProductById, getRelatedProduct } from "@/services/product";
+import { useQuery } from "@tanstack/react-query";
+import SimilarProducts from "./similarProducts";
+import { IProduct } from "@/common/types/product";
 const ProductDetail = () => {
     const [isActive, setIsActive] = useState(1);
     const [content, setContent] = useState("Mô tả sản phẩm");
-    const [mainImage, setMainImage] = useState(
-        "https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-3-600x600.jpg",
-    );
+        const [quantity, setQuantity] = useState(1);
 
-    const images = [
-        "https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-3-600x600.jpg",
-        "https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-2.jpg",
-        "https://www.traviet.com/wp-content/uploads/2023/08/chen-tra-16.webp",
-        "https://www.traviet.com/wp-content/uploads/2015/06/bat-giac-o-long.jpg",
-        "https://www.traviet.com/wp-content/uploads/2015/06/hop-teo-8g.jpg",
-    ];
+    const { id } = useParams<{ id: any }>();
+
+    const { data, isLoading, isError, error } = useQuery({
+        queryKey: ["getProductById", id],
+        queryFn: () => getProductById(id),
+    });
+    const { data: relatedProduct } = useQuery({
+        queryKey: ["relatedProducts", id],
+        queryFn: () => getRelatedProduct(id),
+    });
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [id]);
+    const [mainImage, setMainImage] = useState();
+
     const [activeIndex, setActiveIndex] = useState(null);
 
     const menuList = [
@@ -38,6 +50,25 @@ const ProductDetail = () => {
         setIsActive(item.index);
         setContent(item.content);
     };
+    const product = data?.product;
+    const images = product ? [product.image, ...(product.gallery || [])] : [];
+
+    console.log(product);
+    let filteredProducts = data?.products;
+
+    if (product && filteredProducts) {
+        filteredProducts = filteredProducts.filter(
+            (item: IProduct) =>
+                Array.isArray(item.category) &&
+                item.category.some((cate) => product.category.includes(cate)) &&
+                item._id !== product._id, // Loại bỏ sản phẩm hiện tại
+        );
+    }
+ const handleAddToCart = () => {
+        console.log(`Added ${quantity} ${product.name} to cart.`);
+    };
+    if (isLoading) return <div>Loading...</div>;
+    if (isError) return <div>{error.message}</div>;
     return (
         <>
             <div className="padding py-16 lg:py-20">
@@ -51,7 +82,11 @@ const ProductDetail = () => {
                                     {images.map((image, index) => (
                                         <div
                                             key={index}
-                                            className={`w-[20%] lg:w-full border border-gray-200 shadow-xl cursor-pointer transition-opacity duration-300 ${activeIndex === index ? "opacity-50" : "opacity-100"}`}
+                                            className={`w-[20%] lg:w-full border border-gray-200 shadow-xl cursor-pointer transition-opacity duration-300 ${
+                                                activeIndex === index
+                                                    ? "opacity-50"
+                                                    : "opacity-100"
+                                            }`}
                                             onClick={() => {
                                                 setMainImage(image);
                                                 setActiveIndex(index);
@@ -67,7 +102,7 @@ const ProductDetail = () => {
                                 </div>
                                 <div className="order-1 lg:order-2 w-[100%] lg:w-[85%] border-gray-200 overflow-hidden rounded-[6px] shadow-md">
                                     <img
-                                        src={mainImage}
+                                        src={mainImage || product.image}
                                         className="w-full h-full object-cover transition-opacity duration-300 ease-in-out"
                                         alt="Main"
                                     />
@@ -118,18 +153,26 @@ const ProductDetail = () => {
                             </div>
                             <div className="*:text-[#424242]">
                                 <h3 className="text-[42px] font-semibold py-4">
-                                    Trà Ô Long
+                                    {product.name}
                                 </h3>
+                                <div>
+                                    <span className="font-medium text-[#EB2606] lg:text-xl lg:tracking-[0.7px] mb:text-base flex items-center lg:gap-x-3 lg:mt-0.5 mb:gap-x-2">
+                                        {product.regular_price *
+                                            (1 - product.discount / 100)}{" "}
+                                        đ
+                                        <del className="font-light lg:text-sm mb:text-sm text-[#9D9EA2]">
+                                            {product.regular_price} đ
+                                        </del>
+                                    </span>
+                                </div>
+
                                 <div className="*:font-medium">
-                                    <p className="pb-4 leading-[150%]">
-                                        Trà Ô Long của Trà Việt là một sản phẩm
-                                        trà đặc biệt được lấy từ đồn điền vùng
-                                        Bảo Lộc, nơi nổi tiếng với sản xuất trà
-                                        chất lượng cao. Được chọn lựa từ giống
-                                        trà Ô Long Tứ Quý, sản phẩm này mang đến
-                                        những trải nghiệm thưởng thức trà tuyệt
-                                        vời.
-                                    </p>
+                                    <p
+                                        className="pb-4 leading-[150%]"
+                                        dangerouslySetInnerHTML={{
+                                            __html: product?.description || "",
+                                        }}
+                                    ></p>
                                     <ul className="list-disc pl-5 *:leading-[160%]">
                                         <li className="">
                                             Lên men 30%, vị chát nhẹ và không
@@ -157,6 +200,30 @@ const ProductDetail = () => {
                                     </ul>
                                 </div>
                             </div>
+                            {/*Thêm giỏ hàng */}
+                            <div className="mt-10 flex items-center gap-4">
+                                <div className="flex items-center gap-4">
+                                    <span className="whitespace-nowrap">
+                                        Số lượng:
+                                    </span>
+                                    <input
+                                        type="number"
+                                        value={quantity}
+                                        min={1}
+                                        onChange={(e) =>
+                                            setQuantity(Number(e.target.value))
+                                        }
+                                        className="border border-gray-300 w-20 p-2 text-center"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleAddToCart}
+                                    className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 ml-10 transition-colors"
+                                >
+                                    Thêm vào giỏ hàng
+                                </button>
+                            </div>
+
                             <div className="border-t mt-10 pt-8 border-gray-300 *:uppercase *:text-[rgba(66,66,66,0.55)] *:text-sm *:font-semibold flex flex-col *:leading-[160%] tracking-[0.14px]">
                                 <span className="">Mã: 19001901</span>
                                 <span className="">Danh mục: Trà Xanh</span>
@@ -191,7 +258,8 @@ const ProductDetail = () => {
                     <div className="text-center pt-10">{content}</div>
                 </div>
                 {/* similar product */}
-                <div className="mt-28">
+                <SimilarProducts products={relatedProduct} />
+                {/* <div className="mt-28">
                     <h3 className="text-xl font-semibold text-[rgba(66,66,66,0.55)] text-center pb-5">
                         Sản phẩm tương tự
                     </h3>
@@ -293,7 +361,7 @@ const ProductDetail = () => {
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
         </>
     );

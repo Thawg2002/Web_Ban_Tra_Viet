@@ -82,7 +82,7 @@ export const columns: ColumnDef<IProduct>[] = [
     },
     {
         accessorKey: "featured_image",
-        header: "ảnh sản phẩm",
+        header: "Ảnh sản phẩm",
         cell: ({ row }) => {
             const { image } = row.original;
             return <img src={image} alt="image" width={50} />;
