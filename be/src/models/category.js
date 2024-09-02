@@ -13,12 +13,12 @@ const categorySchema = new Schema(
       unique: true,
       lowercase: true,
     },
-    // products: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Product",
-    //   },
-    // ],
+    products: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   { timestamps: true, versionKey: false }
 );

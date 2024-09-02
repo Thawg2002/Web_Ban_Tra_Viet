@@ -52,6 +52,13 @@ import logo_amazon from "./image/ecomerce-icon-amazon.gif";
 import logo_lazada from "./image/ecomerce-icon-lazada.gif";
 import logo_shoppe from "./image/ecomerce-icon-shopee.gif";
 
+import phu_bw from "./image/phu-bw-400x400.webp";
+import gioi_thieu_tra1 from "./image/gioi-thieu-ve-tra-viet-9-1200x800.webp";
+import gioi_thieu_tra2 from "./image/gioi-thieu-ve-tra-viet2.webp";
+
+import mong_kieu from "./image/mong-kieu-400x400.webp";
+import dinh_ngoc_dung from "./image/dinh-ngoc-dung-4-400x400.webp";
+import thanh_huyen from "./image/huyen-tea-trainer-614x614.jpg";
 export {
     banner_qua_tang_doanh_nghiep,
     banner_am_chen,
@@ -96,5 +103,14 @@ export {
     tra_tuyet_zoom,
     loai_hat_dinh_duong,
     kinh_doanh_tra_viet,
-    logo_bo_cong_thuong,logo_amazon,logo_lazada,logo_shoppe
+    logo_bo_cong_thuong,
+    logo_amazon,
+    logo_lazada,
+    logo_shoppe,
+    phu_bw,
+    gioi_thieu_tra1,
+    gioi_thieu_tra2,
+    mong_kieu,
+    dinh_ngoc_dung,
+    thanh_huyen,
 };

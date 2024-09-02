@@ -2,14 +2,15 @@ import { IProduct } from "@/common/types/product";
 import React, { forwardRef } from "react";
 
 type Props = {
-    products: any;
+    products?: any;
     category?: string;
     price?: number;
 };
 
 const SimilarProducts = forwardRef<HTMLDivElement, Props>(
     ({ products, category, price }: Props, ref) => {
-        let filteredProducts = products?.data;
+        let filteredProducts = products?.data ?? [];
+        
 
         // Lọc sản phẩm dựa trên danh mục
         if (category) {
@@ -17,6 +18,8 @@ const SimilarProducts = forwardRef<HTMLDivElement, Props>(
                 item.category?.some((cate) => cate === category),
             );
         }
+
+        console.log("Filtered by Category:", filteredProducts);
 
         // Lọc sản phẩm dựa trên giá
         if (price != 0 && price != undefined) {
@@ -26,7 +29,7 @@ const SimilarProducts = forwardRef<HTMLDivElement, Props>(
                 return discountedPrice >= 0 && discountedPrice <= price;
             });
         }
-
+        console.log("Filtered by Price:", filteredProducts);
         return (
             <div ref={ref} className="mt-28">
                 <h3 className="text-xl font-semibold text-[rgba(66,66,66,0.55)] text-center pb-5">
@@ -53,7 +56,7 @@ const SimilarProducts = forwardRef<HTMLDivElement, Props>(
                                         />
                                     </a>
                                 </div>
-                                <h3 className="mt-4 text-gray-800 text-sm">
+                                <h3 className="mt-4 text-gray-800 text-sm capitalize">
                                     {product.name}
                                 </h3>
                                 <p className="text-red-600">★★★★★</p>

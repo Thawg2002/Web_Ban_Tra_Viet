@@ -6,29 +6,83 @@ import { getProductById, getRelatedProduct } from "@/services/product";
 import { useQuery } from "@tanstack/react-query";
 import SimilarProducts from "./similarProducts";
 import { IProduct } from "@/common/types/product";
+import useCart from "@/common/hooks/useCart";
+import { toast } from "@/components/ui/use-toast";
 const ProductDetail = () => {
     const [isActive, setIsActive] = useState(1);
     const [content, setContent] = useState("Mô tả sản phẩm");
-        const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState(1);
+    const [mainImage, setMainImage] = useState<string | undefined>();
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-    const { id } = useParams<{ id: any }>();
+    const { id } = useParams<{ id: string }>();
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
 
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ["getProductById", id],
         queryFn: () => getProductById(id),
     });
+
     const { data: relatedProduct } = useQuery({
         queryKey: ["relatedProducts", id],
         queryFn: () => getRelatedProduct(id),
     });
 
+    const { addItem } = useCart(user?._id);
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [id]);
-    const [mainImage, setMainImage] = useState();
 
-    const [activeIndex, setActiveIndex] = useState(null);
+    const handleIncrease = () => {
+        if (product && quantity < product.countInStock) {
+            setQuantity(quantity + 1);
+        }
+    };
 
+    const handleDecrease = () => {
+        setQuantity(quantity > 1 ? quantity - 1 : 1);
+    };
+
+    const handleAddToCart = () => {
+        if (!user?._id) {
+            toast({
+                variant: "error",
+                title: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.",
+            });
+            return;
+        }
+
+        if (product && quantity <= product.countInStock) {
+            addItem.mutate(
+                {
+                    userId: user._id,
+                    productId: product._id,
+                    quantity,
+                },
+                {
+                    onSuccess: () => {
+                        toast({
+                            variant: "success",
+                            title: "Thêm sản phẩm thành công.",
+                        });
+                    },
+                    onError: (error: any) => {
+                        toast({
+                            variant: "error",
+                            title: "Đã xảy ra lỗi khi thêm sản phẩm.",
+                            description: error.message,
+                        });
+                    },
+                },
+            );
+        } else {
+            toast({
+                variant: "error",
+                title: "Số lượng sản phẩm không hợp lệ.",
+            });
+        }
+    };
     const menuList = [
         {
             index: 1,
@@ -53,20 +107,6 @@ const ProductDetail = () => {
     const product = data?.product;
     const images = product ? [product.image, ...(product.gallery || [])] : [];
 
-    console.log(product);
-    let filteredProducts = data?.products;
-
-    if (product && filteredProducts) {
-        filteredProducts = filteredProducts.filter(
-            (item: IProduct) =>
-                Array.isArray(item.category) &&
-                item.category.some((cate) => product.category.includes(cate)) &&
-                item._id !== product._id, // Loại bỏ sản phẩm hiện tại
-        );
-    }
- const handleAddToCart = () => {
-        console.log(`Added ${quantity} ${product.name} to cart.`);
-    };
     if (isLoading) return <div>Loading...</div>;
     if (isError) return <div>{error.message}</div>;
     return (
@@ -152,16 +192,21 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                             <div className="*:text-[#424242]">
-                                <h3 className="text-[42px] font-semibold py-4">
+                                <h3 className="text-[42px] font-semibold py-4 capitalize">
                                     {product.name}
                                 </h3>
                                 <div>
                                     <span className="font-medium text-[#EB2606] lg:text-xl lg:tracking-[0.7px] mb:text-base flex items-center lg:gap-x-3 lg:mt-0.5 mb:gap-x-2">
-                                        {product.regular_price *
-                                            (1 - product.discount / 100)}{" "}
+                                        {Number(
+                                            product.regular_price *
+                                                (1 - product.discount / 100),
+                                        ).toLocaleString()}{" "}
                                         đ
                                         <del className="font-light lg:text-sm mb:text-sm text-[#9D9EA2]">
-                                            {product.regular_price} đ
+                                            {Number(
+                                                product.regular_price,
+                                            ).toLocaleString()}{" "}
+                                            đ
                                         </del>
                                     </span>
                                 </div>
@@ -201,11 +246,10 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                             {/*Thêm giỏ hàng */}
+                            {/* Quantity and Add to Cart */}
                             <div className="mt-10 flex items-center gap-4">
                                 <div className="flex items-center gap-4">
-                                    <span className="whitespace-nowrap">
-                                        Số lượng:
-                                    </span>
+                                    <span>Số lượng:</span>
                                     <input
                                         type="number"
                                         value={quantity}
@@ -259,109 +303,6 @@ const ProductDetail = () => {
                 </div>
                 {/* similar product */}
                 <SimilarProducts products={relatedProduct} />
-                {/* <div className="mt-28">
-                    <h3 className="text-xl font-semibold text-[rgba(66,66,66,0.55)] text-center pb-5">
-                        Sản phẩm tương tự
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-5 mb-5">
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src="https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-3-600x600.jpg"
-                                    alt="Trà Sen"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src="https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-2.jpg" // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Sen Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Sen
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src="https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-3-600x600.jpg"
-                                    alt="Trà Sen"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src="https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-2.jpg" // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Sen Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Sen
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src="https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-3-600x600.jpg"
-                                    alt="Trà Sen"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src="https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-2.jpg" // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Sen Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Sen
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src="https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-3-600x600.jpg"
-                                    alt="Trà Sen"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src="https://www.traviet.com/wp-content/uploads/2015/06/tra-o-long-2.jpg" // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Sen Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Sen
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-                    </div>
-                </div> */}
             </div>
         </>
     );

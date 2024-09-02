@@ -103,7 +103,7 @@ const ProductCategory = () => {
     return (
         <div>
             <div className="text-center mt-10">
-                <h1 className="text-2xl md:text-4xl font-semibold">
+                <h1 className="text-2xl md:text-4xl font-semibold ">
                     {categoryName}
                 </h1>
                 <p className="text-gray-600 text-sm md:text-lg mt-4 mx-4 md:mx-96">
@@ -113,7 +113,7 @@ const ProductCategory = () => {
 
                 <p className="text-sm md:text-xl text-gray-600 mt-4">
                     Tham khảo:
-                    <a className="text-red-600 mx-2 inline-block">TRÀ TẾT</a>
+                    <a href="/" className="text-red-600 mx-2 inline-block">TRÀ TẾT</a>
                 </p>
             </div>
             <div className="flex flex-col md:flex-row mx-4 md:mx-10 mt-5">
@@ -223,7 +223,7 @@ const ProductCategory = () => {
                                         />
                                     </a>
                                 </div>
-                                <h3 className="mt-4 text-gray-800 text-sm">
+                                <h3 className="mt-4 text-gray-800 text-sm capitalize">
                                     {product.name}
                                 </h3>
                                 <p className="text-red-600">★★★★★</p>

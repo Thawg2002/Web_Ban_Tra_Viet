@@ -2,23 +2,16 @@ import { StatusCodes } from "http-status-codes";
 import Category from "../models/category";
 import Product from "../models/product";
 import slugify from "slugify";
-
 export const createCategory = async (req, res) => {
   try {
     const category = await Category.create({
       name: req.body.name,
-      description: req.body.description,
       slug: slugify(req.body.name, "-"),
     });
 
-    return res.status(StatusCodes.CREATED).json({
-      message: "Thêm danh mục thành công",
-      data: category,
-    });
+    return res.status(StatusCodes.CREATED).json(category);
   } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message,
-    });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
   }
 };
 
@@ -32,7 +25,7 @@ export const getAll = async (req, res) => {
     }
     return res
       .status(StatusCodes.OK)
-      .json({ message: "Lấy danh mục thành công", categories });
+      .json({ message: "Lấy sản phẩm thành công", categories });
   } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
   }
@@ -58,25 +51,24 @@ export const getCategoryById = async (req, res) => {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
   }
 };
+export const deleteCategoryById = async (req, res) => {
+  try {
+    const category = await Category.findByIdAndDelete(req.params.id);
+    return res.status(StatusCodes.OK).json(category);
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+  }
+};
 export const updateCategoryById = async (req, res) => {
   try {
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Cập nhật danh mục thành công", category });
+    return res.status(StatusCodes.OK).json(category);
   } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
   }
 };
-export const deleteCategoryById = async (req, res) => {
-  try {
-    const category = await Category.findByIdAndDelete(req.params.id);
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Xóa danh mục thành công", category });
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
-  }
-};
+
+// iphone 13 product max => /product/iphone-13-product-max
+// GET /product/:slug

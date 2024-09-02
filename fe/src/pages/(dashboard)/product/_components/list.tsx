@@ -65,7 +65,7 @@ const ProductList = () => {
                 <div className="flex items-center py-4">
                     <HeaderTable table={table} />
                 </div>
-                <div className="rounded-md border">
+                <div className="rounded-md border capitalize">
                     <DataTable table={table} column={columns} />
                 </div>
                 <div className="flex items-center justify-end space-x-2 py-4">
