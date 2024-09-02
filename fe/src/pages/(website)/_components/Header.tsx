@@ -1,7 +1,8 @@
 import { logo_traviet, logo_traviet_main, tra_o_long } from "@/assets/img";
+import useCart from "@/common/hooks/useCart";
 import { Dropdown, MenuProps } from "antd";
 import { Space } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     AiFillCaretDown,
     AiFillCaretUp,
@@ -19,8 +20,8 @@ const Header = () => {
     const [isScrolled, setIsScrolled] = useState(false);
 
     // Hiệu ứng giỏ hàng
-    const [isCartOpen, setIsCartOpen] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false); // Ví dụ
+    const [isVisible, setIsVisible] = useState(false); // Ví dụ
     const location = useLocation();
 
     useEffect(() => {
@@ -102,6 +103,18 @@ const Header = () => {
             onClick: handleLogout,
         },
     ];
+    const { cart } = useCart(user?._id);
+    const listchecked = cart?.cart?.cartData?.products || [];
+    const totalPriceChecked = useMemo(() => {
+        console.log("List checked:", listchecked);
+        const result = listchecked?.reduce((total, item: any) => {
+            return total + (item.price || 0) * (item.quantity || 1);
+        }, 0);
+        console.log("Total Price Checked:", result);
+        return result;
+    }, [listchecked]);
+    console.log(totalPriceChecked);
+
     return (
         <header
             className={` ${isScrolled ? "bg-[#f6f6f6]" : "bg-transparent"} transition-colors duration-300`}
@@ -200,38 +213,60 @@ const Header = () => {
                                             : "opacity-0 scale-x-0 scale-y-0"
                                     }`}
                                 >
-                                    <div className="mb-4 flex items-center">
-                                        <img
-                                            src={tra_o_long}
-                                            alt="Sản phẩm Trà Ô Long"
-                                            className="w-16 h-16 rounded-lg mr-4 object-cover"
-                                        />
-                                        <div>
-                                            <h2 className="font-normal text-xs leading-tight">
-                                                Quà Tặng Người Mới Uống Trà -
-                                                Trà Ô Long, Trà Sâm Dứa
-                                            </h2>
-                                            <p className="mt-2 text-xs text-gray-200">
-                                                1 x 522.000 đ
-                                            </p>
-                                        </div>
-                                    </div>
+                                    {/* Hiển thị danh sách sản phẩm trong giỏ hàng */}
+                                    {listchecked.length > 0 ? (
+                                        listchecked.map((product: any) => (
+                                            <div
+                                                key={product._id}
+                                                className="mb-4 flex items-center"
+                                            >
+                                                <img
+                                                    src={
+                                                        product.image ||
+                                                        "default-image.png"
+                                                    } // Thay đổi 'default-image.png' nếu cần
+                                                    alt={product.name}
+                                                    className="w-16 h-16 rounded-lg mr-4 object-cover"
+                                                />
+                                                <div>
+                                                    <h2 className="font-normal text-xs leading-tight capitalize">
+                                                        {product.name}
+                                                    </h2>
+                                                    <p className="mt-2 text-xs text-gray-200">
+                                                        {product.quantity} x{" "}
+                                                        {Number(
+                                                            product.price,
+                                                        ).toLocaleString()}{" "}
+                                                        đ
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-center text-sm text-gray-200">
+                                            Giỏ hàng của bạn trống.
+                                        </p>
+                                    )}
+
                                     <div className="border-t border-red-300 pt-4">
                                         <div className="flex justify-between items-center mb-4">
                                             <span className="font-bold text-base">
                                                 Tổng số phụ:
                                             </span>
                                             <span className="font-bold text-base">
-                                                522.000 đ
+                                                {totalPriceChecked.toLocaleString()}{" "}
+                                                đ
                                             </span>
                                         </div>
 
                                         <button className="w-full mt-3 bg-white text-red-600 font-medium text-sm py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-50">
                                             Thanh Toán
                                         </button>
-                                        <button className="w-full mt-2 text-white font-medium text-base py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-500">
-                                            Xem Giỏ Hàng
-                                        </button>
+                                        <Link to={`/cart`}>
+                                            <button className="w-full mt-2 text-white font-medium text-base py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-500">
+                                                Xem Giỏ Hàng
+                                            </button>
+                                        </Link>
                                     </div>
                                     <div className="mt-4 text-center text-sm text-red-100">
                                         Miễn phí giao hàng cho đơn trên

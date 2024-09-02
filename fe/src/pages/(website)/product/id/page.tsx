@@ -34,16 +34,6 @@ const ProductDetail = () => {
         window.scrollTo(0, 0);
     }, [id]);
 
-    const handleIncrease = () => {
-        if (product && quantity < product.countInStock) {
-            setQuantity(quantity + 1);
-        }
-    };
-
-    const handleDecrease = () => {
-        setQuantity(quantity > 1 ? quantity - 1 : 1);
-    };
-
     const handleAddToCart = () => {
         if (!user?._id) {
             toast({

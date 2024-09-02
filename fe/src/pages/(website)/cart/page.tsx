@@ -1,95 +1,303 @@
 import { tra_o_long } from "@/assets/img";
-import React from "react";
-
+import useCart from "@/common/hooks/useCart";
+import { toast } from "@/components/ui/use-toast";
+import { Checkbox } from "antd";
+import { Link } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { MdDeleteSweep } from "react-icons/md";
+import { FaDeleteLeft } from "react-icons/fa6";
 const ShoppingCart = () => {
-    const cartItems = [
-        {
-            name: "Quà tặng khách hàng, đối tác - Trà Cổ Thụ, Trà Lài, Trà Thái Nguyên, Trà Ô Long",
-            price: 1000000,
-            quantity: 9,
-        },
-        {
-            name: "Trà Ô Long - Hộp 10 túi 8 gram tiện dụng",
-            price: 247000,
-            quantity: 1,
-        },
-    ];
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const [listchecked, setListChecked] = useState<string[]>([]);
 
-    const subtotal = 9247000;
-    const tax = 739760;
-    const total = 9986760;
+    const {
+        cart,
+        isLoading,
+        error,
+        decreaseQuantity,
+        increaseQuantity,
+        removeItem,
+    } = useCart(user?._id);
+    // check từng san phẩm
+    const onChangeChecked = (e: any) => {
+        if (listchecked.includes(e.target.value)) {
+            // nếu checkbox đã được chọn thì tạo ra mảng mới k có cái id ý nữa ,sau đó set lại danh sách
+            const newList = listchecked.filter(
+                (item) => item !== e.target.value,
+            );
+            setListChecked(newList);
+        } else {
+            // nếu chwua thì thêm vào danh sách check
+            setListChecked([...listchecked, e.target.value]);
+        }
+    };
+    //Check toàn bộ
+    const onChangeCheckedAll = (e: any) => {
+        const newListCheck: any = [];
+        if (e.target.checked) {
+            // console.log("data", cart?.cart?.cartData?.products);
+            cart?.cart?.cartData?.products.map((item: any) =>
+                newListCheck.push(item as any),
+            );
+            setListChecked(newListCheck);
+        } else {
+            setListChecked([]);
+        }
+    };
+    //Tính tổng giá những sản phẩm được checked
+    const totalPriceChecked = useMemo(() => {
+        const result = listchecked?.reduce((total, item: any) => {
+            return total + (item.finalPrice || 0);
+        }, 0);
+        return result;
+    }, [listchecked]);
+
+    const handleQuantity = async (message: string, productId: string) => {
+        try {
+            if (message === "decreaseQuantity") {
+                decreaseQuantity.mutate({
+                    userId: user._id,
+                    productId,
+                });
+            } else if (message === "increaseQuantity") {
+                increaseQuantity.mutate({
+                    userId: user._id,
+                    productId,
+                });
+            }
+        } catch (error) {
+            console.log("error", error);
+        }
+    };
+    // Xóa sản phẩm
+    const onhandleDelete = async (message: string, items: any) => {
+        try {
+            if (message === "deleteOneProduct") {
+                removeItem.mutate({
+                    userId: user._id,
+                    productIds: items.productId,
+                });
+                setListChecked([]);
+                toast({
+                    variant: "success",
+                    title: "Xóa thành công sản phẩm.",
+                });
+            } else if (message === "deleteAllProduct") {
+                for (const item of items) {
+                    await removeItem.mutateAsync({
+                        userId: user._id,
+                        productIds: item.productId,
+                    });
+                }
+                setListChecked([]);
+                toast({
+                    variant: "success",
+                    title: "Xóa thành công sản phẩm.",
+                });
+            }
+        } catch (error) {
+            console.log("error", error);
+            toast({
+                variant: "error",
+                title: "Đã xảy ra lỗi khi xóa sản phẩm.",
+            });
+        }
+    };
+    if (isLoading) return <p>Loading...</p>;
+    if (error) return <p>Error loading cart data</p>;
 
     return (
-        <div className="max-w-full lg:max-w-[1200px] mx-auto p-4 lg:p-6">
-            <h1 className="text-3xl lg:text-5xl font-bold mb-4 lg:mb-6 text-center">
-                Giỏ hàng
-            </h1>
-            <div className="flex flex-col md:flex-row gap-4 lg:gap-6 mt-6 lg:mt-8">
-                <div className="w-full md:w-2/3">
-                    {cartItems.map((item, index) => (
-                        <div
-                            key={index}
-                            className="flex flex-col md:flex-row items-center border-b py-4 md:py-2"
-                        >
-                            <button className="mr-4 text-gray-500">
-                                &times;
-                            </button>
-                            <img
-                                src={tra_o_long}
-                                alt={item.name}
-                                className="w-16 h-16 md:w-20 md:h-20 object-cover mb-4 md:mb-0 mr-0 md:mr-4"
-                            />
-                            <div className="flex-grow text-center md:text-left">
-                                <p className=" font-semibold">{item.name}</p>
-                                <p className="text-gray-600">
-                                    {item.price.toLocaleString()} ₫
-                                </p>
-                            </div>
-                            <input
-                                type="number"
-                                value={item.quantity}
-                                className="w-16 p-2 border rounded text-center mt-2 md:mt-0"
-                                min="1"
-                            />
-                            <p className="ml-0 md:ml-4 mt-2 md:mt-0 font-roboto">
-                                {(item.price * item.quantity).toLocaleString()}{" "}
-                                ₫
-                            </p>
+        <main className="lg:w-[1170px] mb:w-[342px] lg:mt-8 mb:mt-6 mx-auto grid lg:grid-cols-[686px_420px] mb:grid-cols-[100%] justify-between *:w-full pb-10">
+            <div>
+                <h1 className="text-3xl lg:text-5xl font-bold mb-4 lg:mb-6 text-center">
+                    Giỏ hàng ({cart?.cart?.totalQuantity})
+                </h1>
+                <span className="text-xl  mb-[1px] items-center justify-between pb-2 border-b">
+                    <div className="flex justify-between">
+                        <div>
+                            <Checkbox
+                                onChange={onChangeCheckedAll}
+                                checked={
+                                    listchecked?.length ===
+                                    cart?.cart?.cartData?.products.length
+                                }
+                                className="text-[#9D9EA2]"
+                            >
+                                Chọn tất cả
+                            </Checkbox>
                         </div>
-                    ))}
-                </div>
-                <div className="w-full md:w-1/3 bg-gray-100 p-4 lg:p-6 rounded">
-                    <h2 className="text-lg lg:text-xl font-bold mb-2 lg:mb-4">
-                        CỘNG GIỎ HÀNG
-                    </h2>
-                    <div className="flex justify-between mb-2">
-                        <span>TẠM TÍNH</span>
-                        <span>{subtotal.toLocaleString()} ₫</span>
+                        <div className="w-[30px] max-w-[30px]">
+                            {listchecked?.length ===
+                                cart?.cart?.cartData?.products.length ||
+                            listchecked?.length > 1 ? (
+                                <MdDeleteSweep
+                                    className="text-[25px] text-red-500 cursor-pointer"
+                                    onClick={() =>
+                                        onhandleDelete(
+                                            "deleteAllProduct",
+                                            listchecked,
+                                        )
+                                    }
+                                />
+                            ) : (
+                                <MdDeleteSweep className="text-[25px] text-red-300" />
+                            )}
+                        </div>
                     </div>
-                    <div className="flex justify-between mb-2 lg:mb-4">
-                        <span>THUẾ VAT 8%</span>
-                        <span>{tax.toLocaleString()} ₫</span>
+                </span>
+                {!cart?.cart?.cartData?.products ||
+                cart?.cart?.cartData?.products?.length === 0 ? (
+                    <div className="text-center mt-5 text-gray-400">
+                        <span>Không có sản phẩm trong giỏ hàng</span>
                     </div>
-                    <div className="flex justify-between font-bold text-base lg:text-lg">
-                        <span>TỔNG</span>
-                        <span>{total.toLocaleString()} ₫</span>
+                ) : (
+                    <div className="flex flex-col border-b lg:pb-[22px] mb:pb-3">
+                        {cart?.cart?.cartData?.products?.map(
+                            (item: any, index: number) => {
+                                return (
+                                    <section
+                                        className="flex lg:mt-[23px] mb:mt-[15px] gap-x-4 group relative "
+                                        key={index}
+                                    >
+                                        <Checkbox
+                                            value={item}
+                                            onChange={onChangeChecked}
+                                            checked={listchecked.includes(item)}
+                                        ></Checkbox>
+                                        <img
+                                            className="border rounded w-12 h-12 p-1"
+                                            src={item.image}
+                                            alt=""
+                                        />
+                                        {/* change quantity, name , price */}
+                                        <div className="relative w-full flex flex-col *:justify-between gap-y-2.5 lg:gap-y-3">
+                                            <div className="lg:py-2 mb-0.5 lg:mb-0 flex lg:flex-row mb:flex-col lg:items-center gap-x-4">
+                                                <span className="text-[#9D9EA2] text-sm capitalize">
+                                                    {item.name}
+                                                </span>
+                                                <div className="relative lg:absolute lg:left-1/2 lg:-translate-x-[20.5%]">
+                                                    <div className="lg:mt-0 mb:mt-[12.5px] flex items-center *:grid *:place-items-center *:lg:w-9 *:lg:h-9 *:mb:w-8 *:mb:h-8">
+                                                        <button
+                                                            onClick={() =>
+                                                                handleQuantity(
+                                                                    "decreaseQuantity",
+                                                                    item.productId,
+                                                                )
+                                                            }
+                                                        >
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width={12}
+                                                                height={12}
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth={2}
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                className="lucide lucide-minus text-xs"
+                                                            >
+                                                                <path d="M5 12h14" />
+                                                            </svg>
+                                                        </button>
+                                                        <div className="bg-[#F4F4F4] text-xs rounded">
+                                                            {item.quantity}
+                                                        </div>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleQuantity(
+                                                                    "increaseQuantity",
+                                                                    item.productId,
+                                                                )
+                                                            }
+                                                        >
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width={12}
+                                                                height={12}
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth={2}
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                className="lucide lucide-plus text-xs"
+                                                            >
+                                                                <path d="M5 12h14" />
+                                                                <path d="M12 5v14" />
+                                                            </svg>
+                                                        </button>
+                                                        <span className="ml-3 text-sm">
+                                                            {Number(
+                                                                item.price,
+                                                            ).toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                    {/* price */}
+                                                    <span className="block absolute lg:hidden text-[#9D9EA2] text-sm top-5 right-0">
+                                                        {Number(
+                                                            item.price,
+                                                        ).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                                {/* price */}
+                                                <span className="hidden lg:block text-[#4a4c54] text-sm ">
+                                                  
+                                                    {Number(
+                                                        item.finalPrice,
+                                                    ).toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="hidden group-hover:flex items-center justify-center w-[55px] max-w-[55px]">
+                                            <FaDeleteLeft
+                                                className="w-[55px] max-w-[55px] mb-2 text-red-500 text-[20px] cursor-pointer"
+                                                onClick={() =>
+                                                    onhandleDelete(
+                                                        "deleteOneProduct",
+                                                        item,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    </section>
+                                );
+                            },
+                        )}
                     </div>
-                    <button className="w-full bg-red-500 text-white py-2 lg:py-3 rounded mt-4 uppercase font-bold">
-                        Tiến hành thanh toán
+                )}
+            </div>
+
+            {/* right */}
+            <div className="hidden lg:block">
+                <div className="w-full lg:p-6 mb:p-5 border rounded-2xl flex flex-col gap-y-[3px]">
+                    <div className="flex flex-col gap-y-4">
+                        <section className="flex justify-between text-sm">
+                            <span className="text-[#9D9EA2]">Tổng </span>
+                            <p>
+                                {Number(totalPriceChecked).toLocaleString()} đ
+                            </p>
+                        </section>
+                    </div>
+
+                    <a
+                        href={"/"}
+                        className="font-semibold text-sm underline cursor-pointer my-1 tracking-[-0.1px]"
+                    >
+                        Tiếp tục mua hàng
+                    </a>
+                    <button className="bg-[#17AF26] px-10 h-14 rounded-[100px] text-white flex my-[13px] gap-x-4 place-items-center justify-center">
+                        <span>Thanh Toán</span>|
+                        <span>
+                            {" "}
+                            {Number(totalPriceChecked).toLocaleString()} đ
+                        </span>
                     </button>
+                    {/* payment */}
                 </div>
             </div>
-            <div className="mt-6 flex flex-col md:flex-row items-center">
-                <input
-                    type="text"
-                    placeholder="Mã ưu đãi"
-                    className="p-2 border rounded mr-2 mb-2 md:mb-0"
-                />
-                <button className="bg-gray-200 text-gray-700 py-2 px-4 rounded">
-                    ÁP DỤNG
-                </button>
-            </div>
-        </div>
+            {/* delivery */}
+        </main>
     );
 };
 
