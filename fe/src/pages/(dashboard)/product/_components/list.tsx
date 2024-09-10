@@ -56,14 +56,16 @@ const ProductList = () => {
         <div>
             <div>
                 <Link to={"/admin/products/add"}>
-                    <Button className="mb-4">Add Product</Button>
+                    <Button className="mb-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+                        Thêm sản phẩm
+                    </Button>
                 </Link>
             </div>
             <div className="w-full">
                 <div className="flex items-center py-4">
                     <HeaderTable table={table} />
                 </div>
-                <div className="rounded-md border">
+                <div className="rounded-md border capitalize">
                     <DataTable table={table} column={columns} />
                 </div>
                 <div className="flex items-center justify-end space-x-2 py-4">

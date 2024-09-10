@@ -109,10 +109,17 @@ const CategoryEdit = () => {
                 >
                     <Input />
                 </Form.Item>
-                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                    <Button type="primary" htmlType="submit">
+                <Form.Item
+                    wrapperCol={{ offset: 8, span: 16 }}
+                    className="flex justify-center mt-6"
+                >
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg flex items-center justify-center"
+                    >
                         {isPending ? (
-                            <AiOutlineLoading3Quarters />
+                            <AiOutlineLoading3Quarters className="animate-spin mr-2" />
                         ) : (
                             <span>Submit</span>
                         )}
