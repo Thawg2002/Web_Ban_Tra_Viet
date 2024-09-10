@@ -4,9 +4,10 @@ import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dontev from "dotenv";
 import RefreshToken from "../models/RefreshToken";
+import { loginFormValidation, registerFormValidation } from "../validations/auth";
+
 dontev.config();
 
-import { loginFormValidation, registerFormValidation } from "../validations/auth";
 export const generateAccessToken = async (payload) => {
     return jwt.sign(payload, process.env.SECRET_ACCESS_TOKEN, { expiresIn: "1h" });
 }
@@ -55,6 +56,7 @@ export const login = async (req, res) => {
         return res.status(StatusCodes.OK).json({
             message: "Đăng nhập thành công",
             accessToken: accessToken,
+            refreshToken: refreshToken,
         })
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
