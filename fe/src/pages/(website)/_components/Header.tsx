@@ -12,7 +12,7 @@ import { CiMenuBurger, CiSearch } from "react-icons/ci";
 import { FaRegUserCircle, FaUser } from "react-icons/fa";
 import { IoCartOutline, IoCloseCircleSharp } from "react-icons/io5";
 import { useMediaQuery } from "react-responsive";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Header = () => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -23,6 +23,16 @@ const Header = () => {
     const [isCartOpen, setIsCartOpen] = useState(false); // Ví dụ
     const [isVisible, setIsVisible] = useState(false); // Ví dụ
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleCartClick = () => {
+        if (window.innerWidth <= 768) {
+            // Giả sử 768px là breakpoint cho responsive
+            navigate("/cart");
+        } else {
+            toggleCart();
+        }
+    };
 
     useEffect(() => {
         if (isCartOpen) {
@@ -202,7 +212,7 @@ const Header = () => {
                         <div className="relative">
                             <IoCartOutline
                                 className="ml-[20px] cursor-pointer"
-                                onClick={toggleCart}
+                                onClick={handleCartClick}
                             />
                             {/* Cart Dropdown */}
                             {isCartOpen && (
@@ -259,9 +269,11 @@ const Header = () => {
                                             </span>
                                         </div>
 
-                                        <button className="w-full mt-3 bg-white text-red-600 font-medium text-sm py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-50">
-                                            Thanh Toán
-                                        </button>
+                                        <Link to={`/checkout`}>
+                                            <button className="w-full mt-3 bg-white text-red-600 font-medium text-sm py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-50">
+                                                Thanh Toán
+                                            </button>
+                                        </Link>
                                         <Link to={`/cart`}>
                                             <button className="w-full mt-2 text-white font-medium text-base py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-500">
                                                 Xem Giỏ Hàng
@@ -282,7 +294,6 @@ const Header = () => {
                             <>
                                 <Dropdown menu={{ items }}>
                                     <a onClick={(e) => e.preventDefault()}>
-                                        {" "}
                                         <Link to="/login">
                                             <FaRegUserCircle className="ml-[20px] cursor-pointer" />
                                         </Link>

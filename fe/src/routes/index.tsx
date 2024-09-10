@@ -8,12 +8,17 @@ import ProductManagement from "@/pages/(dashboard)/product/page";
 import NotFound from "@/pages/(website)/404/page";
 import AboutPage from "@/pages/(website)/about/page";
 import ShoppingCart from "@/pages/(website)/cart/page";
-import CartPage from "@/pages/(website)/cart/page";
+
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
 import LoginPage from "@/pages/(website)/login/page";
 import OrderSuccess from "@/pages/(website)/order-success/page";
+import OrderAdd from "@/pages/(website)/order/_components/OrderAdd";
+import OrderDetail from "@/pages/(website)/order/_components/OrderDetail";
+
+import OrderList from "@/pages/(website)/order/_components/OrderList";
 import CheckoutPage from "@/pages/(website)/order/page";
+// import CheckoutPage from "@/pages/(website)/order/page";
 import ProductCategory from "@/pages/(website)/product/category/page";
 import ProductDetail from "@/pages/(website)/product/id/page";
 import { Route, Routes } from "react-router-dom";
@@ -30,6 +35,7 @@ const Router = () => {
                     <Route path="login" element={<LoginPage />} />
                     <Route path="cart" element={<ShoppingCart />} />
                     <Route path="order-success" element={<OrderSuccess />} />
+
                     <Route path="checkout" element={<CheckoutPage />} />
                 </Route>
                 <Route path="admin" element={<LayoutAdmin />}>

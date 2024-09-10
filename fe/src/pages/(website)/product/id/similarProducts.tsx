@@ -1,5 +1,6 @@
 import { IProduct } from "@/common/types/product";
 import React, { forwardRef } from "react";
+import { Link } from "react-router-dom";
 
 type Props = {
     products?: any;
@@ -10,7 +11,6 @@ type Props = {
 const SimilarProducts = forwardRef<HTMLDivElement, Props>(
     ({ products, category, price }: Props, ref) => {
         let filteredProducts = products?.data ?? [];
-        
 
         // Lọc sản phẩm dựa trên danh mục
         if (category) {
@@ -60,9 +60,12 @@ const SimilarProducts = forwardRef<HTMLDivElement, Props>(
                                     {product.name}
                                 </h3>
                                 <p className="text-red-600">★★★★★</p>
-                                <a className="text-red-600 text-sm font-medium">
+                                <Link
+                                    to={`/products/${product._id}`}
+                                    className="text-red-600 text-sm font-medium"
+                                >
                                     ĐỌC TIẾP
-                                </a>
+                                </Link>
                             </div>
                         ))
                     ) : (

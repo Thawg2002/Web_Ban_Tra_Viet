@@ -151,9 +151,11 @@ const HomePage = () => {
                                             )}
                                         </span>
 
-                                        <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
-                                            Thêm vào giỏ hàng
-                                        </p>
+                                        <Link to={`products/${product._id}`}>
+                                            <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
+                                                Xem chi tiết
+                                            </p>
+                                        </Link>
                                     </div>
                                 </div>
                             ))}

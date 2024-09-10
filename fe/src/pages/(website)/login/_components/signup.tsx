@@ -15,10 +15,14 @@ interface SignupFormData {
 
 const Signup = (props: Props) => {
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
     };
+    const toggleConfirmPasswordVisibility = () =>
+        setConfirmPasswordVisible(!confirmPasswordVisible);
+
     const [messageApi, contextHolder] = message.useMessage();
     // const navigate = useNavigate();
     const {
@@ -30,33 +34,30 @@ const Signup = (props: Props) => {
         mode: "onBlur", // Trigger validation on blur
     });
 
-     const { mutate, isPending, isError, error } = useMutation({
-         mutationFn: async (user: SignupFormData) => {
-             return await SignupUser(user);
-         },
-         onSuccess: (response: any) => {
-             messageApi.open({
-                 type: "success",
-                 content: "Đăng ký thành công",
-             });
-             // Điều hướng người dùng đến trang đăng nhập hoặc trang khác sau khi thành công
-         },
-         onError: (error: any) => {
-             // Xử lý lỗi khi đăng ký thất bại
-             if (error.message.includes("email")) {
-                 // Nếu API trả về lỗi liên quan đến email đã tồn tại
-                 messageApi.open({
-                     type: "error",
-                     content: "Email đã tồn tại, vui lòng sử dụng email khác",
-                 });
-             } else {
-                 messageApi.open({
-                     type: "error",
-                     content: "Đăng ký thất bại, vui lòng thử lại",
-                 });
-             }
-         },
-     });
+    const { mutate, isPending, isError, error } = useMutation({
+        mutationFn: SignupUser,
+        onSuccess: () => {
+            messageApi.open({
+                type: "success",
+                content: "Đăng ký thành công",
+            });
+            // Điều hướng đến trang đăng nhập
+        },
+        onError: (error: any) => {
+            // Kiểm tra cấu trúc của lỗi và đảm bảo rằng có thông báo lỗi
+            const errorMessage =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Đăng ký thất bại, vui lòng thử lại";
+
+            messageApi.open({
+                type: "error",
+                content: errorMessage.includes("email")
+                    ? "Email đã tồn tại, vui lòng sử dụng email khác"
+                    : "Đăng ký thất bại, vui lòng thử lại",
+            });
+        },
+    });
 
     const onSubmit = async (data: SignupFormData) => {
         mutate(data);
@@ -121,6 +122,7 @@ const Signup = (props: Props) => {
                             </p>
                         )}
                     </div>
+
                     <div className="mb-4">
                         <label
                             className="block text-gray-700 text-sm font-bold mb-2"
@@ -162,7 +164,7 @@ const Signup = (props: Props) => {
                                         d={
                                             passwordVisible
                                                 ? "M10 4c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6m0-2C5.586 2 2 6.486 2 10s3.586 8 8 8 8-3.486 8-8-3.586-8-8-8zM10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                                                : "M10 2C5.586 2 2 6.486 2 10s3.586 8 8 8 8-3.486 8-8-3.586-8-8-8-8zm0 14c-3.243 0-6-3.482-6-6s2.757-6 6-6 6 3.482 6 6-2.757 6-6 6zm0-11c-1.655 0-3 1.345-3 3s1.345 3 3 3 3-1.345 3-3-1.345-3-3-3z"
+                                                : "M10 2C5.586 2 2 6.486 2 10s3.586 8 8 8 8-3.486 8-8-3.586-8-8-8zm0 14c-3.243 0-6-3.482-6-6s2.757-6 6-6 6 3.482 6 6-2.757 6-6 6zm0-11c-1.655 0-3 1.345-3 3s1.345 3 3 3 3-1.345 3-3-1.345-3-3-3z"
                                         }
                                     />
                                 </svg>
@@ -174,33 +176,63 @@ const Signup = (props: Props) => {
                             </p>
                         )}
                     </div>
+
                     <div className="mb-4">
                         <label
                             className="block text-gray-700 text-sm font-bold mb-2"
-                            htmlFor="confirmPassword"
+                            htmlFor="password"
                         >
                             Xác nhận mật khẩu *
                         </label>
-                        <input
-                            {...register("confirmPassword", {
-                                required: "Xác nhận mật khẩu là bắt buộc",
-                                validate: (value) =>
-                                    value === getValues("password") ||
-                                    "Mật khẩu xác nhận không khớp",
-                            })}
-                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                                errors.confirmPassword ? "border-red-500" : ""
-                            }`}
-                            id="confirmPassword"
-                            type={passwordVisible ? "text" : "password"}
-                            placeholder="Xác nhận mật khẩu"
-                        />
+                        <div className="relative">
+                            <input
+                                {...register("confirmPassword", {
+                                    required: "Xác nhận mật khẩu là bắt buộc",
+                                    validate: (value) =>
+                                        value === getValues("password") ||
+                                        "Mật khẩu xác nhận không khớp",
+                                })}
+                                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                                    errors.confirmPassword
+                                        ? "border-red-500"
+                                        : ""
+                                }`}
+                                id="confirmPassword"
+                                type={
+                                    confirmPasswordVisible ? "text" : "password"
+                                }
+                                placeholder="Xác nhận mật khẩu"
+                            />
+                            <span
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                                onClick={toggleConfirmPasswordVisibility}
+                            >
+                                <svg
+                                    className={`h-5 w-5 ${
+                                        confirmPasswordVisible
+                                            ? "text-pink-500"
+                                            : "text-gray-500"
+                                    }`}
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                >
+                                    <path
+                                        d={
+                                            confirmPasswordVisible
+                                                ? "M10 4c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6m0-2C5.586 2 2 6.486 2 10s3.586 8 8 8 8-3.486 8-8-3.586-8-8-8zM10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
+                                                : "M10 2C5.586 2 2 6.486 2 10s3.586 8 8 8 8-3.486 8-8-3.586-8-8-8zm0 14c-3.243 0-6-3.482-6-6s2.757-6 6-6 6 3.482 6 6-2.757 6-6 6zm0-11c-1.655 0-3 1.345-3 3s1.345 3 3 3 3-1.345 3-3-1.345-3-3-3z"
+                                        }
+                                    />
+                                </svg>
+                            </span>
+                        </div>
                         {errors.confirmPassword && (
                             <p className="text-red-500 text-xs mt-2">
                                 {errors.confirmPassword.message}
                             </p>
                         )}
                     </div>
+
                     <div className="mb-4">
                         <label className="inline-flex items-center">
                             <input
