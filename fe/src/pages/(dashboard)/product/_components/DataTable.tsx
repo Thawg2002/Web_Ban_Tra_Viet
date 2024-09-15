@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/table";
 
 const DataTable = ({ table, columns }: any) => {
-    
     return (
         <>
             <Table>

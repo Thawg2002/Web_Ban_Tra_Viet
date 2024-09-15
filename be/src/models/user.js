@@ -17,20 +17,14 @@ const userSchema = new Schema(
       maxlength: 30,
     },
     role: {
-      type: Boolean,
-      default: false,
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
     avatar: {
       type: String,
       default: "../upload/default-avatar.jpeg",
     },
-    blocked_at: {
-      type: Boolean,
-      default: false,
-    },
-    phone: {
-      type: Number,
-    }
   },
   { timestamps: true, versionKey: false }
 );

@@ -1,8 +1,15 @@
 import { logo_traviet, logo_traviet_main, tra_o_long } from "@/assets/img";
-import { useEffect, useState } from "react";
-import { AiFillCaretDown, AiFillCaretUp } from "react-icons/ai";
+import useCart from "@/common/hooks/useCart";
+import { Dropdown, MenuProps } from "antd";
+import { Space } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+    AiFillCaretDown,
+    AiFillCaretUp,
+    AiOutlineUserDelete,
+} from "react-icons/ai";
 import { CiMenuBurger, CiSearch } from "react-icons/ci";
-import { FaRegUserCircle } from "react-icons/fa";
+import { FaRegUserCircle, FaUser } from "react-icons/fa";
 import { IoCartOutline, IoCloseCircleSharp } from "react-icons/io5";
 import { useMediaQuery } from "react-responsive";
 import { Link, useLocation } from "react-router-dom";
@@ -13,8 +20,8 @@ const Header = () => {
     const [isScrolled, setIsScrolled] = useState(false);
 
     // Hiệu ứng giỏ hàng
-    const [isCartOpen, setIsCartOpen] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false); // Ví dụ
+    const [isVisible, setIsVisible] = useState(false); // Ví dụ
     const location = useLocation();
 
     useEffect(() => {
@@ -54,6 +61,59 @@ const Header = () => {
     }, []);
     const logoToShow =
         isLargeScreen && !isScrolled ? logo_traviet : logo_traviet_main;
+    const userString = localStorage.getItem("user");
+    const user = userString ? JSON.parse(userString) : {};
+    // Menu properties
+
+    const handleLogout = () => {
+        // Xóa thông tin người dùng khỏi localStorage (hoặc state/cookie tùy thuộc vào ứng dụng của bạn)
+        localStorage.removeItem("user");
+
+        // Điều hướng người dùng đến trang đăng nhập
+    };
+    const items: MenuProps["items"] = [
+        {
+            key: "1",
+            label: (
+                <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://www.antgroup.com"
+                >
+                    User information
+                </a>
+            ),
+        },
+        ...(user?.role == "admin"
+            ? [
+                  {
+                      key: "2",
+                      label: (
+                          <Link to="/admin" rel="noopener noreferrer">
+                              Admin Page
+                          </Link>
+                      ),
+                  },
+              ]
+            : []),
+        {
+            key: "4",
+            danger: true,
+            label: "Logout",
+            onClick: handleLogout,
+        },
+    ];
+    const { cart } = useCart(user?._id);
+    const listchecked = cart?.cart?.cartData?.products || [];
+    const totalPriceChecked = useMemo(() => {
+        console.log("List checked:", listchecked);
+        const result = listchecked?.reduce((total, item: any) => {
+            return total + (item.price || 0) * (item.quantity || 1);
+        }, 0);
+        console.log("Total Price Checked:", result);
+        return result;
+    }, [listchecked]);
+    console.log(totalPriceChecked);
 
     return (
         <header
@@ -117,7 +177,7 @@ const Header = () => {
                                     </li>
                                 </Link>
 
-                                <Link to={""}>
+                                <Link to={"/about"}>
                                     <li className="mx-2">GIỚI THIỆU</li>
                                 </Link>
                                 <Link to={""}>
@@ -153,38 +213,60 @@ const Header = () => {
                                             : "opacity-0 scale-x-0 scale-y-0"
                                     }`}
                                 >
-                                    <div className="mb-4 flex items-center">
-                                        <img
-                                            src={tra_o_long}
-                                            alt="Sản phẩm Trà Ô Long"
-                                            className="w-16 h-16 rounded-lg mr-4 object-cover"
-                                        />
-                                        <div>
-                                            <h2 className="font-normal text-xs leading-tight">
-                                                Quà Tặng Người Mới Uống Trà -
-                                                Trà Ô Long, Trà Sâm Dứa
-                                            </h2>
-                                            <p className="mt-2 text-xs text-gray-200">
-                                                1 x 522.000 đ
-                                            </p>
-                                        </div>
-                                    </div>
+                                    {/* Hiển thị danh sách sản phẩm trong giỏ hàng */}
+                                    {listchecked.length > 0 ? (
+                                        listchecked.map((product: any) => (
+                                            <div
+                                                key={product._id}
+                                                className="mb-4 flex items-center"
+                                            >
+                                                <img
+                                                    src={
+                                                        product.image ||
+                                                        "default-image.png"
+                                                    } // Thay đổi 'default-image.png' nếu cần
+                                                    alt={product.name}
+                                                    className="w-16 h-16 rounded-lg mr-4 object-cover"
+                                                />
+                                                <div>
+                                                    <h2 className="font-normal text-xs leading-tight capitalize">
+                                                        {product.name}
+                                                    </h2>
+                                                    <p className="mt-2 text-xs text-gray-200">
+                                                        {product.quantity} x{" "}
+                                                        {Number(
+                                                            product.price,
+                                                        ).toLocaleString()}{" "}
+                                                        đ
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-center text-sm text-gray-200">
+                                            Giỏ hàng của bạn trống.
+                                        </p>
+                                    )}
+
                                     <div className="border-t border-red-300 pt-4">
                                         <div className="flex justify-between items-center mb-4">
                                             <span className="font-bold text-base">
                                                 Tổng số phụ:
                                             </span>
                                             <span className="font-bold text-base">
-                                                522.000 đ
+                                                {totalPriceChecked.toLocaleString()}{" "}
+                                                đ
                                             </span>
                                         </div>
 
                                         <button className="w-full mt-3 bg-white text-red-600 font-medium text-sm py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-50">
                                             Thanh Toán
                                         </button>
-                                        <button className="w-full mt-2 text-white font-medium text-base py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-500">
-                                            Xem Giỏ Hàng
-                                        </button>
+                                        <Link to={`/cart`}>
+                                            <button className="w-full mt-2 text-white font-medium text-base py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-500">
+                                                Xem Giỏ Hàng
+                                            </button>
+                                        </Link>
                                     </div>
                                     <div className="mt-4 text-center text-sm text-red-100">
                                         Miễn phí giao hàng cho đơn trên
@@ -195,9 +277,26 @@ const Header = () => {
                         </div>
 
                         {/* Dropdown end  */}
-                        <Link to="/login">
-                            <FaRegUserCircle className="ml-[20px] cursor-pointer" />
-                        </Link>
+
+                        {user?._id ? (
+                            <>
+                                <Dropdown menu={{ items }}>
+                                    <a onClick={(e) => e.preventDefault()}>
+                                        {" "}
+                                        <Link to="/login">
+                                            <FaRegUserCircle className="ml-[20px] cursor-pointer" />
+                                        </Link>
+                                    </a>
+                                </Dropdown>
+                            </>
+                        ) : (
+                            <Link to={"/login"}>
+                                <span className=" cursor-pointer">
+                                    <AiOutlineUserDelete />
+                                </span>{" "}
+                            </Link>
+                        )}
+
                         <CiMenuBurger
                             className="ml-[20px] lg:hidden"
                             onClick={toggleMenu}
@@ -236,7 +335,7 @@ const Header = () => {
                                             <Link to={"/tra"}>TRÀ</Link>
                                             <ul className=" *:mt-2 font-normal">
                                                 <li>
-                                                    <Link to={"/tra-xanh"}>
+                                                    <Link to={"/products"}>
                                                         Trà xanh
                                                     </Link>
                                                 </li>
@@ -276,7 +375,7 @@ const Header = () => {
                                 )}
                             </div>
                         </Link>
-                        <Link to={""}>
+                        <Link to={`/about`}>
                             <li>GIỚI THIỆU</li>
                         </Link>
                         <Link to={""}>

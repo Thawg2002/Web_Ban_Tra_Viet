@@ -1,189 +1,197 @@
-import React, { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import {
-    banner_banh_trung_thu_5,
-    banner_qua_tet_scaled,
-    hong_tra_hagiang,
-    hong_tra_hagiang2,
-    tra_co_thu,
-    tra_co_thu2,
-    tra_lai,
-    tra_lai2,
-    tra_moc_cau,
-    tra_moc_cau2,
-    tra_no_hoa,
-    tra_no_hoa2,
-    tra_non_tom,
-    tra_non_tom2,
-    tra_o_long,
-    tra_o_long2,
-    tra_o_long_nhansam,
-    tra_o_long_nhansam2,
-    tra_pho_nhi,
-    tra_pho_nhi2,
-    tra_sam_dua,
-    tra_sam_dua2,
-    tra_sen,
-    tra_sen2,
-    tra_sen_tayho,
-    tra_sen_tayho2,
-    tra_thiet_quan_am,
-    tra_thiet_quan_am2,
-    tra_tuyet,
-    tra_tuyet_zoom,
-    zalo_image,
-} from "@/assets/img";
+import { banner_banh_trung_thu_5, banner_qua_tet_scaled } from "@/assets/img";
+import { useQuery } from "@tanstack/react-query";
+
+import { getAllCategories } from "@/services/categories";
+import CategoryFilter from "../_components/categoryFilter";
+import { getAllProducts } from "@/services/product";
+import Breadcrumbs from "../_components/breadcrumbs";
 
 const ProductCategory = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [price, setPrice] = useState(0);
+    const [categorifilter, setCategorifilter] = useState<string | null>(null);
+    const productListRef = useRef<HTMLDivElement>(null);
+    const [sortOption, setSortOption] = useState<string>("default");
+    const [categoryName, setCategoryName] = useState<string>("Trà Xanh");
+    const [categoryDescription, setCategoryDescription] = useState<string>("");
+
+    // Hàm xử lý khi giá trị của thanh trượt thay đổi
+    // const handleRangeChange = (event: any) => {
+    //     setPrice(event.target.value);
+    // };
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
+
+    const handleSortOptionChange = (option: string) => {
+        setSortOption(option);
+        setIsOpen(false); // Đóng dropdown sau khi chọn
+    };
+
+    const {
+        data: products,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["products"],
+        queryFn: async () => getAllProducts(),
+    });
+    const {
+        data: category,
+        isLoading: isLoadingCategory,
+        isError: isErrorCategory,
+        error: errorCategory,
+    } = useQuery({
+        queryKey: ["categories"],
+        queryFn: getAllCategories,
+    });
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    const onhandleCategories = (
+        valueCategory: string | null,
+        inputValue: number,
+        categoryDisplayName: string,
+        categoryDisplayDescription: string, // Thêm tham số cho mô tả
+    ) => {
+        setCategorifilter(valueCategory);
+        setPrice(inputValue);
+        setCategoryName(categoryDisplayName || "Trà Xanh");
+        setCategoryDescription(categoryDisplayDescription || ""); // Cập nhật mô tả
+    };
+
+    const handleScrollToProductList = () => {
+        if (productListRef.current) {
+            productListRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+    const filteredProducts = products?.data
+        .filter((product: any) => {
+            return (
+                (!categorifilter ||
+                    product.category.includes(categorifilter)) &&
+                (price === 0 || product.regular_price <= price)
+            );
+        })
+        .sort((a: any, b: any) => {
+            if (sortOption === "newest") {
+                return (
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime()
+                );
+            } else if (sortOption === "lowToHigh") {
+                return a.regular_price - b.regular_price;
+            } else if (sortOption === "highToLow") {
+                return b.regular_price - a.regular_price;
+            } else if (sortOption === "bestRating") {
+                return b.rating - a.rating; // Giả sử có trường 'rating'
+            } else {
+                return 0; // Mặc định không sắp xếp
+            }
+        });
+
+    if (isLoadingCategory) return <div>LoadingCategory...</div>;
+    if (isErrorCategory) return <div>{errorCategory.message}</div>;
+    if (isLoading) return <div>Loading...</div>;
+    if (isError) return <div>{error.message}</div>;
+
     return (
         <div>
             <div className="text-center mt-10">
-                <h1 className="text-2xl md:text-4xl font-semibold">Trà Xanh</h1>
+                <h1 className="text-2xl md:text-4xl font-semibold ">
+                    {categoryName}
+                </h1>
                 <p className="text-gray-600 text-sm md:text-lg mt-4 mx-4 md:mx-96">
-                    Các chuyên gia của Trà Việt đi khắp các vùng trà từ Tây Bắc,
-                    Thái Nguyên đến Bảo Lộc để lựa chọn ra 12 loại trà xanh cao
-                    cấp nhất Việt Nam.
+                    {categoryDescription ||
+                        "Các chuyên gia của Trà Việt đi khắp các vùng trà từ Tây Bắc, Thái Nguyên đến Bảo Lộc để lựa chọn ra 12 loại trà xanh cao cấp nhất Việt Nam."}
                 </p>
+
                 <p className="text-sm md:text-xl text-gray-600 mt-4">
                     Tham khảo:
-                    <a className="text-red-600 mx-2 inline-block">TRÀ TẾT</a>
+                    <a href="/" className="text-red-600 mx-2 inline-block">TRÀ TẾT</a>
                 </p>
             </div>
             <div className="flex flex-col md:flex-row mx-4 md:mx-10 mt-5">
-                <div className="md:w-1/6 p-4">
-                    <h2 className="font-semibold text-lg">DANH MỤC SẢN PHẨM</h2>
-                    <ul className="mt-4 space-y-2">
-                        <li className="flex items-center justify-between">
-                            <label className="flex items-center">
-                                <input
-                                    type="radio"
-                                    name="category"
-                                    className="mr-2"
-                                />
-                                Trà
-                            </label>
-                            <span className="text-gray-600">26</span>
-                        </li>
-                        <li className="flex items-center justify-between">
-                            <label className="flex items-center">
-                                <input
-                                    type="radio"
-                                    name="category"
-                                    className="mr-2"
-                                    defaultChecked
-                                />
-                                <span className="text-red-600">Trà Xanh</span>
-                            </label>
-                            <span className="text-gray-600">14</span>
-                        </li>
-                        <li className="flex items-center justify-between">
-                            <label className="flex items-center">
-                                <input
-                                    type="radio"
-                                    name="category"
-                                    className="mr-2"
-                                />
-                                Trà Thảo Mộc
-                            </label>
-                            <span className="text-gray-600">12</span>
-                        </li>
-                    </ul>
-                    <div className="mt-8">
-                        <h3 className="font-semibold text-lg">
-                            KHOẢNG GIÁ TUỲ CHỌN
-                        </h3>
-                        <div className="mt-4">
-                            <input type="range" className="w-full" />
-                            <div className="flex justify-between mt-2 text-xs md:text-sm text-gray-600">
-                                <span>0 đ</span>
-                                <span>9.999.000 đ</span>
-                            </div>
-                            <button className="mt-4 bg-red-600 text-white py-2 px-4 rounded text-xs md:text-base">
-                                LỌC
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
+                <CategoryFilter
+                    category={category?.categories}
+                    onchangeCategories={onhandleCategories}
+                    onScrollToProductList={handleScrollToProductList}
+                />
                 <div className="md:w-5/6 p-4">
                     <div className="flex flex-col md:flex-row">
-                        <div className="flex-grow">
-                            <nav className="text-gray-500 text-xs">
-                                <a href="#" className="hover:text-gray-700">
-                                    TRANG CHỦ
-                                </a>{" "}
-                                /
-                                <a
-                                    href="#"
-                                    className="mx-2 hover:text-gray-700"
-                                >
-                                    CỬA HÀNG
-                                </a>{" "}
-                                /
-                                <a
-                                    href="#"
-                                    className="mx-2 hover:text-gray-700"
-                                >
-                                    TRÀ
-                                </a>{" "}
-                                /
-                                <a
-                                    href="#"
-                                    className="mx-2 hover:text-gray-700"
-                                >
-                                    TRÀ XANH
-                                </a>
-                            </nav>
-                        </div>
-
+                        <Breadcrumbs />
                         <div className="w-full md:w-1/6 text-right mt-4 md:mt-0">
                             <div className="relative">
                                 <button
                                     onClick={toggleDropdown}
                                     className="text-gray-700 font-medium"
                                 >
-                                    THỨ TỰ MẶC ĐỊNH
+                                    {sortOption === "default"
+                                        ? "THỨ TỰ MẶC ĐỊNH"
+                                        : sortOption === "newest"
+                                          ? "Mới nhất"
+                                          : sortOption === "lowToHigh"
+                                            ? "Giá: Thấp đến Cao"
+                                            : sortOption === "highToLow"
+                                              ? "Giá: Cao đến Thấp"
+                                              : "Đánh giá tốt nhất"}
                                     <span className="ml-1">&#9662;</span>
                                 </button>
                                 {isOpen && (
                                     <div className="absolute right-0 mt-2 w-full md:w-48 bg-white border border-gray-200 rounded shadow-lg z-50">
                                         <ul className="py-2 text-sm text-gray-700">
                                             <li>
-                                                <a
-                                                    href="#"
-                                                    className="block px-4 py-2 text-left hover:bg-red-500 hover:text-white"
+                                                <button
+                                                    onClick={() =>
+                                                        handleSortOptionChange(
+                                                            "newest",
+                                                        )
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left hover:bg-red-500 hover:text-white"
                                                 >
                                                     Mới nhất
-                                                </a>
+                                                </button>
                                             </li>
                                             <li>
-                                                <a
-                                                    href="#"
-                                                    className="block px-4 py-2 text-left hover:bg-red-500 hover:text-white"
+                                                <button
+                                                    onClick={() =>
+                                                        handleSortOptionChange(
+                                                            "lowToHigh",
+                                                        )
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left hover:bg-red-500 hover:text-white"
                                                 >
                                                     Giá: Thấp đến Cao
-                                                </a>
+                                                </button>
                                             </li>
                                             <li>
-                                                <a
-                                                    href="#"
-                                                    className="block px-4 py-2 text-left hover:bg-red-500 hover:text-white"
+                                                <button
+                                                    onClick={() =>
+                                                        handleSortOptionChange(
+                                                            "highToLow",
+                                                        )
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left hover:bg-red-500 hover:text-white"
                                                 >
                                                     Giá: Cao đến Thấp
-                                                </a>
+                                                </button>
                                             </li>
                                             <li>
-                                                <a
-                                                    href="#"
-                                                    className="block px-4 py-2 text-left hover:bg-red-500 hover:text-white"
+                                                <button
+                                                    onClick={() =>
+                                                        handleSortOptionChange(
+                                                            "bestRating",
+                                                        )
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left hover:bg-red-500 hover:text-white"
                                                 >
                                                     Đánh giá tốt nhất
-                                                </a>
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>
@@ -192,359 +200,41 @@ const ProductCategory = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-5 mb-5">
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_o_long}
-                                    alt="Trà Ô Long"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_o_long2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Ô Long Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
+                    <div
+                        ref={productListRef}
+                        className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-5 mb-5"
+                    >
+                        {filteredProducts?.map((product: any) => (
+                            <div key={product._id} className="text-center">
+                                <div className="relative cursor-pointer">
+                                    <a
+                                        href={`products/${product._id}`}
+                                        className="text-red-600 text-sm font-medium"
+                                    >
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
+                                        />
+                                        <img
+                                            src={product.gallery[0]}
+                                            alt={`${product.name} Hover`}
+                                            className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
+                                        />
+                                    </a>
+                                </div>
+                                <h3 className="mt-4 text-gray-800 text-sm capitalize">
+                                    {product.name}
+                                </h3>
+                                <p className="text-red-600">★★★★★</p>
+                                <a
+                                    href={`products/${product._id}`}
+                                    className="text-red-600 text-sm font-medium"
+                                >
+                                    ĐỌC TIẾP
+                                </a>
                             </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Ô Long
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_co_thu}
-                                    alt="Trà Cổ Thụ"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_co_thu2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Cổ Thụ Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Cổ Thụ
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={hong_tra_hagiang}
-                                    alt="Trà Ô Long Nhân Sâm"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={hong_tra_hagiang2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Ô Long Nhân Sâm Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Hồng trà Hà Giang
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_non_tom}
-                                    alt="Trà Nõn Tôm"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_non_tom2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Nõn Tôm Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Nõn Tôm
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-5 mb-5">
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_sen_tayho}
-                                    alt="Trà Ô Long"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_sen_tayho2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Ô Long Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Sen Tây Hồ
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_lai}
-                                    alt="Trà Cổ Thụ"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_lai2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Cổ Thụ Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Lải
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_o_long_nhansam}
-                                    alt="Hồng trà Hà Giang"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_o_long_nhansam2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Hồng trà Hà Giang Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Ô Long Nhân Sâm
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_pho_nhi}
-                                    alt="Trà Phổ Nhĩ"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_pho_nhi2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Phổ Nhĩ Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Phổ Nhĩ
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-5 mb-5">
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_sam_dua}
-                                    alt="Trà Sâm Dứa"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_sam_dua2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Sâm Dứa Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Sâm Dứa
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_sen}
-                                    alt="Trà Sen"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_sen2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Sen Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Sen
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_moc_cau}
-                                    alt="Trà Thái Nguyên"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_moc_cau2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Thái Nguyên Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Thái Nguyên
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_thiet_quan_am}
-                                    alt="Trà Thiết Quan Âm"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_thiet_quan_am2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Thiết Quan Âm Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Thiết Quan Âm
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_tuyet}
-                                    alt="Trà Thiết Quan Âm"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_tuyet_zoom} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà Thiết Quan Âm Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà Thiết Quan Âm
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
-                        <div className="text-center">
-                            <div className="relative cursor-pointer">
-                                <img
-                                    src={tra_no_hoa}
-                                    alt="Trà nở hoa nghệ thuật"
-                                    className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                />
-                                <img
-                                    src={tra_no_hoa2} // Thay bằng đường dẫn ảnh khác cho hover
-                                    alt="Trà nở hoa nghệ thuật Hover"
-                                    className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                />
-                            </div>
-                            <h3 className="mt-4 text-gray-800 text-sm">
-                                Trà nở hoa nghệ thuật
-                            </h3>
-                            <p className="text-red-600">★★★★★</p>
-                            <a
-                                href="#"
-                                className="text-red-600 text-sm font-medium"
-                            >
-                                ĐỌC TIẾP
-                            </a>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -725,19 +415,6 @@ const ProductCategory = () => {
                     </div>
                 </div>
             </div>
-            <footer className="bg-[#efefef] pt-[60px] pb-[30px]">
-                <div className="px-[50px]">
-                    <div>
-                        <h1>Hotline đặt hàng</h1>
-                        <p>0987-6666-8888</p>
-                        <img
-                            src={zalo_image}
-                            alt=""
-                            className="max-w-[150px]"
-                        />
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 };

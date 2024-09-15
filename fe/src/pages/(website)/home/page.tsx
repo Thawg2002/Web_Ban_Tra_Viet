@@ -17,8 +17,30 @@ import {
 } from "@/assets/img";
 import { Link } from "react-router-dom";
 import Footer from "../_components/Footer";
+import { getAllProducts } from "@/services/product";
+import { useQuery } from "@tanstack/react-query";
 
 const HomePage = () => {
+    const {
+        data, // Khởi tạo giá trị mặc định là mảng rỗng
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["products"],
+        queryFn: async () => getAllProducts(),
+    });
+
+    if (isLoading) return <p>Loading...</p>;
+    if (isError) return <p>Error: {error.message}</p>;
+
+    // Sắp xếp sản phẩm theo ngày tạo giảm dần (sản phẩm mới nhất trước)
+    const sortedProducts = [...data?.data]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 4);
+
+    if (isLoading) return <div>Loading...</div>;
+
     return (
         <>
             <Banner />
@@ -75,139 +97,66 @@ const HomePage = () => {
                     <div className="container">
                         {/* list */}
                         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-                            {/* item */}
-                            <div className="">
-                                <div className="relative group">
-                                    <img
-                                        src={hop_tri_an_open}
-                                        alt=""
-                                        className="max-w-[100%] max-h-[100%] object-contain"
-                                    />
-                                    <img
-                                        src={hop_tri_ki_open}
-                                        alt=""
-                                        className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    />
-                                </div>
+                            {sortedProducts && sortedProducts.map((product) => (
+                                <div key={product._id} className="">
+                                    <a href={`products/${product._id}`}>
+                                        {" "}
+                                        <div className="relative group">
+                                            <img
+                                                src={product.image || ""} // Sử dụng giá trị mặc định nếu không có hình ảnh
+                                                alt={product.name || "Sản phẩm"}
+                                                className="max-w-[100%] max-h-[100%] object-contain"
+                                            />
+                                            <img
+                                                src={product.gallery} // Sử dụng giá trị mặc định nếu không có hình ảnh
+                                                alt={product.name || "Sản phẩm"}
+                                                className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                            />
+                                        </div>
+                                    </a>
 
-                                <div className="">
-                                    <h2 className="text-[#424242] pt-[17px]">
-                                        Bộ ấm trà Bách Niên
-                                    </h2>
+                                    <div className="">
+                                        <h2 className="text-[#424242] pt-[17px] capitalize">
+                                            {product.name || "Tên sản phẩm"}
+                                        </h2>
 
-                                    <span className="pt-[5px] w-auto flex flex-wrap">
-                                        <del className="mr-2 text-[#6d6d6d]">
-                                            <span className="">1.295.000đ</span>
-                                        </del>
-                                        <span className="text-[#302e2e] ">
-                                            675.000đ
+                                        <span className="pt-[5px] w-auto flex flex-wrap">
+                                            {product.discount ? (
+                                                <>
+                                                    <del className="mr-2 text-[#6d6d6d]">
+                                                        <span className="">
+                                                            {Number(
+                                                                product.regular_price,
+                                                            ).toLocaleString()}
+                                                            đ
+                                                        </span>
+                                                    </del>
+                                                    <span className="text-[#302e2e] ">
+                                                        {Number(
+                                                            product.regular_price *
+                                                            (1 -
+                                                                product.discount /
+                                                                100),
+                                                        ).toLocaleString()}{" "}
+                                                        đ
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span className="text-[#302e2e] ">
+                                                    {Number(
+                                                        product.regular_price,
+                                                    ).toLocaleString()}
+                                                    đ
+                                                </span>
+                                            )}
                                         </span>
-                                    </span>
 
-                                    <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
-                                        Thêm vào giỏ hàng
-                                    </p>
+                                        <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
+                                            Thêm vào giỏ hàng
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="">
-                                <div className="relative group">
-                                    <img
-                                        src={hop_tri_an_open}
-                                        alt=""
-                                        className="max-w-[100%] max-h-[100%] object-contain"
-                                    />
-                                    <img
-                                        src={hop_tri_ki_open}
-                                        alt=""
-                                        className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    />
-                                </div>
-
-                                <div className="">
-                                    <h2 className="text-[#424242] pt-[17px]">
-                                        Bộ ấm trà Bách Niên
-                                    </h2>
-
-                                    <span className="pt-[5px] w-auto flex flex-wrap">
-                                        <del className="mr-2 text-[#6d6d6d]">
-                                            <span className="">1.295.000đ</span>
-                                        </del>
-                                        <span className="text-[#302e2e] ">
-                                            675.000đ
-                                        </span>
-                                    </span>
-
-                                    <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
-                                        Thêm vào giỏ hàng
-                                    </p>
-                                </div>
-                            </div>{" "}
-                            <div className="">
-                                <div className="relative group">
-                                    <img
-                                        src={hop_tri_an_open}
-                                        alt=""
-                                        className="max-w-[100%] max-h-[100%] object-contain"
-                                    />
-                                    <img
-                                        src={hop_tri_ki_open}
-                                        alt=""
-                                        className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    />
-                                </div>
-
-                                <div className="">
-                                    <h2 className="text-[#424242] pt-[17px]">
-                                        Bộ ấm trà Bách Niên
-                                    </h2>
-
-                                    <span className="pt-[5px] w-auto flex flex-wrap">
-                                        <del className="mr-2 text-[#6d6d6d]">
-                                            <span className="">1.295.000đ</span>
-                                        </del>
-                                        <span className="text-[#302e2e] ">
-                                            675.000đ
-                                        </span>
-                                    </span>
-
-                                    <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
-                                        Thêm vào giỏ hàng
-                                    </p>
-                                </div>
-                            </div>{" "}
-                            <div className="">
-                                <div className="relative group">
-                                    <img
-                                        src={hop_tri_an_open}
-                                        alt=""
-                                        className="max-w-[100%] max-h-[100%] object-contain"
-                                    />
-                                    <img
-                                        src={hop_tri_ki_open}
-                                        alt=""
-                                        className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    />
-                                </div>
-
-                                <div className="">
-                                    <h2 className="text-[#424242] pt-[17px]">
-                                        Bộ ấm trà Bách Niên
-                                    </h2>
-
-                                    <span className="pt-[5px] w-auto flex flex-wrap">
-                                        <del className="mr-2 text-[#6d6d6d]">
-                                            <span className="">1.295.000đ</span>
-                                        </del>
-                                        <span className="text-[#302e2e] ">
-                                            675.000đ
-                                        </span>
-                                    </span>
-
-                                    <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
-                                        Thêm vào giỏ hàng
-                                    </p>
-                                </div>
-                            </div>{" "}
+                            ))}
                         </div>
                     </div>
                 </div>
