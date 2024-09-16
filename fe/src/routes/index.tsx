@@ -13,20 +13,41 @@ import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
 import LoginPage from "@/pages/(website)/login/page";
 import OrderSuccess from "@/pages/(website)/order-success/page";
-import OrderAdd from "@/pages/(website)/order/_components/OrderAdd";
-import OrderDetail from "@/pages/(website)/order/_components/OrderDetail";
 
-import OrderList from "@/pages/(website)/order/_components/OrderList";
 import CheckoutPage from "@/pages/(website)/order/page";
 // import CheckoutPage from "@/pages/(website)/order/page";
 import ProductCategory from "@/pages/(website)/product/category/page";
 import ProductDetail from "@/pages/(website)/product/id/page";
+import PrivateRouter from "@/pages/PrivateRouter";
 import { Route, Routes } from "react-router-dom";
 
 const Router = () => {
     return (
         <>
             <Routes>
+                <Route element={<PrivateRouter />}>
+                    <Route path="admin" element={<LayoutAdmin />}>
+                        <Route
+                            path="products"
+                            element={<ProductManagement />}
+                        />
+                        <Route
+                            path="products/add"
+                            element={<ProductAddPage />}
+                        />
+                        <Route
+                            path="products/:id/edit"
+                            element={<ProductEditPage />}
+                        />
+                        <Route path="category" element={<CategoryList />} />
+                        <Route path="category/add" element={<CategoryAdd />} />
+                        <Route
+                            path="category/:id/edit"
+                            element={<CategoryEdit />}
+                        />
+                    </Route>
+                </Route>
+
                 <Route path="/" element={<LayoutWebsite />}>
                     <Route index element={<HomePage />} />
                     <Route path="products" element={<ProductCategory />} />
@@ -38,20 +59,7 @@ const Router = () => {
 
                     <Route path="checkout" element={<CheckoutPage />} />
                 </Route>
-                <Route path="admin" element={<LayoutAdmin />}>
-                    <Route path="products" element={<ProductManagement />} />
-                    <Route path="products/add" element={<ProductAddPage />} />
-                    <Route
-                        path="products/:id/edit"
-                        element={<ProductEditPage />}
-                    />
-                    <Route path="category" element={<CategoryList />} />
-                    <Route path="category/add" element={<CategoryAdd />} />
-                    <Route
-                        path="category/:id/edit"
-                        element={<CategoryEdit />}
-                    />
-                </Route>
+
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </>
