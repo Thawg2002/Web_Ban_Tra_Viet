@@ -86,15 +86,15 @@ const Header = () => {
         },
         ...(user?.role == "admin"
             ? [
-                  {
-                      key: "2",
-                      label: (
-                          <Link to="/admin" rel="noopener noreferrer">
-                              Admin Page
-                          </Link>
-                      ),
-                  },
-              ]
+                {
+                    key: "2",
+                    label: (
+                        <Link to="/admin" rel="noopener noreferrer">
+                            Admin Page
+                        </Link>
+                    ),
+                },
+            ]
             : []),
         {
             key: "4",
@@ -107,7 +107,7 @@ const Header = () => {
     const listchecked = cart?.cart?.cartData?.products || [];
     const totalPriceChecked = useMemo(() => {
         console.log("List checked:", listchecked);
-        const result = listchecked?.reduce((total, item: any) => {
+        const result = listchecked?.reduce((total: any, item: any) => {
             return total + (item.price || 0) * (item.quantity || 1);
         }, 0);
         console.log("Total Price Checked:", result);
@@ -120,7 +120,7 @@ const Header = () => {
             className={` ${isScrolled ? "bg-[#f6f6f6]" : "bg-transparent"} transition-colors duration-300`}
         >
             <div className="padding py-[10px]">
-                <div className=" flex justify-between lg:mx-[69px]">
+                <div className=" flex justify-between ">
                     <div className="flex">
                         {/* logo */}
                         <div className="">
@@ -128,11 +128,10 @@ const Header = () => {
                                 <img
                                     src={logoToShow}
                                     alt=""
-                                    className={`${
-                                        isLargeScreen && !isScrolled
-                                            ? "lg:w-[80px] lg:h-[140px]"
-                                            : "lg:w-[150px] lg:h-[40px]"
-                                    } w-[117px] h-[30px] md:w-[150px] md:h-[40px]`}
+                                    className={`${isLargeScreen && !isScrolled
+                                        ? "lg:w-[80px] lg:h-[140px]"
+                                        : "lg:w-[150px] lg:h-[40px]"
+                                        } w-[117px] h-[30px] md:w-[150px] md:h-[40px]`}
                                 />
                             </Link>
                         </div>
@@ -207,11 +206,10 @@ const Header = () => {
                             {/* Cart Dropdown */}
                             {isCartOpen && (
                                 <div
-                                    className={`absolute right-0 mt-2 w-80 bg-pink-600 text-white rounded-xl shadow-xl p-4 transition-transform duration-500 ease-in-out transform ${
-                                        isVisible
-                                            ? "opacity-100 scale-x-100 scale-y-100"
-                                            : "opacity-0 scale-x-0 scale-y-0"
-                                    }`}
+                                    className={`absolute right-0 mt-2 w-80 bg-pink-600 text-white rounded-xl shadow-xl p-4 transition-transform duration-500 ease-in-out transform ${isVisible
+                                        ? "opacity-100 scale-x-100 scale-y-100"
+                                        : "opacity-0 scale-x-0 scale-y-0"
+                                        }`}
                                 >
                                     {/* Hiển thị danh sách sản phẩm trong giỏ hàng */}
                                     {listchecked.length > 0 ? (
@@ -312,9 +310,8 @@ const Header = () => {
                 )}
                 {/* menu moblie */}
                 <div
-                    className={`fixed top-0 right-0 h-full w-64 bg-white z-50 transform ${
-                        menuOpen ? "translate-x-0" : "translate-x-full"
-                    } transition-transform duration-400 ease-in-out`}
+                    className={`fixed top-0 right-0 h-full w-64 bg-white z-50 transform ${menuOpen ? "translate-x-0" : "translate-x-full"
+                        } transition-transform duration-400 ease-in-out`}
                 >
                     <div className="flex justify-end">
                         <IoCloseCircleSharp

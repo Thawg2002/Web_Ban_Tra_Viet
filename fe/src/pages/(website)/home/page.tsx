@@ -36,7 +36,7 @@ const HomePage = () => {
 
     // Sắp xếp sản phẩm theo ngày tạo giảm dần (sản phẩm mới nhất trước)
     const sortedProducts = [...data?.data]
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .sort((a, b) => new Date(b.createdAt) as any - (new Date(a.createdAt) as any))
         .slice(0, 4);
 
     if (isLoading) return <div>Loading...</div>;
