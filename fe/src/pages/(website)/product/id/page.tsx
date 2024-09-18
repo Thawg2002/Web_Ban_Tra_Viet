@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { IoStar } from "react-icons/io5";
 import { useParams } from "react-router-dom";
 import SimilarProducts from "./similarProducts";
+import { getAllCategories } from "@/services/categories";
 const ProductDetail = () => {
     const [isActive, setIsActive] = useState(1);
     const [content, setContent] = useState("Mô tả sản phẩm");
@@ -26,7 +27,10 @@ const ProductDetail = () => {
         queryKey: ["relatedProducts", id],
         queryFn: () => getRelatedProduct(id as string),
     });
-
+    const { data: category } = useQuery({
+        queryKey: ["categories"],
+        queryFn: getAllCategories,
+    });
     const { addItem } = useCart(user?._id);
 
     useEffect(() => {
@@ -253,7 +257,9 @@ const ProductDetail = () => {
 
                             <div className="border-t mt-10 pt-8 border-gray-300 *:uppercase *:text-[rgba(66,66,66,0.55)] *:text-sm *:font-semibold flex flex-col *:leading-[160%] tracking-[0.14px]">
                                 <span className="">Mã: 19001901</span>
-                                <span className="">Danh mục: Trà Xanh</span>
+                                <span className="">
+                                    Danh mục: {product.name}
+                                </span>
                                 <span className="">
                                     Thẻ: Ai cũng thích, Bậc tăng ni, Bán chạy
                                     nhất, Bảo Lộc, Dễ ngủ, Hương nồng đượm, Mới

@@ -1,11 +1,11 @@
-import { tra_o_long } from "@/assets/img";
 import useCart from "@/common/hooks/useCart";
 import { toast } from "@/components/ui/use-toast";
 import { Checkbox } from "antd";
-import { Link } from "lucide-react";
+
 import React, { useMemo, useState } from "react";
 import { MdDeleteSweep } from "react-icons/md";
 import { FaDeleteLeft } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 const ShoppingCart = () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const [listchecked, setListChecked] = useState<string[]>([]);
@@ -148,7 +148,15 @@ const ShoppingCart = () => {
                 {!cart?.cart?.cartData?.products ||
                 cart?.cart?.cartData?.products?.length === 0 ? (
                     <div className="text-center mt-5 text-gray-400">
-                        <span>Không có sản phẩm trong giỏ hàng</span>
+                        <span className="block text-lg mb-4">
+                            Không có sản phẩm trong giỏ hàng
+                        </span>
+                        <Link
+                            to={`/`}
+                            className="text-pink-500 hover:text-pink-700 underline font-semibold"
+                        >
+                            Mua sản phẩm
+                        </Link>
                     </div>
                 ) : (
                     <div className="flex flex-col border-b lg:pb-[22px] mb:pb-3">
@@ -242,7 +250,6 @@ const ShoppingCart = () => {
                                                 </div>
                                                 {/* price */}
                                                 <span className="hidden lg:block text-[#4a4c54] text-sm ">
-                                                  
                                                     {Number(
                                                         item.finalPrice,
                                                     ).toLocaleString()}
@@ -287,9 +294,10 @@ const ShoppingCart = () => {
                         Tiếp tục mua hàng
                     </a>
                     <button className="bg-[#17AF26] px-10 h-14 rounded-[100px] text-white flex my-[13px] gap-x-4 place-items-center justify-center">
-                        <span>Thanh Toán</span>|
+                        <Link to={`/checkout`}>
+                            <span>Thanh Toán </span>|
+                        </Link>
                         <span>
-                            {" "}
                             {Number(totalPriceChecked).toLocaleString()} đ
                         </span>
                     </button>

@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import router from "./routers";
 import authRouter from "./routers/auth";
 import cartRouter from "./routers/cart";
+import orderRouter from "./routers/order";
 import categoryRouter from "./routers/category";
 import productRouter from "./routers/product";
 // import logingoogle from "./routers/logingoogle";
@@ -26,7 +27,7 @@ app.use("/api/v1", productRouter);
 app.use("/api/v1", authRouter);
 app.use("/api/v1", categoryRouter);
 app.use("/api/v1", cartRouter);
-// app.use("/api/v1", orderRouter);
+app.use("/api/v1", orderRouter);
 // app.use("/api/v1", logingoogle);
 
 app.use(cookieParser());
