@@ -108,7 +108,7 @@ const HomePage = () => {
                                                 className="max-w-[100%] max-h-[100%] object-contain"
                                             />
                                             <img
-                                                src={product.gallery} // Sử dụng giá trị mặc định nếu không có hình ảnh
+                                                src={product.gallery[0]} // Sử dụng giá trị mặc định nếu không có hình ảnh
                                                 alt={product.name || "Sản phẩm"}
                                                 className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                             />

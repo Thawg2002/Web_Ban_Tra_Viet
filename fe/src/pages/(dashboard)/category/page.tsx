@@ -2,9 +2,13 @@ import { toast } from "@/components/ui/use-toast";
 import { deleteCategories, getAllCategories } from "@/services/categories";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { TableProps } from "antd";
-import { Button, Popconfirm, Table } from "antd";
+import { Button, Popconfirm, Table, Input } from "antd";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+
+const { Search } = Input;
+
 interface DataType {
     _id: string;
     key: string;
@@ -14,6 +18,9 @@ interface DataType {
 
 const CategoryList = () => {
     const queryClient = useQueryClient();
+    const [filterName, setFilterName] = useState<string>("");
+    const [filterSlug, setFilterSlug] = useState<string>("");
+
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ["category"],
         queryFn: async () => {
@@ -24,12 +31,12 @@ const CategoryList = () => {
             }
         },
     });
-    const dataNewKey = data?.categories?.map((item: any) => {
-        return {
-            key: item._id,
-            ...item,
-        };
-    });
+
+    const dataNewKey = data?.categories?.map((item: any) => ({
+        key: item._id,
+        ...item,
+    }));
+
     const {
         mutate,
         isPending,
@@ -60,17 +67,59 @@ const CategoryList = () => {
         },
     });
 
+    const handleSearch = (value: string, type: "name" | "slug") => {
+        if (type === "name") {
+            setFilterName(value);
+        } else {
+            setFilterSlug(value);
+        }
+    };
+
     const columns: TableProps<DataType>["columns"] = [
         {
             title: "Name",
             dataIndex: "name",
             key: "name",
+            filteredValue: [filterName],
+            filterDropdown: () => (
+                <div style={{ padding: 8 }}>
+                    <Search
+                        placeholder="Search name"
+                        onSearch={(value) => handleSearch(value, "name")}
+                        style={{
+                            width: 188,
+                            marginBottom: 8,
+                            display: "block",
+                        }}
+                    />
+                </div>
+            ),
+            onFilter: (value, record) =>
+                record.name.toLowerCase().includes(value.toLowerCase()) ||
+                !filterName,
             render: (text) => <a>{text}</a>,
         },
         {
-            title: "slug",
+            title: "Slug",
             dataIndex: "slug",
             key: "slug",
+            filteredValue: [filterSlug],
+            filterDropdown: () => (
+                <div style={{ padding: 8 }}>
+                    <Search
+                        placeholder="Search slug"
+                        onSearch={(value) => handleSearch(value, "slug")}
+                        style={{
+                            width: 188,
+                            marginBottom: 8,
+                            display: "block",
+                        }}
+                    />
+                </div>
+            ),
+            onFilter: (value, record) =>
+                record.slug.toLowerCase().includes(value.toLowerCase()) ||
+                !filterSlug,
         },
         {
             title: "Action",
@@ -80,10 +129,9 @@ const CategoryList = () => {
                     <Link to={`/admin/category/${category._id}/edit`}>
                         <Button className="mx-2">Sửa</Button>
                     </Link>
-
                     <Popconfirm
-                        title="Delete the task"
-                        description="Are you sure to delete this task?"
+                        title="Delete the category"
+                        description="Are you sure to delete this category?"
                         onConfirm={() => mutate(category)}
                         okText="Yes"
                         cancelText="No"
@@ -98,9 +146,11 @@ const CategoryList = () => {
             ),
         },
     ];
+
     if (isLoading) return <div>Loading...</div>;
     if (isError) return <div>{error.message}</div>;
     if (isErrorDelete) return <div>{errorDelete.message}</div>;
+
     return (
         <>
             <h2 className="font-medium text-[18px] my-3">Danh sách Danh mục</h2>

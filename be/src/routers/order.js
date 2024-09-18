@@ -4,6 +4,7 @@ import {
   deleteOrder,
   getOrderById,
   getOrders,
+  mergeOrders,
   updateOrder,
   updateOrderStatus,
 } from "../controllers/order.js";
@@ -16,4 +17,6 @@ router.get("/orders/:userId/:orderId", getOrderById);
 router.put("/orders/:orderId", updateOrder);
 router.put("/orders/:orderId/status", updateOrderStatus);
 router.delete("/orders/:orderId", deleteOrder);
+router.post("/orders/merge/:userId", mergeOrders);
+
 export default router;
