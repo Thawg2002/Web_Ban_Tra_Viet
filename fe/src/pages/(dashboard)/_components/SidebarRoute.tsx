@@ -1,7 +1,8 @@
 "use client";
 
-import { BarChart, List } from "lucide-react";
+import { BarChart, List, User } from "lucide-react";
 import SidebarItem from "./SidebarItem";
+import { FaBox } from "react-icons/fa6";
 
 const routes = [
     {
@@ -18,6 +19,16 @@ const routes = [
         icon: List,
         label: "Danh mục",
         href: "/admin/category",
+    },
+    {
+        icon: User,
+        label: "Tài khoản",
+        href: "/admin/user",
+    },
+    {
+        icon: FaBox,
+        label: "Đơn hàng",
+        href: "/admin/order",
     },
 ];
 

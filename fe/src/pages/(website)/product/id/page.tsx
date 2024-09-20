@@ -8,6 +8,7 @@ import SimilarProducts from "./similarProducts";
 import { IProduct } from "@/common/types/product";
 import useCart from "@/common/hooks/useCart";
 import { toast } from "@/components/ui/use-toast";
+import { getAllCategories } from "@/services/categories";
 const ProductDetail = () => {
     const [isActive, setIsActive] = useState(1);
     const [content, setContent] = useState("Mô tả sản phẩm");
@@ -22,12 +23,15 @@ const ProductDetail = () => {
         queryKey: ["getProductById", id],
         queryFn: () => getProductById(id),
     });
-
+console.log(data);
     const { data: relatedProduct } = useQuery({
         queryKey: ["relatedProducts", id],
         queryFn: () => getRelatedProduct(id),
     });
-
+    const { data: category } = useQuery({
+        queryKey: ["categories"],
+        queryFn: getAllCategories,
+    });
     const { addItem } = useCart(user?._id);
 
     useEffect(() => {
@@ -202,36 +206,14 @@ const ProductDetail = () => {
                                 </div>
 
                                 <div className="*:font-medium">
-                                    <p
-                                        className="pb-4 leading-[150%]"
-                                        dangerouslySetInnerHTML={{
-                                            __html: product?.description || "",
-                                        }}
-                                    ></p>
-                                    <ul className="list-disc pl-5 *:leading-[160%]">
-                                        <li className="">
-                                            Lên men 30%, vị chát nhẹ và không
-                                            gắt, mang đến một trà Ô Long thưởng
-                                            thức êm dịu và tinh tế.
-                                        </li>
-                                        <li className="">
-                                            Màu nước vàng sóng sánh, tạo điểm
-                                            nhấn đẹp mắt cho ly trà.
-                                        </li>
-                                        <li className="">
-                                            Hương thơm mạnh mẽ và hậu vị đậm đà,
-                                            mang đến một trải nghiệm thưởng thức
-                                            trà độc đáo.
-                                        </li>
-                                        <li className="">
-                                            Pha được nhiều lần nước mà vẫn giữ
-                                            nguyên hương vị đặc trưng.
-                                        </li>
-                                        <li className="">
-                                            Là một lựa chọn tuyệt vời để tặng
-                                            những người yêu thích hương vị trà
-                                            đậm đà và trải nghiệm trà độc đáo
-                                        </li>
+                                    <ul className="list-disc pl-5 *:leading-[160%] mt-5">
+                                        <li
+                                            className=""
+                                            dangerouslySetInnerHTML={{
+                                                __html:
+                                                    product?.description || "",
+                                            }}
+                                        ></li>
                                     </ul>
                                 </div>
                             </div>
@@ -260,7 +242,9 @@ const ProductDetail = () => {
 
                             <div className="border-t mt-10 pt-8 border-gray-300 *:uppercase *:text-[rgba(66,66,66,0.55)] *:text-sm *:font-semibold flex flex-col *:leading-[160%] tracking-[0.14px]">
                                 <span className="">Mã: 19001901</span>
-                                <span className="">Danh mục: Trà Xanh</span>
+                                <span className="">
+                                    Danh mục: {product.name}
+                                </span>
                                 <span className="">
                                     Thẻ: Ai cũng thích, Bậc tăng ni, Bán chạy
                                     nhất, Bảo Lộc, Dễ ngủ, Hương nồng đượm, Mới

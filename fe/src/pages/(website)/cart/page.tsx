@@ -1,15 +1,16 @@
-import { tra_o_long } from "@/assets/img";
 import useCart from "@/common/hooks/useCart";
 import { toast } from "@/components/ui/use-toast";
 import { Checkbox } from "antd";
-import { Link } from "lucide-react";
-import React, { useMemo, useState } from "react";
+
+import React, { useMemo, useState, useEffect } from "react";
 import { MdDeleteSweep } from "react-icons/md";
 import { FaDeleteLeft } from "react-icons/fa6";
+import { Link, useNavigate } from "react-router-dom";
+
 const ShoppingCart = () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const [listchecked, setListChecked] = useState<string[]>([]);
-
+    const navigate = useNavigate();
     const {
         cart,
         isLoading,
@@ -18,49 +19,47 @@ const ShoppingCart = () => {
         increaseQuantity,
         removeItem,
     } = useCart(user?._id);
-    // check từng san phẩm
+
+    // Update total price whenever cart data or listchecked changes
+    const totalPriceChecked = useMemo(() => {
+        const selectedProducts = cart?.cart?.cartData?.products.filter(
+            (item: any) => listchecked.includes(item.productId),
+        );
+        const result = selectedProducts?.reduce((total, item: any) => {
+            return total + (item.finalPrice || 0);
+        }, 0);
+        return result || 0;
+    }, [cart?.cart?.cartData?.products, listchecked]);
+
     const onChangeChecked = (e: any) => {
-        if (listchecked.includes(e.target.value)) {
-            // nếu checkbox đã được chọn thì tạo ra mảng mới k có cái id ý nữa ,sau đó set lại danh sách
-            const newList = listchecked.filter(
-                (item) => item !== e.target.value,
-            );
-            setListChecked(newList);
-        } else {
-            // nếu chwua thì thêm vào danh sách check
-            setListChecked([...listchecked, e.target.value]);
-        }
+        const productId = e.target.value;
+        setListChecked((prevList) =>
+            prevList.includes(productId)
+                ? prevList.filter((item) => item !== productId)
+                : [...prevList, productId],
+        );
     };
-    //Check toàn bộ
+
     const onChangeCheckedAll = (e: any) => {
-        const newListCheck: any = [];
         if (e.target.checked) {
-            // console.log("data", cart?.cart?.cartData?.products);
-            cart?.cart?.cartData?.products.map((item: any) =>
-                newListCheck.push(item as any),
+            const allProductIds = cart?.cart?.cartData?.products.map(
+                (item: any) => item.productId,
             );
-            setListChecked(newListCheck);
+            setListChecked(allProductIds || []);
         } else {
             setListChecked([]);
         }
     };
-    //Tính tổng giá những sản phẩm được checked
-    const totalPriceChecked = useMemo(() => {
-        const result = listchecked?.reduce((total, item: any) => {
-            return total + (item.finalPrice || 0);
-        }, 0);
-        return result;
-    }, [listchecked]);
 
     const handleQuantity = async (message: string, productId: string) => {
         try {
             if (message === "decreaseQuantity") {
-                decreaseQuantity.mutate({
+                await decreaseQuantity.mutateAsync({
                     userId: user._id,
                     productId,
                 });
             } else if (message === "increaseQuantity") {
-                increaseQuantity.mutate({
+                await increaseQuantity.mutateAsync({
                     userId: user._id,
                     productId,
                 });
@@ -69,15 +68,17 @@ const ShoppingCart = () => {
             console.log("error", error);
         }
     };
-    // Xóa sản phẩm
+
     const onhandleDelete = async (message: string, items: any) => {
         try {
             if (message === "deleteOneProduct") {
-                removeItem.mutate({
+                await removeItem.mutateAsync({
                     userId: user._id,
                     productIds: items.productId,
                 });
-                setListChecked([]);
+                setListChecked((prevList) =>
+                    prevList.filter((item) => item !== items.productId),
+                );
                 toast({
                     variant: "success",
                     title: "Xóa thành công sản phẩm.",
@@ -103,6 +104,28 @@ const ShoppingCart = () => {
             });
         }
     };
+
+    const handleCheckout = () => {
+        if (listchecked.length === 0) {
+            toast({
+                variant: "error",
+                title: "Vui lòng chọn ít nhất một sản phẩm để thanh toán.",
+            });
+            return;
+        }
+
+        const selectedProducts = cart?.cart?.cartData?.products.filter(
+            (item: any) => listchecked.includes(item.productId),
+        );
+
+        localStorage.setItem(
+            "selectedProducts",
+            JSON.stringify(selectedProducts),
+        );
+
+        navigate("/checkout");
+    };
+
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error loading cart data</p>;
 
@@ -118,7 +141,7 @@ const ShoppingCart = () => {
                             <Checkbox
                                 onChange={onChangeCheckedAll}
                                 checked={
-                                    listchecked?.length ===
+                                    listchecked.length ===
                                     cart?.cart?.cartData?.products.length
                                 }
                                 className="text-[#9D9EA2]"
@@ -127,15 +150,20 @@ const ShoppingCart = () => {
                             </Checkbox>
                         </div>
                         <div className="w-[30px] max-w-[30px]">
-                            {listchecked?.length ===
+                            {listchecked.length ===
                                 cart?.cart?.cartData?.products.length ||
-                            listchecked?.length > 1 ? (
+                            listchecked.length > 1 ? (
                                 <MdDeleteSweep
                                     className="text-[25px] text-red-500 cursor-pointer"
                                     onClick={() =>
                                         onhandleDelete(
                                             "deleteAllProduct",
-                                            listchecked,
+                                            cart?.cart?.cartData?.products.filter(
+                                                (item: any) =>
+                                                    listchecked.includes(
+                                                        item.productId,
+                                                    ),
+                                            ),
                                         )
                                     }
                                 />
@@ -146,13 +174,21 @@ const ShoppingCart = () => {
                     </div>
                 </span>
                 {!cart?.cart?.cartData?.products ||
-                cart?.cart?.cartData?.products?.length === 0 ? (
+                cart?.cart?.cartData?.products.length === 0 ? (
                     <div className="text-center mt-5 text-gray-400">
-                        <span>Không có sản phẩm trong giỏ hàng</span>
+                        <span className="block text-lg mb-4">
+                            Không có sản phẩm trong giỏ hàng
+                        </span>
+                        <Link
+                            to={`/`}
+                            className="text-pink-500 hover:text-pink-700 underline font-semibold"
+                        >
+                            Mua sản phẩm
+                        </Link>
                     </div>
                 ) : (
                     <div className="flex flex-col border-b lg:pb-[22px] mb:pb-3">
-                        {cart?.cart?.cartData?.products?.map(
+                        {cart?.cart?.cartData?.products.map(
                             (item: any, index: number) => {
                                 return (
                                     <section
@@ -160,16 +196,17 @@ const ShoppingCart = () => {
                                         key={index}
                                     >
                                         <Checkbox
-                                            value={item}
+                                            value={item.productId}
                                             onChange={onChangeChecked}
-                                            checked={listchecked.includes(item)}
+                                            checked={listchecked.includes(
+                                                item.productId,
+                                            )}
                                         ></Checkbox>
                                         <img
                                             className="border rounded w-12 h-12 p-1"
                                             src={item.image}
                                             alt=""
                                         />
-                                        {/* change quantity, name , price */}
                                         <div className="relative w-full flex flex-col *:justify-between gap-y-2.5 lg:gap-y-3">
                                             <div className="lg:py-2 mb-0.5 lg:mb-0 flex lg:flex-row mb:flex-col lg:items-center gap-x-4">
                                                 <span className="text-[#9D9EA2] text-sm capitalize">
@@ -233,16 +270,13 @@ const ShoppingCart = () => {
                                                             ).toLocaleString()}
                                                         </span>
                                                     </div>
-                                                    {/* price */}
                                                     <span className="block absolute lg:hidden text-[#9D9EA2] text-sm top-5 right-0">
                                                         {Number(
                                                             item.price,
                                                         ).toLocaleString()}
                                                     </span>
                                                 </div>
-                                                {/* price */}
                                                 <span className="hidden lg:block text-[#4a4c54] text-sm ">
-                                                  
                                                     {Number(
                                                         item.finalPrice,
                                                     ).toLocaleString()}
@@ -268,7 +302,6 @@ const ShoppingCart = () => {
                 )}
             </div>
 
-            {/* right */}
             <div className="hidden lg:block">
                 <div className="w-full lg:p-6 mb:p-5 border rounded-2xl flex flex-col gap-y-[3px]">
                     <div className="flex flex-col gap-y-4">
@@ -286,17 +319,17 @@ const ShoppingCart = () => {
                     >
                         Tiếp tục mua hàng
                     </a>
-                    <button className="bg-[#17AF26] px-10 h-14 rounded-[100px] text-white flex my-[13px] gap-x-4 place-items-center justify-center">
-                        <span>Thanh Toán</span>|
+                    <button
+                        className="bg-[#17AF26] px-10 h-14 rounded-[100px] text-white flex my-[13px] gap-x-4 place-items-center justify-center"
+                        onClick={handleCheckout}
+                    >
+                        <span>Thanh Toán</span> |
                         <span>
-                            {" "}
                             {Number(totalPriceChecked).toLocaleString()} đ
                         </span>
                     </button>
-                    {/* payment */}
                 </div>
             </div>
-            {/* delivery */}
         </main>
     );
 };
