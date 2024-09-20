@@ -324,7 +324,12 @@ const OrderList = () => {
                                         {new Intl.NumberFormat("vi-VN", {
                                             style: "currency",
                                             currency: "VND",
-                                        }).format(item.productId.regular_price)}
+                                        }).format(
+                                            item.productId.regular_price *
+                                                (1 -
+                                                    item.productId.discount /
+                                                        100),
+                                        )}
                                     </p>
                                 </div>
                             </li>

@@ -86,7 +86,7 @@ const HomePage = () => {
                         TRÀ QUÀ TẶNG
                     </h1>
                     <h2 className="mt-[28px] mb-[24px] text-[24px] text-[rgb(83,83,83)] md:text-[40px] md:text-[#000]">
-                        Hộp trà bán chạy
+                        Sản phẩm bán chạy
                     </h2>
                     <p className="text-[#808080] text-[14px] md:text-[rgb(83,83,83)]">
                         Những hộp trà biếu đang được chọn mua nhiều nhât

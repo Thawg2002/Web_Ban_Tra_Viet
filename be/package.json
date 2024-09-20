@@ -28,6 +28,7 @@
         "mongoose": "^8.2.2",
         "mongoose-paginate-v2": "^1.8.2",
         "oauth2orize": "^1.12.0",
-        "slugify": "^1.6.6"
+        "slugify": "^1.6.6",
+        "ws": "^8.18.0"
     }
 }
