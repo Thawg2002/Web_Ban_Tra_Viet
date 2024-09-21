@@ -25,7 +25,7 @@ const ShoppingCart = () => {
         const selectedProducts = cart?.cart?.cartData?.products.filter(
             (item: any) => listchecked.includes(item.productId),
         );
-        const result = selectedProducts?.reduce((total, item: any) => {
+        const result = selectedProducts?.reduce((total:any, item: any) => {
             return total + (item.finalPrice || 0);
         }, 0);
         return result || 0;
