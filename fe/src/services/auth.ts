@@ -32,3 +32,21 @@ export const SignupUser = async (user: any) => {
         }
     }
 };
+export const getAllUsers = async () => {
+    try {
+        const response = await instance.get(`/auth/users`);
+      
+        return response.data.user;
+
+       
+        // Giả sử API trả về dữ liệu ở response.data
+    } catch (error: any) {
+        if (error.response) {
+            throw new Error(error.response.data.message || "Lấy danh sách người dùng thất bại");
+        } else if (error.request) {
+            throw new Error("Không thể kết nối đến máy chủ");
+        } else {
+            throw new Error("Có lỗi xảy ra, vui lòng thử lại");
+        }
+    }
+};

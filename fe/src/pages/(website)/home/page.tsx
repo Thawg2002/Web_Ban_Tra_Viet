@@ -86,7 +86,7 @@ const HomePage = () => {
                         TRÀ QUÀ TẶNG
                     </h1>
                     <h2 className="mt-[28px] mb-[24px] text-[24px] text-[rgb(83,83,83)] md:text-[40px] md:text-[#000]">
-                        Hộp trà bán chạy
+                        Sản phẩm bán chạy
                     </h2>
                     <p className="text-[#808080] text-[14px] md:text-[rgb(83,83,83)]">
                         Những hộp trà biếu đang được chọn mua nhiều nhât
@@ -108,7 +108,7 @@ const HomePage = () => {
                                                 className="max-w-[100%] max-h-[100%] object-contain"
                                             />
                                             <img
-                                                src={product.gallery} // Sử dụng giá trị mặc định nếu không có hình ảnh
+                                                src={product.gallery[0]} // Sử dụng giá trị mặc định nếu không có hình ảnh
                                                 alt={product.name || "Sản phẩm"}
                                                 className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                             />
@@ -151,9 +151,11 @@ const HomePage = () => {
                                             )}
                                         </span>
 
-                                        <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
-                                            Thêm vào giỏ hàng
-                                        </p>
+                                        <Link to={`products/${product._id}`}>
+                                            <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
+                                                Xem chi tiết
+                                            </p>
+                                        </Link>
                                     </div>
                                 </div>
                             ))}

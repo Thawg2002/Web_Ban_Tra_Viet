@@ -7,6 +7,7 @@ import { getAllCategories } from "@/services/categories";
 import CategoryFilter from "../_components/categoryFilter";
 import { getAllProducts } from "@/services/product";
 import Breadcrumbs from "../_components/breadcrumbs";
+import { Link } from "react-router-dom";
 
 const ProductCategory = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -39,6 +40,7 @@ const ProductCategory = () => {
     } = useQuery({
         queryKey: ["products"],
         queryFn: async () => getAllProducts(),
+        staleTime: 5 * 60 * 60,
     });
     const {
         data: category,
@@ -47,6 +49,7 @@ const ProductCategory = () => {
         error: errorCategory,
     } = useQuery({
         queryKey: ["categories"],
+        staleTime: 5 * 60 * 60,
         queryFn: getAllCategories,
     });
     useEffect(() => {
@@ -227,12 +230,12 @@ const ProductCategory = () => {
                                     {product.name}
                                 </h3>
                                 <p className="text-red-600">★★★★★</p>
-                                <a
-                                    href={`products/${product._id}`}
+                                <Link
+                                    to={`products/${product._id}`}
                                     className="text-red-600 text-sm font-medium"
                                 >
                                     ĐỌC TIẾP
-                                </a>
+                                </Link>
                             </div>
                         ))}
                     </div>

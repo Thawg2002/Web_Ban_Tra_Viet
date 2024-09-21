@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
-
+import BlacklistedToken from "../models/black-listed-token";
 
 const signupSchema = Joi.object({
   name: Joi.string().min(3).max(30).messages({
@@ -136,4 +136,49 @@ export const refreshToken = async (req, res) => {
       .json({ error: "Internal Server Error" });
   }
 };
+export const isTokenBlacklisted = async (token) => {
+  const tokenInBlacklist = await BlacklistedToken.findOne({ token });
+  return !!tokenInBlacklist;
+};
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); // Không trả về trường password
+    return res.status(StatusCodes.OK).json({
+      users,
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: "Internal Server Error" });
+  }
+};
 
+export const updateUserRole = async (req, res) => {
+  const { userId } = req.params; // Lấy ID người dùng từ tham số URL
+  const { role } = req.body; // Lấy vai trò mới từ body yêu cầu
+
+  try {
+    // Tìm người dùng theo ID và cập nhật vai trò
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true } // Trả về người dùng đã được cập nhật
+    ).select("-password"); // Không trả về trường password
+
+    if (!updatedUser) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: "User not found" });
+    }
+
+    return res.status(StatusCodes.OK).json({
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: "Internal Server Error" });
+  }
+};

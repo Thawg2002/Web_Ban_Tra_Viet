@@ -1,10 +1,39 @@
-import { tra_co_thu, tra_o_long } from "@/assets/img";
-import React from "react";
+import React, { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const OrderSuccess = () => {
+interface Product {
+    image: string;
+    name: string;
+    quantity: number;
+    price: number;
+}
+
+interface LocationState {
+    orderNumber?: string;
+    products?: Product[];
+    totalPrice?: number;
+}
+
+const OrderSuccess: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { orderNumber, products, totalPrice }: LocationState =
+        location.state || {};
+
+    useEffect(() => {
+        // Xóa giỏ hàng sau khi hiển thị trang thành công
+        localStorage.removeItem("cart");
+        // Hoặc nếu bạn đang sử dụng một state management library như Redux:
+        // dispatch(clearCart());
+    }, []);
+
+    const handleContinueShopping = () => {
+        navigate("/products");
+    };
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 sm:p-6">
-            <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg text-center ">
+            <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg text-center">
                 <div className="flex justify-center items-center mb-6">
                     <div className="bg-green-100 text-green-500 rounded-full p-4">
                         <svg
@@ -28,46 +57,63 @@ const OrderSuccess = () => {
                 </h1>
                 <p className="text-gray-700 mb-6">
                     Chúng tôi đã nhận đơn hàng của bạn và sẽ gửi đi trong 5-7
-                    ngày làm việc. <br />
-                    Mã đơn hàng của bạn là <strong>#B1234</strong>
+                    ngày làm việc.
+                    <br />
+                    Mã đơn hàng của bạn là <strong>#{orderNumber}</strong>
                 </p>
 
+                {/* Tóm tắt đơn hàng */}
                 <div className="bg-gray-100 p-4 rounded-lg mb-6">
                     <h2 className="text-lg font-semibold mb-3 text-left">
                         Tóm tắt đơn hàng
                     </h2>
-                    <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center">
-                            <img
-                                src={tra_o_long}
-                                alt="Sản phẩm 1"
-                                className="w-12 h-12 rounded mr-4"
-                            />
-                            <span>Trà ô long</span>
-                        </div>
-                        <span>250.000 đ</span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center">
-                            <img
-                                src={tra_co_thu}
-                                alt="Sản phẩm 2"
-                                className="w-12 h-12 rounded mr-4"
-                            />
-                            <span>Trà cổ thụ</span>
-                        </div>
-                        <span>250.000 đ</span>
-                    </div>
+                    {products?.length ? (
+                        products.map((product, index) => (
+                            <div
+                                key={index}
+                                className="flex justify-between items-center mb-2"
+                            >
+                                <div className="flex items-center">
+                                    <img
+                                        src={product.image}
+                                        alt={product.name}
+                                        className="w-12 h-12 rounded mr-4"
+                                    />
+                                    <span className="capitalize">
+                                        {product.name}
+                                    </span>
+                                    <span className="text-gray-600 ml-2">
+                                        x {product.quantity}
+                                    </span>
+                                </div>
+                                <span>
+                                    {new Intl.NumberFormat("vi-VN", {
+                                        style: "currency",
+                                        currency: "VND",
+                                    }).format(product.price)}
+                                </span>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-600">
+                            Không có sản phẩm nào trong đơn hàng.
+                        </p>
+                    )}
                     <hr className="my-4" />
                     <div className="flex justify-between items-center font-bold">
                         <span>Tổng cộng</span>
-                        <span>500.000 đ</span>
+                        <span>
+                            {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                            }).format(totalPrice || 0)}
+                        </span>
                     </div>
                 </div>
 
                 <button
                     className="bg-pink-500 text-white font-bold py-2 px-4 rounded hover:bg-pink-700 focus:outline-none focus:shadow-outline"
-                    onClick={() => (window.location.href = "/products")}
+                    onClick={handleContinueShopping}
                 >
                     Tiếp tục mua sắm
                 </button>
