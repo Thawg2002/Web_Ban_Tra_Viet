@@ -4,8 +4,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { AiFillContainer } from "react-icons/ai";
 import { FaUserCircle } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-// import { toast, ToastContainer } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { getConfig } from "@/services/cart";
 const CheckoutPage = () => {
@@ -95,15 +95,15 @@ const CheckoutPage = () => {
         try {
             const response = await instance.post("orders", orderData);
 
-            // toast.success(`Đặt Hàng Thành Công`, {
-            //     position: "top-right",
-            //     autoClose: 3000,
-            //     hideProgressBar: false,
-            //     closeOnClick: true,
-            //     pauseOnHover: true,
-            //     draggable: true,
-            //     progress: undefined,
-            // });
+            toast.success(`Đặt Hàng Thành Công`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
 
             console.log(response?.data);
             for (const item of listchecked) {
@@ -126,15 +126,15 @@ const CheckoutPage = () => {
         } catch (error) {
             console.error("Đặt hàng thất bại:", error);
 
-            // toast.error("Failed to create order.", {
-            //     position: "top-right",
-            //     autoClose: 2000,
-            //     hideProgressBar: false,
-            //     closeOnClick: true,
-            //     pauseOnHover: true,
-            //     draggable: true,
-            //     progress: undefined,
-            // });
+            toast.error("Failed to create order.", {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
         }
     };
 
@@ -158,7 +158,7 @@ const CheckoutPage = () => {
                 phone: userPaypal?.phone,
                 email: user.email,
             },
-            paymentMethod: "cash on delivery",
+            paymentMethod: "bank transfer",
         };
 
         console.log(orderData);
@@ -166,15 +166,15 @@ const CheckoutPage = () => {
         try {
             const response = await instance.post("orders", orderData);
 
-            // toast.success(`Đặt Hàng Thành Công`, {
-            //     position: "top-right",
-            //     autoClose: 3000,
-            //     hideProgressBar: false,
-            //     closeOnClick: true,
-            //     pauseOnHover: true,
-            //     draggable: true,
-            //     progress: undefined,
-            // });
+            toast.success(`Đặt Hàng Thành Công`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
 
             console.log(response?.data);
 
@@ -186,7 +186,7 @@ const CheckoutPage = () => {
                         totalPrice: totalPriceChecked,
                     },
                 });
-            }, 3000);
+            }, 2000);
             for (const item of listchecked) {
                 await removeItem.mutateAsync({
                     userId: user.userId,
@@ -198,15 +198,15 @@ const CheckoutPage = () => {
         } catch (error) {
             console.error("Đặt hàng thất bại:", error);
 
-            // toast.error("Failed to create order.", {
-            //     position: "top-right",
-            //     autoClose: 2000,
-            //     hideProgressBar: false,
-            //     closeOnClick: true,
-            //     pauseOnHover: true,
-            //     draggable: true,
-            //     progress: undefined,
-            // });
+            toast.error("Failed to create order.", {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
         }
     };
     const addPaypalScript = async () => {
@@ -240,9 +240,10 @@ const CheckoutPage = () => {
             }));
         }
     }, []);
+    if (isLoading) return <div>LOADING...</div>;
     return (
         <div className="pt-[40px]">
-            {/* <ToastContainer /> */}
+            <ToastContainer />
             <div className="px-[20px]">
                 <div className="px-[10px]">
                     <div className="text-center">
@@ -462,7 +463,7 @@ const CheckoutPage = () => {
                                 </h3>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 py-[10px] *:text-[#424242]">
+                        {/* <div className="grid grid-cols-2 py-[10px] *:text-[#424242]">
                             <div>
                                 <h3>THUẾ VAT 8%</h3>
                             </div>
@@ -474,17 +475,14 @@ const CheckoutPage = () => {
                                     đ
                                 </h3>
                             </div>
-                        </div>
+                        </div> */}
                         <div className="grid grid-cols-2 py-[10px] *:text-[#424242]">
                             <div>
                                 <h3>TỔNG</h3>
                             </div>
                             <div>
                                 <h3 className="text-[25px] font-semibold">
-                                    {(totalPriceChecked * 1.08).toLocaleString(
-                                        "vi-VN",
-                                    )}
-                                    đ
+                                    {totalPriceChecked.toLocaleString("vi-VN")}đ
                                 </h3>
                             </div>
                         </div>

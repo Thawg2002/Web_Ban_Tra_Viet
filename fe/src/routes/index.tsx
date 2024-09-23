@@ -14,6 +14,9 @@ import ShoppingCart from "@/pages/(website)/cart/page";
 
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
+import ForgotPassword from "@/pages/(website)/login/ForgotPassword";
+import ResetPassword from "@/pages/(website)/login/ResetPassword";
+
 import LoginPage from "@/pages/(website)/login/page";
 import OrderSuccess from "@/pages/(website)/order-success/page";
 
@@ -63,6 +66,11 @@ const Router = () => {
                     <Route path="order-success" element={<OrderSuccess />} />
 
                     <Route path="checkout" element={<CheckoutPage />} />
+                    <Route path="forgot-password" element={<ForgotPassword/>} />
+                    <Route
+                        path="reset-password/:token"
+                        element={<ResetPassword/>}
+                    />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
