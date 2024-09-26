@@ -35,10 +35,10 @@ export const SignupUser = async (user: any) => {
 export const getAllUsers = async () => {
     try {
         const response = await instance.get(`/auth/users`);
-      
+
         return response.data.user;
 
-       
+
         // Giả sử API trả về dữ liệu ở response.data
     } catch (error: any) {
         if (error.response) {
@@ -50,3 +50,22 @@ export const getAllUsers = async () => {
         }
     }
 };
+
+export const sendEmailResetPassword = async (data) => {
+    try {
+        const response = await instance.post(`/reset-password`, data);
+        return response;
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        throw error;
+    }
+}
+export const resetPasswordByCode = async (data) => {
+    try {
+        const response = await instance.post(`/change-password-by-code`, data);
+        return response;
+    } catch (error) {
+        console.error('Error resetting password by code:', error);
+        throw error;
+    }
+}

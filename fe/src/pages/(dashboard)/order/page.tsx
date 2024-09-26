@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Spin, Alert, Select, Button, message, Modal } from "antd";
 import instance from "@/configs/axios"; // axios config từ dự án của bạn
 import OrderFilter from "./component_/OrderFilter";
+import TextArea from "antd/es/input/TextArea";
 
 const { Option } = Select;
 
@@ -13,11 +14,15 @@ const OrderList = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchName, setSearchName] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
+    const [cancellationReason, setCancellationReason] = useState("");
+    const [cancelModalVisible, setCancelModalVisible] = useState(false);
+    const [orderToCancel, setOrderToCancel] = useState(null);
 
     const [visibleColumns, setVisibleColumns] = useState({
         orderNumber: true,
         customerName: true,
         totalPrice: true,
+        paymentMethod: true, // Add this line to ensure payment method is visible
         status: true,
         actions: true,
     });
@@ -36,23 +41,6 @@ const OrderList = () => {
 
         fetchOrders();
     }, []);
-    const handleStatusChange = async (orderId, newStatus) => {
-        try {
-            await instance.put(`/orders/${orderId}/status`, {
-                status: newStatus,
-            });
-            setOrders(
-                orders.map((order) =>
-                    order._id === orderId
-                        ? { ...order, status: newStatus }
-                        : order,
-                ),
-            );
-            message.success("Cập nhật trạng thái đơn hàng thành công");
-        } catch (error) {
-            message.error("Cập nhật trạng thái đơn hàng thất bại");
-        }
-    };
 
     const handleColumnVisibilityChange = (column) => {
         setVisibleColumns((prev) => ({
@@ -69,54 +57,72 @@ const OrderList = () => {
         setSelectedOrder(null);
     };
 
-    const handleCancelOrder = async (orderId) => {
-        const orderToCancel = orders.find((order) => order._id === orderId);
-
-        if (
-            !orderToCancel ||
-            ["đã giao", "đã hủy"].includes(orderToCancel.status)
-        ) {
-            message.error("Đơn hàng này không thể hủy.");
+    const handleStatusChange = async (orderId, newStatus) => {
+        if (!orderId) {
+            message.error("Order ID is undefined");
             return;
         }
 
-        Modal.confirm({
-            title: "Xác nhận hủy đơn hàng",
-            content: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
-            okText: "Đồng ý",
-            cancelText: "Hủy bỏ",
-            okButtonProps: {
-                style: {
-                    backgroundColor: "#ff4d4f",
-                    borderColor: "#ff4d4f",
-                    color: "white",
-                },
-            },
-            cancelButtonProps: {
-                style: {
-                    backgroundColor: "#f0f0f0",
-                    borderColor: "#d9d9d9",
-                    color: "#595959",
-                },
-            },
-            onOk: async () => {
-                try {
-                    await instance.put(`/orders/${orderId}/status`, {
-                        status: "đã hủy",
-                    });
-                    setOrders(
-                        orders.map((order) =>
-                            order._id === orderId
-                                ? { ...order, status: "đã hủy" }
-                                : order,
-                        ),
-                    );
-                    message.success("Hủy đơn hàng thành công");
-                } catch (error) {
-                    message.error("Hủy đơn hàng thất bại");
-                }
-            },
-        });
+        if (newStatus === "đã hủy") {
+            // Nếu chọn trạng thái "đã hủy", mở modal nhập lý do
+            setOrderToCancel(orders.find((order) => order._id === orderId));
+            setCancelModalVisible(true);
+            return; // Dừng quá trình cập nhật trạng thái ở đây để chờ xác nhận từ modal
+        }
+
+        try {
+            await instance.put(`/orders/${orderId}/status`, {
+                status: newStatus,
+            });
+            setOrders(
+                orders.map((order) =>
+                    order._id === orderId
+                        ? { ...order, status: newStatus }
+                        : order,
+                ),
+            );
+            message.success("Cập nhật trạng thái đơn hàng thành công");
+        } catch (error) {
+            console.error("Error updating order status:", error);
+            message.error("Cập nhật trạng thái đơn hàng thất bại");
+        }
+    };
+
+    const handleCancelOrder = (order) => {
+        if (["đã giao", "đã hủy"].includes(order.status)) {
+            message.error("Đơn hàng này không thể hủy.");
+            return;
+        }
+        setOrderToCancel(order); // Set toàn bộ đối tượng đơn hàng
+        setCancelModalVisible(true);
+    };
+
+    const confirmCancelOrder = async () => {
+        if (!orderToCancel || !orderToCancel._id) {
+            message.error("Không thể xác định đơn hàng cần hủy");
+            return;
+        }
+
+        try {
+            await instance.put(`/orders/${orderToCancel._id}/status`, {
+                status: "đã hủy",
+                cancellationReason,
+            });
+            setOrders(
+                orders.map((order) =>
+                    order._id === orderToCancel._id
+                        ? { ...order, status: "đã hủy", cancellationReason }
+                        : order,
+                ),
+            );
+            message.success("Hủy đơn hàng thành công");
+            setCancelModalVisible(false);
+            setOrderToCancel(null);
+            setCancellationReason("");
+        } catch (error) {
+            console.error("Error cancelling order:", error);
+            message.error("Hủy đơn hàng thất bại");
+        }
     };
 
     const columns = [
@@ -144,6 +150,12 @@ const OrderList = () => {
             visible: visibleColumns.totalPrice,
         },
         {
+            title: "Phương thức thanh toán", // This is your payment method column
+            dataIndex: "paymentMethod",
+            key: "paymentMethod",
+            visible: visibleColumns.paymentMethod, // Ensure this is visible
+        },
+        {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
@@ -157,7 +169,7 @@ const OrderList = () => {
                     <Option value="đã xác nhận">Đã xác nhận</Option>
                     <Option value="đang giao">Đang giao</Option>
                     <Option value="đã giao">Đã giao</Option>
-                    <Option value="đã hủy">Đã hủy</Option>
+                    <Option value="">Đã hủy</Option>
                 </Select>
             ),
             visible: visibleColumns.status,
@@ -175,7 +187,7 @@ const OrderList = () => {
                     </Button>
 
                     {record.status !== "đã hủy" && (
-                        <Button onClick={() => handleCancelOrder(record._id)}>
+                        <Button onClick={() => handleCancelOrder(record)}>
                             Hủy
                         </Button>
                     )}
@@ -284,11 +296,16 @@ const OrderList = () => {
                         }).format(selectedOrder.totalPrice)}
                     </p>
                     <p>
-                        <strong>Trạng thái:</strong> {selectedOrder.status}
+                        <strong className="font-semibold text-gray-800">
+                            Trạng thái:
+                        </strong>{" "}
+                        {selectedOrder.status}
                         {selectedOrder.status === "đã hủy" && (
-                            <span style={{ color: "red" }}>
-                                {" "}
-                                (Đơn hàng đã bị hủy)
+                            <span className="ml-2 text-red-600 font-medium">
+                                (Đơn hàng đã bị hủy) - Lý do:{" "}
+                                {selectedOrder.cancellationReason
+                                    ? selectedOrder.cancellationReason
+                                    : "Không có lý do"}
                             </span>
                         )}
                     </p>
@@ -336,6 +353,54 @@ const OrderList = () => {
                         ))}
                     </ul>
                 </Modal>
+            )}
+            {cancelModalVisible && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-auto">
+                        <h2 className="text-xl font-semibold mb-4">
+                            Hủy đơn hàng
+                        </h2>
+                        <p className="mb-4">
+                            Vui lòng nhập lý do hủy đơn hàng:
+                        </p>
+                        <textarea
+                            rows={4}
+                            value={cancellationReason}
+                            onChange={(e) =>
+                                setCancellationReason(e.target.value)
+                            }
+                            placeholder="Nhập lý do hủy đơn hàng"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        ></textarea>
+                        <div className="flex justify-end mt-4 space-x-2">
+                            <button
+                                onClick={() => {
+                                    setCancelModalVisible(false);
+                                    setOrderToCancel(null);
+                                    setCancellationReason("");
+                                }}
+                                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (cancellationReason.trim() === "") {
+                                        alert(
+                                            "Vui lòng nhập lý do hủy đơn hàng!",
+                                        );
+                                        return;
+                                    }
+                                    confirmCancelOrder();
+                                }}
+                                className={`px-4 py-2 rounded-md text-white ${cancellationReason.trim() ? "bg-red-500 hover:bg-red-600" : "bg-red-300 cursor-not-allowed"}`}
+                                disabled={!cancellationReason.trim()}
+                            >
+                                Xác nhận hủy
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

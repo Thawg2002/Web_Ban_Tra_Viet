@@ -21,6 +21,12 @@ const userSchema = new Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    resetPasswordToken: {
+      type: String,
+    }, // Thêm token để reset mật khẩu
+    resetPasswordExpiry: {
+      type: Date,
+    }, // Thêm thời gian hết hạn của token
     avatar: {
       type: String,
       default: "../upload/default-avatar.jpeg",
