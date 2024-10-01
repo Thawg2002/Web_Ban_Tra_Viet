@@ -76,11 +76,14 @@ const Header = () => {
     // Menu properties
 
     const handleLogout = () => {
-        // Xóa thông tin người dùng khỏi localStorage (hoặc state/cookie tùy thuộc vào ứng dụng của bạn)
+        // Xóa thông tin người dùng khỏi localStorage
         localStorage.removeItem("user");
 
-        // Điều hướng người dùng đến trang đăng nhập
+        // Điều hướng về trang đăng nhập và tải lại trang
+        navigate("/login");
+        window.location.reload(); // Tự động tải lại trang
     };
+
     const items: MenuProps["items"] = [
         {
             key: "1",
@@ -264,11 +267,11 @@ const Header = () => {
                                             </span>
                                         </div>
 
-                                        <Link to={`/checkout`}>
+                                        {/* <Link to={`/checkout`}>
                                             <button className="w-full mt-3 bg-white text-red-600 font-medium text-sm py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-50">
                                                 Thanh Toán
                                             </button>
-                                        </Link>
+                                        </Link> */}
                                         <Link to={`/cart`}>
                                             <button className="w-full mt-2 text-white font-medium text-base py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-500">
                                                 Xem Giỏ Hàng

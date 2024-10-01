@@ -37,10 +37,11 @@ export const create = async (req, res) => {
   }
 };
 
+
 export const getAllProducts = async (req, res) => {
   const {
     _page = 1,
-    _limit = 10,
+    _limit = 20,
     _sort = "createdAt",
     _order = "asc",
     _expand,

@@ -54,10 +54,21 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["bank transfer", "cash on delivery"],
     },
+    // status: {
+    //   type: String,
+    //   enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+    //   default: "pending",
+    // },
     status: {
       type: String,
-      enum: ["Chờ xác nhận", "Xác nhận", "Đang giao hàng", "Đã nhận", "Đã hủy"],
-      default: "pending",
+      enum: [
+        "chờ xác nhận",
+        "đã xác nhận",
+        "đang giao",
+        "đã giao",
+        "đã hủy",
+      ],
+      default: "chờ xử lý",
     },
     paymentId: String,
   },

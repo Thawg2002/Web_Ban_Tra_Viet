@@ -2,9 +2,12 @@ import CategoryAdd from "@/pages/(dashboard)/category/add/page";
 import CategoryEdit from "@/pages/(dashboard)/category/edit/page";
 import CategoryList from "@/pages/(dashboard)/category/page";
 import LayoutAdmin from "@/pages/(dashboard)/layout";
+import OrderList from "@/pages/(dashboard)/order/page";
+
 import ProductAddPage from "@/pages/(dashboard)/product/add/page";
 import ProductEditPage from "@/pages/(dashboard)/product/edit/page";
 import ProductManagement from "@/pages/(dashboard)/product/page";
+import UserList from "@/pages/(dashboard)/user/page";
 import NotFound from "@/pages/(website)/404/page";
 import AboutPage from "@/pages/(website)/about/page";
 import LayoutAccount from "@/pages/(website)/account/layout";
@@ -47,6 +50,8 @@ const Router = () => {
                             path="category/:id/edit"
                             element={<CategoryEdit />}
                         />
+                        <Route path="user" element={<UserList />} />
+                        <Route path="order" element={<OrderList />} />
                     </Route>
                 </Route>
 

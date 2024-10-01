@@ -17,6 +17,7 @@ const CheckoutPage = () => {
         phone: "",
         email: "",
     });
+    const [selectedProducts, setSelectedProducts] = useState([]);
 
     useEffect(() => {
         const user = localStorage.getItem("user");
@@ -29,38 +30,43 @@ const CheckoutPage = () => {
                 email: userInfo.email || prevFormData.email,
             }));
         }
+
+        // Đọc danh sách sản phẩm đã chọn từ localStorage
+        const products = JSON.parse(
+            localStorage.getItem("selectedProducts") || "[]",
+        );
+        setSelectedProducts(products);
     }, []);
 
     const { cart } = useCart(user.userId);
-    const listchecked = cart?.cart?.cartData?.products || [];
 
     const totalPriceChecked = useMemo(() => {
-        if (!listchecked.length) {
-            console.log("No items in the cart.");
+        if (!selectedProducts.length) {
+            console.log("No items selected for checkout.");
             return 0;
         }
 
-        console.log("List checked:", listchecked);
-        const result = listchecked.reduce((total, item) => {
+        console.log("Selected products:", selectedProducts);
+        const result = selectedProducts.reduce((total, item) => {
             return total + (item.price || 0) * (item.quantity || 1);
         }, 0);
         console.log("Total Price Checked:", result);
         return result;
-    }, [listchecked]);
+    }, [selectedProducts]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        console.log("Payment Method:", paymentMethod); // Thêm dòng này để kiểm tra giá trị paymentMethod
+        console.log("Payment Method:", paymentMethod);
 
-        if (listchecked.length === 0) {
-            toast.error("No items in the cart.");
+        if (selectedProducts.length === 0) {
+            toast.error("No items selected for checkout.");
             return;
         }
 
         const orderData = {
             userId: user.userId,
-            items: listchecked.map((item) => ({
+            items: selectedProducts.map((item) => ({
                 productId: item.productId,
                 quantity: item.quantity,
             })),
@@ -92,11 +98,14 @@ const CheckoutPage = () => {
 
             console.log(response?.data);
 
+            // Xóa danh sách sản phẩm đã chọn khỏi localStorage sau khi đặt hàng thành công
+            localStorage.removeItem("selectedProducts");
+
             setTimeout(() => {
                 navigate("/order-success", {
                     state: {
                         orderNumber: response.data.orderNumber,
-                        products: listchecked,
+                        products: selectedProducts,
                         totalPrice: totalPriceChecked,
                     },
                 });
@@ -306,8 +315,8 @@ const CheckoutPage = () => {
                             <h3>SẢM PHẨM</h3>
                             <h3>TẠM TÍNH</h3>
                         </div>
-                        {listchecked.length > 0 ? (
-                            listchecked.map((item: any, index: number) => (
+                        {selectedProducts.length > 0 ? (
+                            selectedProducts.map((item: any, index: number) => (
                                 <div
                                     key={index}
                                     className="flex justify-between py-[15px] border-b border-[#afafaf] *:text-[#424242]"
@@ -325,7 +334,10 @@ const CheckoutPage = () => {
                             ))
                         ) : (
                             <div className="flex justify-center py-[15px]">
-                                <h3>Không có sản phẩm nào trong giỏ hàng</h3>
+                                <h3>
+                                    Không có sản phẩm nào được chọn để thanh
+                                    toán
+                                </h3>
                             </div>
                         )}
 
@@ -340,7 +352,7 @@ const CheckoutPage = () => {
                                 </h3>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 py-[10px] *:text-[#424242]">
+                        {/* <div className="grid grid-cols-2 py-[10px] *:text-[#424242]">
                             <div>
                                 <h3>THUẾ VAT 8%</h3>
                             </div>
@@ -352,17 +364,14 @@ const CheckoutPage = () => {
                                     đ
                                 </h3>
                             </div>
-                        </div>
+                        </div> */}
                         <div className="grid grid-cols-2 py-[10px] *:text-[#424242]">
                             <div>
                                 <h3>TỔNG</h3>
                             </div>
                             <div>
                                 <h3 className="text-[25px] font-semibold">
-                                    {(totalPriceChecked * 1.08).toLocaleString(
-                                        "vi-VN",
-                                    )}
-                                    đ
+                                    {totalPriceChecked.toLocaleString("vi-VN")}đ
                                 </h3>
                             </div>
                         </div>

@@ -40,6 +40,7 @@ const ProductCategory = () => {
     } = useQuery({
         queryKey: ["products"],
         queryFn: async () => getAllProducts(),
+        staleTime: 5 * 60 * 60,
     });
     const {
         data: category,
@@ -48,6 +49,7 @@ const ProductCategory = () => {
         error: errorCategory,
     } = useQuery({
         queryKey: ["categories"],
+        staleTime: 5 * 60 * 60,
         queryFn: getAllCategories,
     });
     useEffect(() => {
