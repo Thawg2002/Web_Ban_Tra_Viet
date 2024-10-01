@@ -55,33 +55,27 @@ export const getOrders = async (req, res) => {
       "Đã giao",
       "Đã hủy",
     ];
-
     // Tạo object để lưu query
     const query = {};
-
     // Kiểm tra xem status có nằm trong statusList hay không
     if (status && statusList.includes(status)) {
       query.status = status;
     }
-
     // Nếu có customerName, sử dụng regex để tìm kiếm khách hàng theo tên
     if (customerName) {
       query["customerInfo.fullName"] = { $regex: customerName, $options: "i" };
     }
-
     // Tìm kiếm đơn hàng dựa trên điều kiện đã xây dựng
     const orders = await Order.find(query).populate({
       path: "items.productId",
       select: "name image regular_price discount countInStock",
     });
-
     // Nếu không có đơn hàng nào được tìm thấy
     if (orders.length === 0) {
       return res
         .status(StatusCodes.OK)
         .json([]);
     }
-
     // Trả về danh sách đơn hàng
     return res.status(StatusCodes.OK).json(orders);
   } catch (error) {
@@ -165,11 +159,12 @@ export const updateOrderStatus = async (req, res) => {
     //   "cancelled",
     // ];
     const validStatus = [
-      "chờ xác nhận",
-      "đã xác nhận",
-      "đang giao",
-      "đã giao",
-      "đã hủy",
+      "Chờ xác nhận",
+      "Đã xác nhận",
+      "Chờ lấy hàng",
+      "Đang giao hàng",
+      "Đã giao",
+      "Đã hủy",
     ];
 
     if (!validStatus.includes(status)) {

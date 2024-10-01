@@ -151,11 +151,19 @@ const PurchaseIndex = () => {
                                                                 </div>
                                                                 <div className="text-red-500 text-sm md:text-base flex items-end md:items-center font-medium ">
                                                                     <span className="text-gray-500 line-through pr-3">
-                                                                        {orderItem?.productId.regular_price}
 
+                                                                        {Number(
+                                                                            orderItem?.productId.regular_price,
+                                                                        ).toLocaleString()}{" "}
+                                                                        đ
                                                                     </span>
                                                                     <span className="">
-                                                                        {orderItem?.productId.regular_price - orderItem?.productId.discount}
+                                                                        {Number(
+                                                                            orderItem?.productId.regular_price *
+                                                                            (1 - orderItem?.productId.discount / 100),
+                                                                        ).toLocaleString()}{" "}
+                                                                        đ
+
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -165,11 +173,22 @@ const PurchaseIndex = () => {
                                                 </>
                                             )
                                         })}
-                                        <div className="flex justify-end w-full py-5">
+                                        <div className="flex justify-between item-center w-full py-5">
+                                            {["Chờ xác nhận"].includes(orderList?.status) && (
+                                                <button className="px-3 py-3 cursor-pointer text-white border 
+                                                border-[#ee4d2d] rounded-[6px] bg-[#ee4d2d] hover:bg-[#cd3011]
+                                                 transition-all duration-300  text-xs lg:text-[16px]"
+                                                >Hủy đơn hàng</button>
+                                            )}
+                                            <button className=""></button>
                                             <p className="text-right text-sm md:text-base lg:font-medium lg:flex gap-x-3">
                                                 Tổng số tiền:
                                                 <span className="text-red-500 font-medium lg:font-semibold text-sm lg:text-[18px] pl-2 lg:pl-0">
-                                                    {orderList.totalPrice}
+
+                                                    {Number(
+                                                        orderList.totalPrice,
+                                                    ).toLocaleString()}{" "}
+                                                    đ
                                                 </span>
                                             </p>
                                         </div>
