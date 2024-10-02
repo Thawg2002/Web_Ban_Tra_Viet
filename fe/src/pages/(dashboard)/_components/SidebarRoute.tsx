@@ -30,6 +30,11 @@ const routes = [
         label: "Đơn hàng",
         href: "/admin/order",
     },
+    {
+        icon: User,
+        label: "Bài viết",
+        href: "/admin/blog",
+    },
 ];
 
 const SidebarRoutes = () => {
@@ -38,7 +43,6 @@ const SidebarRoutes = () => {
             {routes.map((route) => (
                 <SidebarItem
                     key={route.href}
-                    
                     icon={route.icon}
                     label={route.label}
                     href={route.href}

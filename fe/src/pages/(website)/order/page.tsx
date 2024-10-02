@@ -1,16 +1,18 @@
 import useCart from "@/common/hooks/useCart";
 import instance from "@/configs/axios";
+import { getConfig } from "@/services/cart";
 import React, { useState, useEffect, useMemo } from "react";
 import { AiFillContainer } from "react-icons/ai";
 import { FaUserCircle } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { getConfig } from "@/services/cart";
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { Alert, Spin } from "antd";
 const CheckoutPage = () => {
     const navigate = useNavigate();
     const [paymentMethod, setPaymentMethod] = useState("");
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const [user, setUser] = useState({
         userId: "",
         fullName: "",
@@ -42,26 +44,32 @@ const CheckoutPage = () => {
     const {
         cart,
         isLoading,
+        isError,
         error,
         decreaseQuantity,
         increaseQuantity,
         removeItem,
     } = useCart(user?.userId);
-    const listchecked = cart?.cart?.cartData?.products || [];
+    const listchecked =
+        cart?.cart?.cartData?.products?.filter((product) =>
+            selectedProducts.some(
+                (selected) => selected.productId === product.productId,
+            ),
+        ) || [];
 
     const totalPriceChecked = useMemo(() => {
-        if (!listchecked.length) {
+        if (!selectedProducts.length) {
             console.log("No items in the cart.");
             return 0;
         }
 
-        console.log("List checked:", listchecked);
-        const result = listchecked.reduce((total: any, item: any) => {
+        console.log("Selected products:", selectedProducts);
+        const result = selectedProducts.reduce((total: any, item: any) => {
             return total + (item.price || 0) * (item.quantity || 1);
         }, 0);
         console.log("Total Price Checked:", result);
         return result;
-    }, [listchecked]);
+    }, [selectedProducts]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -75,7 +83,7 @@ const CheckoutPage = () => {
 
         const orderData = {
             userId: user.userId,
-            items: listchecked.map((item: any) => ({
+            items: selectedProducts.map((item: any) => ({
                 productId: item.productId,
                 quantity: item.quantity,
             })),
@@ -139,14 +147,13 @@ const CheckoutPage = () => {
     };
 
     const onSuccessPaypal = async (details: any, data: any) => {
-        if (listchecked.length === 0) {
-            // toast.error("No items in the cart.");
+        if (selectedProducts.length === 0) {
             return;
         }
-        console.log("user", user);
+
         const orderData = {
             userId: user.userId,
-            items: listchecked.map((item: any) => ({
+            items: selectedProducts.map((item: any) => ({
                 productId: item.productId,
                 quantity: item.quantity,
             })),
@@ -161,54 +168,27 @@ const CheckoutPage = () => {
             paymentMethod: "bank transfer",
         };
 
-        console.log(orderData);
-
         try {
             const response = await instance.post("orders", orderData);
-
-            toast.success(`Đặt Hàng Thành Công`, {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
+            navigate("/order-success", {
+                state: {
+                    orderNumber: response.data.orderNumber,
+                    products: selectedProducts, // Only selected products
+                    totalPrice: totalPriceChecked,
+                },
             });
 
-            console.log(response?.data);
-
-            setTimeout(() => {
-                navigate("/order-success", {
-                    state: {
-                        orderNumber: response.data.orderNumber,
-                        products: listchecked,
-                        totalPrice: totalPriceChecked,
-                    },
-                });
-            }, 2000);
-            for (const item of listchecked) {
+            for (const item of selectedProducts) {
                 await removeItem.mutateAsync({
                     userId: user.userId,
                     productIds: item.productId,
                 });
             }
-
-            console.log(response.data.orderNumber);
         } catch (error) {
-            console.error("Đặt hàng thất bại:", error);
-
-            toast.error("Failed to create order.", {
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
+            console.error("Order failed:", error);
         }
     };
+
     const addPaypalScript = async () => {
         try {
             const { data } = await getConfig();
@@ -239,8 +219,28 @@ const CheckoutPage = () => {
                 email: userInfo.email || prevFormData.email,
             }));
         }
+
+        // Đọc danh sách sản phẩm đã chọn từ localStorage
+        const products = JSON.parse(
+            localStorage.getItem("selectedProducts") || "[]",
+        );
+        setSelectedProducts(products);
     }, []);
-    if (isLoading) return <div>LOADING...</div>;
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <Spin
+                    tip="Đang tải..."
+                    size="large"
+                    className="text-blue-500"
+                />
+            </div>
+        );
+    }
+    if (isError)
+        return (
+            <Alert message="Lỗi" description={isError} type="error" showIcon />
+        );
     return (
         <div className="pt-[40px]">
             <ToastContainer />
@@ -429,8 +429,8 @@ const CheckoutPage = () => {
                             <h3>SẢM PHẨM</h3>
                             <h3>TẠM TÍNH</h3>
                         </div>
-                        {listchecked.length > 0 ? (
-                            listchecked.map((item: any, index: number) => (
+                        {selectedProducts.length > 0 ? (
+                            selectedProducts.map((item: any, index: number) => (
                                 <div
                                     key={index}
                                     className="flex justify-between py-[15px] border-b border-[#afafaf] *:text-[#424242]"
@@ -448,7 +448,10 @@ const CheckoutPage = () => {
                             ))
                         ) : (
                             <div className="flex justify-center py-[15px]">
-                                <h3>Không có sản phẩm nào trong giỏ hàng</h3>
+                                <h3>
+                                    Không có sản phẩm nào được chọn để thanh
+                                    toán
+                                </h3>
                             </div>
                         )}
 
@@ -463,6 +466,7 @@ const CheckoutPage = () => {
                                 </h3>
                             </div>
                         </div>
+
                         {/* <div className="grid grid-cols-2 py-[10px] *:text-[#424242]">
                             <div>
                                 <h3>THUẾ VAT 8%</h3>
@@ -486,6 +490,22 @@ const CheckoutPage = () => {
                                 </h3>
                             </div>
                         </div>
+
+                        {/* Payment methods */}
+                        {/* <div className="flex justify-between py-[15px] border-b border-[#afafaf] *:text-[#424242]">
+                            <h3>
+                                <input type="checkbox" className="mr-[10px]" />
+                                VÍ ZALO PAY
+                            </h3>
+                            <h3></h3>
+                        </div>
+                        <div className="flex justify-between py-[15px] border-b border-[#afafaf] *:text-[#424242]">
+                            <h3>
+                                <input type="checkbox" className="mr-[10px]" />
+                                THANH TOÁN KHI NHẬN HÀNG
+                            </h3>
+                            <h3></h3>
+                        </div> */}
                         <div>
                             <h3 className="text-[#424242] text-[14px] font-semibold mt-4">
                                 PHƯƠNG THỨC THANH TOÁN

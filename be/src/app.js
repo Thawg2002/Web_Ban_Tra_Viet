@@ -8,6 +8,7 @@ import router from "./routers";
 import authRouter from "./routers/auth";
 import cartRouter from "./routers/cart";
 import orderRouter from "./routers/order";
+import blogRouter from "./routers/blog";
 import categoryRouter from "./routers/category";
 import productRouter from "./routers/product";
 // import logingoogle from "./routers/logingoogle";
@@ -31,6 +32,7 @@ app.use("/api/v1", categoryRouter);
 app.use("/api/v1", cartRouter);
 app.use("/api/v1", orderRouter);
 app.use("/api", PaymentRouter);
+app.use("/api/v1", blogRouter);
 // app.use("/api/v1", logingoogle);
 
 app.use(cookieParser());

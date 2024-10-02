@@ -8,6 +8,7 @@ import CategoryFilter from "../_components/categoryFilter";
 import { getAllProducts } from "@/services/product";
 import Breadcrumbs from "../_components/breadcrumbs";
 import { Link } from "react-router-dom";
+import { Spin } from "antd";
 
 const ProductCategory = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -98,9 +99,23 @@ const ProductCategory = () => {
             }
         });
 
-    if (isLoadingCategory) return <div>LoadingCategory...</div>;
+    if (isLoadingCategory) {
+        return (
+            <Spin tip="Đang tải..." size="large" className="text-blue-500" />
+        );
+    }
     if (isErrorCategory) return <div>{errorCategory.message}</div>;
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <Spin
+                    tip="Đang tải..."
+                    size="large"
+                    className="text-blue-500"
+                />
+            </div>
+        );
+    }
     if (isError) return <div>{error.message}</div>;
 
     return (
@@ -116,7 +131,9 @@ const ProductCategory = () => {
 
                 <p className="text-sm md:text-xl text-gray-600 mt-4">
                     Tham khảo:
-                    <a href="/" className="text-red-600 mx-2 inline-block">TRÀ TẾT</a>
+                    <a href="/" className="text-red-600 mx-2 inline-block">
+                        TRÀ TẾT
+                    </a>
                 </p>
             </div>
             <div className="flex flex-col md:flex-row mx-4 md:mx-10 mt-5">

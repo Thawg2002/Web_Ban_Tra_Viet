@@ -88,11 +88,19 @@ const OrderList = () => {
         }
     };
 
-    const handleCancelOrder = (order) => {
-        if (["đã giao", "đã hủy"].includes(order.status)) {
+    const handleCancelOrder = (order: any) => {
+        if (!order || typeof order.status !== "string") {
+            message.error("Trạng thái đơn hàng không hợp lệ.");
+            return;
+        }
+
+        const nonCancelableStatuses = ["đang giao", "đã giao", "đã hủy"];
+
+        if (nonCancelableStatuses.includes(order.status)) {
             message.error("Đơn hàng này không thể hủy.");
             return;
         }
+
         setOrderToCancel(order); // Set toàn bộ đối tượng đơn hàng
         setCancelModalVisible(true);
     };
@@ -164,12 +172,31 @@ const OrderList = () => {
                     className="w-[150px]"
                     defaultValue={text}
                     onChange={(value) => handleStatusChange(record._id, value)}
+                    disabled={
+                        record.status === "đã giao" ||
+                        record.status === "đã hủy"
+                    }
                 >
-                    <Option value="chờ xử lý">Chờ xử lý</Option>
-                    <Option value="đã xác nhận">Đã xác nhận</Option>
+                    <Option
+                        value="chờ xử lý"
+                        disabled={record.status === "đang giao"}
+                    >
+                        Chờ xử lý
+                    </Option>
+                    <Option
+                        value="đã xác nhận"
+                        disabled={record.status === "đang giao"}
+                    >
+                        Đã xác nhận
+                    </Option>
                     <Option value="đang giao">Đang giao</Option>
                     <Option value="đã giao">Đã giao</Option>
-                    <Option value="">Đã hủy</Option>
+                    <Option
+                        value="đã hủy"
+                        disabled={record.status === "đang giao"}
+                    >
+                        Đã hủy
+                    </Option>
                 </Select>
             ),
             visible: visibleColumns.status,

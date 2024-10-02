@@ -19,6 +19,7 @@ import { Link } from "react-router-dom";
 import Footer from "../_components/Footer";
 import { getAllProducts } from "@/services/product";
 import { useQuery } from "@tanstack/react-query";
+import { Spin } from "antd";
 
 const HomePage = () => {
     const {
@@ -31,7 +32,13 @@ const HomePage = () => {
         queryFn: async () => getAllProducts(),
     });
 
-    if (isLoading) return <p>Loading...</p>;
+ if (isLoading) {
+     return (
+         <div className="flex items-center justify-center min-h-screen bg-gray-100">
+             <Spin tip="Đang tải..." size="large" className="text-blue-500" />
+         </div>
+     );
+ }
     if (isError) return <p>Error: {error.message}</p>;
 
     // Sắp xếp sản phẩm theo ngày tạo giảm dần (sản phẩm mới nhất trước)
