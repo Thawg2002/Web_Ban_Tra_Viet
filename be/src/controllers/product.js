@@ -37,27 +37,75 @@ export const create = async (req, res) => {
   }
 };
 
-
+// export const getAllProducts = async (req, res) => {
+//   const {
+//     _page = 1,
+//     _limit = 20,
+//     _sort = "createdAt",
+//     _order = "asc",
+//     _expand,
+//   } = req.query;
+//   const options = {
+//     page: _page,
+//     limit: _limit,
+//     sort: { [_sort]: _order === "desc" ? -1 : 1 },
+//   };
+//   const populateOptions = _expand ? [{ path: "category", select: "name" }] : [];
+//   try {
+//     const result = await Product.paginate(
+//       { categoryId: null },
+//       { ...options, populate: populateOptions }
+//     );
+//     if (result.docs.length === 0) throw new Error("No products found");
+//     const response = {
+//       data: result.docs,
+//       pagination: {
+//         currentPage: result.page,
+//         totalPages: result.totalPages,
+//         totalItems: result.totalDocs,
+//       },
+//     };
+//     return res.status(200).json(response);
+//   } catch (error) {
+//     return res.status(400).json({ message: error.message });
+//   }
+// };
 export const getAllProducts = async (req, res) => {
   const {
-    _page = 1,
-    _limit = 20,
-    _sort = "createdAt",
-    _order = "asc",
-    _expand,
+    _page = 1, // Current page number
+    _limit = 20, // Items per page
+    _sort = "createdAt", // Field to sort by
+    _order = "asc", // Sorting order (asc/desc)
+    category, // Filter by category
+    priceRange, // Filter by price range (e.g., "100-500" -> min: 100, max: 500)
   } = req.query;
+
+  const filters = {};
+
+  // Filter by category if provided
+  if (category) {
+    filters.category = { $in: category.split(",") }; // Support multiple categories
+  }
+
+  // Filter by price range if provided
+  if (priceRange) {
+    const [minPrice, maxPrice] = priceRange.split("-").map(Number);
+    filters.price = { $gte: minPrice, $lte: maxPrice };
+  }
+
   const options = {
-    page: _page,
-    limit: _limit,
+    page: parseInt(_page, 10),
+    limit: parseInt(_limit, 10),
     sort: { [_sort]: _order === "desc" ? -1 : 1 },
   };
-  const populateOptions = _expand ? [{ path: "category", select: "name" }] : [];
+
   try {
-    const result = await Product.paginate(
-      { categoryId: null },
-      { ...options, populate: populateOptions }
-    );
-    if (result.docs.length === 0) throw new Error("No products found");
+    const result = await Product.paginate(filters, options);
+
+    if (!result.docs.length) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
     const response = {
       data: result.docs,
       pagination: {
@@ -66,9 +114,10 @@ export const getAllProducts = async (req, res) => {
         totalItems: result.totalDocs,
       },
     };
+
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 

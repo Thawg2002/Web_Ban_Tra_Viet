@@ -1,471 +1,3 @@
-// import React from "react";
-// import { Table, Button, Space, Popconfirm } from "antd";
-// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-// import { Link } from "react-router-dom";
-// import { Blog, deleteBlog, fetchBlogs } from "@/services/blogApi";
-
-// const BlogList: React.FC = () => {
-//     const queryClient = useQueryClient();
-
-//     // Lấy danh sách blog
-//     const { data: blogs, isLoading } = useQuery({
-//         queryKey: ["blogs"],
-//         queryFn: fetchBlogs,
-//     });
-
-//     // Xóa blog
-//     const deleteMutation = useMutation({
-//         mutationFn: (slug: string) => deleteBlog(slug),
-//         onSuccess: () => {
-//             queryClient.invalidateQueries({ queryKey: ["blogs"] }); // Làm mới danh sách sau khi xóa
-//         },
-//     });
-
-//     const columns = [
-//         {
-//             title: "Title",
-//             dataIndex: "title",
-//             key: "title",
-//         },
-//         {
-//             title: "Author",
-//             dataIndex: "author",
-//             key: "author",
-//         },
-//         {
-//             title: "Actions",
-//             key: "actions",
-//             render: (_: any, record: Blog) => (
-//                 <Space size="middle">
-//                     <Link to={`/admin/blog/edit/${record.slug}`}>Edit</Link>
-//                     <Popconfirm
-//                         title="Are you sure to delete this blog?"
-//                         onConfirm={() => deleteMutation.mutate(record.slug!)}
-//                     >
-//                         <Button type="link" danger>
-//                             Delete
-//                         </Button>
-//                     </Popconfirm>
-//                 </Space>
-//             ),
-//         },
-//     ];
-
-//     if (isLoading) {
-//         return <p>Loading...</p>;
-//     }
-
-//     return (
-//         <>
-//             <Link to={`/admin/blog/create`}>
-//                 <Button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg transform transition-all duration-200 hover:scale-105">
-//                     Thêm bài viết
-//                 </Button>
-//             </Link>
-//             <Table dataSource={blogs} columns={columns} rowKey="slug" />
-//         </>
-//     );
-// };
-
-// export default BlogList;
-// import React, { useState } from "react";
-// import {
-//     Table,
-//     Button,
-//     Modal,
-//     Form,
-//     Input,
-//     message,
-//     Space,
-//     Popconfirm,
-// } from "antd";
-// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// import axios from "axios";
-// import instance from "@/configs/axios";
-// import { Blog, createBlog } from "@/services/blogApi";
-// import { Link } from "react-router-dom";
-
-// const fetchBlogs = async () => {
-//     const { data } = await instance.get("/blogs");
-//     return data;
-// };
-
-// const BlogList = () => {
-//     const queryClient = useQueryClient();
-
-//     // Fetch blogs using useQuery
-//     const { data, isLoading, isError } = useQuery({
-//         queryKey: ["blogs"], // use an array as the query key
-//         queryFn: fetchBlogs,
-//     });
-
-//     // Add blog mutation (React Query v5 object form)
-//     const addBlogMutation = useMutation({
-//         mutationFn: (newBlog) => instance.post("/blogs", newBlog),
-//         onSuccess: () => {
-//             queryClient.invalidateQueries({ queryKey: ["blogs"] });
-//             message.success("Blog added successfully!");
-//         },
-//     });
-
-//     // Delete blog mutation (React Query v5 object form)
-//     const deleteBlogMutation = useMutation({
-//         mutationFn: (id) => instance.delete(`/blogs/${id}`),
-//         onSuccess: () => {
-//             queryClient.invalidateQueries({ queryKey: ["blogs"] });
-//             message.success("Blog deleted successfully!");
-//         },
-//     });
-
-//     const [isModalVisible, setIsModalVisible] = useState(false);
-//     const [form] = Form.useForm();
-
-//     const handleAddBlog = () => {
-//         form.validateFields().then((values) => {
-//             addBlogMutation.mutate(values);
-//             form.resetFields();
-//             setIsModalVisible(false);
-//         });
-//     };
-
-//     const handleDelete = (id) => {
-//         deleteBlogMutation.mutate(id);
-//     };
-//     const columns = [
-//         { title: "Title", dataIndex: "title", key: "title" },
-//         { title: "Slug", dataIndex: "slug", key: "slug" },
-//         {
-//             title: "Actions",
-//             key: "actions",
-//             render: (_: any, record: Blog) => (
-//                 <Space size="middle">
-//                     <Link to={`/admin/blog/edit/${record.slug}`}>Edit</Link>
-//                     <Popconfirm
-//                         title="Are you sure to delete this blog?"
-//                         onConfirm={() =>
-//                             deleteBlogMutation.mutate(record.slug!)
-//                         }
-//                     >
-//                         <Button type="link" danger>
-//                             Delete
-//                         </Button>
-//                     </Popconfirm>
-//                 </Space>
-//             ),
-//         },
-//     ];
-//     if (isLoading) return <div>Loading...</div>;
-//     if (isError) return <div>Error loading blogs...</div>;
-
-//     return (
-//         <div>
-//             <Button type="primary" onClick={() => setIsModalVisible(true)}>
-//                 Add Blog
-//             </Button>
-
-//             <Table dataSource={data} columns={columns} />
-
-//             <Modal
-//                 title="Add New Blog"
-//                 open={isModalVisible}
-//                 onOk={handleAddBlog}
-//                 onCancel={() => setIsModalVisible(false)}
-//                 width={800} // Expand modal width for more fields
-//             >
-//                 <Form form={form} layout="vertical">
-
-//                     <Form.Item
-//                         name="title"
-//                         label="Title"
-//                         rules={[
-//                             {
-//                                 required: true,
-//                                 message: "Please input the title!",
-//                             },
-//                         ]}
-//                     >
-//                         <Input />
-//                     </Form.Item>
-
-//                     <Form.Item
-//                         name={["introduction", "heading"]}
-//                         label="Introduction Heading"
-//                         rules={[
-//                             {
-//                                 required: true,
-//                                 message:
-//                                     "Please input the introduction heading!",
-//                             },
-//                         ]}
-//                     >
-//                         <Input />
-//                     </Form.Item>
-
-//                     <Form.List name={["introduction", "paragraphs"]}>
-//                         {(fields, { add, remove }) => (
-//                             <>
-//                                 <Button
-//                                     type="dashed"
-//                                     onClick={() => add()}
-//                                     block
-//                                 >
-//                                     Add Introduction Paragraph
-//                                 </Button>
-//                                 {fields.map((field, index) => (
-//                                     <Space
-//                                         key={field.key}
-//                                         style={{
-//                                             display: "flex",
-//                                             marginBottom: 8,
-//                                         }}
-//                                         align="start"
-//                                     >
-//                                         <Form.Item
-//                                             {...field}
-//                                             name={[field.name, "paragraph"]}
-//                                             label={`Paragraph ${index + 1}`}
-//                                             rules={[
-//                                                 {
-//                                                     required: true,
-//                                                     message:
-//                                                         "Please input the paragraph!",
-//                                                 },
-//                                             ]}
-//                                         >
-//                                             <Input.TextArea />
-//                                         </Form.Item>
-//                                         <Button
-//                                             danger
-//                                             onClick={() => remove(field.name)}
-//                                         >
-//                                             Remove
-//                                         </Button>
-//                                     </Space>
-//                                 ))}
-//                             </>
-//                         )}
-//                     </Form.List>
-
-//                     <Form.Item
-//                         name={["mission", "heading"]}
-//                         label="Mission Heading"
-//                         rules={[
-//                             {
-//                                 required: true,
-//                                 message: "Please input the mission heading!",
-//                             },
-//                         ]}
-//                     >
-//                         <Input />
-//                     </Form.Item>
-
-//                     <Form.Item
-//                         name={["mission", "title"]}
-//                         label="Mission Title"
-//                         rules={[
-//                             {
-//                                 required: true,
-//                                 message: "Please input the mission title!",
-//                             },
-//                         ]}
-//                     >
-//                         <Input />
-//                     </Form.Item>
-
-//                     <Form.List name={["mission", "content"]}>
-//                         {(fields, { add, remove }) => (
-//                             <>
-//                                 <Button
-//                                     type="dashed"
-//                                     onClick={() => add()}
-//                                     block
-//                                 >
-//                                     Add Mission Content
-//                                 </Button>
-//                                 {fields.map((field, index) => (
-//                                     <Space
-//                                         key={field.key}
-//                                         style={{
-//                                             display: "flex",
-//                                             marginBottom: 8,
-//                                         }}
-//                                         align="start"
-//                                     >
-//                                         <Form.Item
-//                                             {...field}
-//                                             name={[field.name, "title"]}
-//                                             label={`Content Title ${index + 1}`}
-//                                             rules={[
-//                                                 {
-//                                                     required: true,
-//                                                     message:
-//                                                         "Please input the content title!",
-//                                                 },
-//                                             ]}
-//                                         >
-//                                             <Input />
-//                                         </Form.Item>
-//                                         <Form.List
-//                                             name={[field.name, "paragraphs"]}
-//                                         >
-//                                             {(
-//                                                 subFields,
-//                                                 {
-//                                                     add: addSub,
-//                                                     remove: removeSub,
-//                                                 },
-//                                             ) => (
-//                                                 <>
-//                                                     <Button
-//                                                         type="dashed"
-//                                                         onClick={() => addSub()}
-//                                                         block
-//                                                     >
-//                                                         Add Content Paragraph
-//                                                     </Button>
-//                                                     {subFields.map(
-//                                                         (
-//                                                             subField,
-//                                                             subIndex,
-//                                                         ) => (
-//                                                             <Space
-//                                                                 key={
-//                                                                     subField.key
-//                                                                 }
-//                                                                 style={{
-//                                                                     display:
-//                                                                         "flex",
-//                                                                     marginBottom: 8,
-//                                                                 }}
-//                                                                 align="start"
-//                                                             >
-//                                                                 <Form.Item
-//                                                                     {...subField}
-//                                                                     name={[
-//                                                                         subField.name,
-//                                                                         "paragraph",
-//                                                                     ]}
-//                                                                     label={`Paragraph ${subIndex + 1}`}
-//                                                                     rules={[
-//                                                                         {
-//                                                                             required:
-//                                                                                 true,
-//                                                                             message:
-//                                                                                 "Please input the paragraph!",
-//                                                                         },
-//                                                                     ]}
-//                                                                 >
-//                                                                     <Input.TextArea />
-//                                                                 </Form.Item>
-//                                                                 <Button
-//                                                                     danger
-//                                                                     onClick={() =>
-//                                                                         removeSub(
-//                                                                             subField.name,
-//                                                                         )
-//                                                                     }
-//                                                                 >
-//                                                                     Remove
-//                                                                 </Button>
-//                                                             </Space>
-//                                                         ),
-//                                                     )}
-//                                                 </>
-//                                             )}
-//                                         </Form.List>
-//                                         <Button
-//                                             danger
-//                                             onClick={() => remove(field.name)}
-//                                         >
-//                                             Remove
-//                                         </Button>
-//                                     </Space>
-//                                 ))}
-//                             </>
-//                         )}
-//                     </Form.List>
-
-//                     {/* Team Members */}
-//                     <Form.List name="team">
-//                         {(fields, { add, remove }) => (
-//                             <>
-//                                 <Button
-//                                     type="dashed"
-//                                     onClick={() => add()}
-//                                     block
-//                                 >
-//                                     Add Team Member
-//                                 </Button>
-//                                 {fields.map((field, index) => (
-//                                     <Space
-//                                         key={field.key}
-//                                         style={{
-//                                             display: "flex",
-//                                             marginBottom: 8,
-//                                         }}
-//                                         align="start"
-//                                     >
-//                                         <Form.Item
-//                                             {...field}
-//                                             name={[field.name, "name"]}
-//                                             label={`Team Member Name ${index + 1}`}
-//                                             rules={[
-//                                                 {
-//                                                     required: true,
-//                                                     message:
-//                                                         "Please input the team member name!",
-//                                                 },
-//                                             ]}
-//                                         >
-//                                             <Input />
-//                                         </Form.Item>
-//                                         <Form.Item
-//                                             {...field}
-//                                             name={[field.name, "title"]}
-//                                             label={`Team Member Title ${index + 1}`}
-//                                             rules={[
-//                                                 {
-//                                                     required: true,
-//                                                     message:
-//                                                         "Please input the team member title!",
-//                                                 },
-//                                             ]}
-//                                         >
-//                                             <Input />
-//                                         </Form.Item>
-//                                         <Form.Item
-//                                             {...field}
-//                                             name={[field.name, "quote"]}
-//                                             label={`Team Member Quote ${index + 1}`}
-//                                         >
-//                                             <Input />
-//                                         </Form.Item>
-//                                         <Form.Item
-//                                             {...field}
-//                                             name={[field.name, "image"]}
-//                                             label={`Team Member Image URL ${index + 1}`}
-//                                         >
-//                                             <Input />
-//                                         </Form.Item>
-//                                         <Button
-//                                             danger
-//                                             onClick={() => remove(field.name)}
-//                                         >
-//                                             Remove
-//                                         </Button>
-//                                     </Space>
-//                                 ))}
-//                             </>
-//                         )}
-//                     </Form.List>
-//                 </Form>
-//             </Modal>
-//         </div>
-//     );
-// };
-
-// export default BlogList;
 import React, { useState } from "react";
 import {
     Table,
@@ -482,25 +14,27 @@ import {
 } from "antd";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UploadOutlined } from "@ant-design/icons";
-
 import instance from "@/configs/axios";
 import { Blog } from "@/services/blogApi";
+import axios from "axios";
 
 const fetchBlogs = async () => {
     const { data } = await instance.get("/blogs");
     return data;
 };
+const CLOUDINARY_UPLOAD_PRESET = "Xuong_React_Node_SU24";
+const CLOUDINARY_FOLDER = "Xuong_React_Nodejs_SU24";
+const CLOUDINARY_NAME = "dtbgv9jja";
 
 const BlogList = () => {
+    const [images, setImages] = useState<string[]>([]); // Updated state for multiple images
     const queryClient = useQueryClient();
 
-    // Fetch blogs using useQuery
     const { data, isLoading, isError } = useQuery({
         queryKey: ["blogs"],
         queryFn: fetchBlogs,
     });
 
-    // Add blog mutation
     const addBlogMutation = useMutation({
         mutationFn: (newBlog) => instance.post("/blogs", newBlog),
         onSuccess: () => {
@@ -509,7 +43,6 @@ const BlogList = () => {
         },
     });
 
-    // Update blog mutation
     const updateBlogMutation = useMutation({
         mutationFn: (updatedBlog) =>
             instance.put(`/blogs/${updatedBlog.slug}`, updatedBlog),
@@ -519,7 +52,6 @@ const BlogList = () => {
         },
     });
 
-    // Delete blog mutation
     const deleteBlogMutation = useMutation({
         mutationFn: (id) => instance.delete(`/blogs/${id}`),
         onSuccess: () => {
@@ -530,14 +62,13 @@ const BlogList = () => {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
-    const [editingBlog, setEditingBlog] = useState(null); // Track which blog is being edited
-    const [fileList, setFileList] = useState([]); // State to manage file list
+    const [editingBlog, setEditingBlog] = useState(null);
 
     const handleAddBlog = () => {
         form.validateFields().then((values) => {
             const blogData = {
                 ...values,
-                image: fileList[0]?.url, // Lưu URL của ảnh vào dữ liệu blog
+                image: images, // Save multiple image URLs into blog data
             };
 
             if (editingBlog) {
@@ -548,47 +79,54 @@ const BlogList = () => {
 
             form.resetFields();
             setIsModalVisible(false);
-            setFileList([]); // Reset fileList
+            setImages([]); // Reset images after submission
         });
     };
 
     const handleEdit = (blog) => {
-        setEditingBlog(blog); // Set the blog to be edited
-        form.setFieldsValue(blog); // Populate form with blog data
-        setIsModalVisible(true); // Open modal
+        setEditingBlog(blog);
+        form.setFieldsValue(blog);
+        setIsModalVisible(true);
+        setImages(blog.image || []); // Set existing images for editing
     };
 
-    const handleUploadChange = ({ fileList: newFileList }) => {
-        setFileList(newFileList);
-    };
-    const uploadFileCloudinary = async (file: File) => {
+    const uploadFileCloudinary = async (file) => {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "your_preset"); // Thay bằng preset của bạn
-        formData.append("folder", "blogs"); // Thư mục trên Cloudinary
+        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+        formData.append("folder", CLOUDINARY_FOLDER);
 
-        const response = await fetch(
-            "https://api.cloudinary.com/v1_1/your_cloudinary_name/image/upload",
-            {
-                method: "POST",
-                body: formData,
-            },
-        );
+        try {
+            const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/${CLOUDINARY_NAME}/image/upload`,
+                formData,
+            );
 
-        const data = await response.json();
-        return data;
-    };
-    // normFile để chuyển file event thành định dạng phù hợp với form
-    const normFile = (e: any) => {
-        if (Array.isArray(e)) {
-            return e;
+            if (response.status === 200) {
+                message.success("Upload thành công!");
+                return response.data.secure_url;
+            } else {
+                message.error("Upload thất bại");
+            }
+        } catch (error) {
+            message.error("Upload thất bại");
+            console.error(error);
         }
-        return e?.fileList;
     };
 
+    const handleUploadChange = async ({ file }) => {
+        const uploadedImageUrl = await uploadFileCloudinary(file);
+        if (uploadedImageUrl) {
+            setImages((prevImages) => [...prevImages, uploadedImageUrl]); // Append the new image URL
+        }
+    };
+
+    // Function to handle removing an image from the list
+    const handleRemoveImage = (imgUrl) => {
+        setImages((prevImages) => prevImages.filter((img) => img !== imgUrl));
+    };
     const columns = [
         { title: "Title", dataIndex: "title", key: "title" },
-
         {
             title: "Actions",
             key: "actions",
@@ -621,8 +159,9 @@ const BlogList = () => {
                 className="bg-blue-600"
                 onClick={() => {
                     setIsModalVisible(true);
-                    form.resetFields(); // Reset form for adding new blog
-                    setEditingBlog(null); // Clear editing state
+                    form.resetFields();
+                    setEditingBlog(null);
+                    setImages([]); // Reset images for new blog
                 }}
             >
                 Thêm bài viết
@@ -636,12 +175,11 @@ const BlogList = () => {
                 onOk={handleAddBlog}
                 onCancel={() => {
                     setIsModalVisible(false);
-                    setEditingBlog(null); // Reset editing state on cancel
+                    setEditingBlog(null);
                 }}
                 width={800}
             >
                 <Form form={form} layout="vertical">
-                    {/* Tiêu đề */}
                     <Form.Item
                         label="Tiêu đề"
                         name="title"
@@ -655,47 +193,46 @@ const BlogList = () => {
                         <Input />
                     </Form.Item>
 
-                    {/* Phần upload ảnh */}
-                    <Form.Item
-                        label="Tải ảnh lên"
-                        name="image"
-                        valuePropName="fileList"
-                        getValueFromEvent={normFile}
-                    >
+                    <Form.Item label="Upload Ảnh">
                         <Upload
-                            name="image"
-                            listType="picture"
-                            customRequest={async ({
-                                file,
-                                onSuccess,
-                                onError,
-                            }) => {
-                                try {
-                                    const result =
-                                        await uploadFileCloudinary(file); // Gọi hàm upload ảnh
-                                    setFileList([
-                                        {
-                                            uid: file.uid,
-                                            name: file.name,
-                                            status: "done",
-                                            url: result.url, // URL của ảnh sau khi upload thành công
-                                        },
-                                    ]);
-                                    onSuccess?.(result.url); // Trả về URL ảnh
-                                } catch (error) {
-                                    onError?.(error);
-                                }
+                            name="images"
+                            listType="picture-card"
+                            fileList={images.map((url) => ({
+                                uid: url, // Unique identifier
+                                name: url.split("/").pop(), // Display the name of the image
+                                url,
+                                status: "done",
+                            }))}
+                            multiple
+                            customRequest={({ file, onSuccess }) => {
+                                handleUploadChange({ file });
+                                setTimeout(() => {
+                                    onSuccess("ok");
+                                }, 0);
                             }}
-                            fileList={fileList}
-                            onRemove={() => setFileList([])} // Xóa ảnh khỏi danh sách
+                            onRemove={(file) => handleRemoveImage(file.url)} // Handle removing images
                         >
-                            <Button icon={<UploadOutlined />}>
-                                Tải ảnh lên
-                            </Button>
+                            <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
                         </Upload>
                     </Form.Item>
+                    {images.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap" }}>
+                            {images.map((imgUrl, index) => (
+                                <img
+                                    key={index}
+                                    src={imgUrl}
+                                    alt={`Uploaded ${index + 1}`}
+                                    style={{
+                                        width: "200px",
+                                        marginRight: "10px",
+                                        marginBottom: "10px",
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
 
-                    {/* Đường dẫn (Slug) */}
+                    {/* Multiple image upload (gallery) */}
 
                     {/* Phần giới thiệu */}
                     <Form.Item
@@ -960,6 +497,77 @@ const BlogList = () => {
                                         </Form.Item>
 
                                         {/* Upload ảnh */}
+                                        <Form.Item
+                                            {...field}
+                                            name={[field.name, "gallery"]}
+                                            label="Thư viện ảnh"
+                                        >
+                                            <Upload
+                                                name="file"
+                                                listType="picture"
+                                                maxCount={1}
+                                                customRequest={async ({
+                                                    file,
+                                                    onSuccess,
+                                                }) => {
+                                                    const uploadedImageUrl =
+                                                        await uploadFileCloudinary(
+                                                            file,
+                                                        );
+                                                    form.setFieldsValue({
+                                                        team: form
+                                                            .getFieldValue(
+                                                                "team",
+                                                            )
+                                                            .map(
+                                                                (
+                                                                    member: any,
+                                                                    idx: number,
+                                                                ) => {
+                                                                    if (
+                                                                        idx ===
+                                                                        index
+                                                                    ) {
+                                                                        return {
+                                                                            ...member,
+                                                                            gallery:
+                                                                                uploadedImageUrl, // Save uploaded image URL to gallery field
+                                                                        };
+                                                                    }
+                                                                    return member;
+                                                                },
+                                                            ),
+                                                    });
+                                                    setTimeout(() => {
+                                                        onSuccess("ok");
+                                                    }, 0);
+                                                }}
+                                            >
+                                                <Button
+                                                    icon={<UploadOutlined />}
+                                                >
+                                                    Chọn ảnh
+                                                </Button>
+                                            </Upload>
+                                            {form.getFieldValue([
+                                                "team",
+                                                index,
+                                                "gallery",
+                                            ]) && (
+                                                <img
+                                                    src={form.getFieldValue([
+                                                        "team",
+                                                        index,
+                                                        "gallery",
+                                                    ])}
+                                                    alt={`Gallery item ${index}`}
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "auto",
+                                                    }}
+                                                />
+                                            )}
+                                        </Form.Item>
 
                                         {/* Xóa thành viên */}
                                         <Button

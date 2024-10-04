@@ -8,7 +8,7 @@ type Props = {
         categoryId: string | null,
         price: number,
         categoryName: string,
-        categoryDescription: string
+        categoryDescription: string,
     ) => void;
     onScrollToProductList: () => void;
 };
@@ -21,19 +21,26 @@ const CategoryFilter = ({
     const [valueCategory, setValueCategory] = useState<string | null>(null);
     const [inputValue, setInputValue] = useState<number>(0);
     const [selectedCategoryName, setSelectedCategoryName] =
-        useState<string>("Trà Xanh");
+        useState<string>("Tất cả sản phẩm");
     const [selectedCategoryDescription, setSelectedCategoryDescription] =
-        useState<string>("");
+        useState<string>("Hiển thị tất cả các sản phẩm.");
 
     const onChangeCategory = (e: RadioChangeEvent) => {
         const selectedId = e.target.value;
         setValueCategory(selectedId);
-        const selectedCategory = category.find(
-            (item) => item._id === selectedId,
-        );
-        if (selectedCategory) {
-            setSelectedCategoryName(selectedCategory.name);
-            setSelectedCategoryDescription(selectedCategory.description || "");
+        if (selectedId === null) {
+            setSelectedCategoryName("Tất cả sản phẩm");
+            setSelectedCategoryDescription("Hiển thị tất cả các sản phẩm.");
+        } else {
+            const selectedCategory = category.find(
+                (item) => item._id === selectedId,
+            );
+            if (selectedCategory) {
+                setSelectedCategoryName(selectedCategory.name);
+                setSelectedCategoryDescription(
+                    selectedCategory.description || "",
+                );
+            }
         }
     };
 
@@ -48,16 +55,21 @@ const CategoryFilter = ({
             categoryName: selectedCategoryName,
             categoryDescription: selectedCategoryDescription,
         });
-        onchangeCategories(valueCategory, inputValue, selectedCategoryName, selectedCategoryDescription);
+        onchangeCategories(
+            valueCategory,
+            inputValue,
+            selectedCategoryName,
+            selectedCategoryDescription,
+        );
         onScrollToProductList();
     };
 
     const onHandleClearFilter = () => {
         setValueCategory(null);
         setInputValue(0);
-        setSelectedCategoryName("Trà Xanh");
-        setSelectedCategoryDescription("");
-        onchangeCategories(null, 0, "Trà Xanh", "");
+        setSelectedCategoryName("Tất cả sản phẩm");
+        setSelectedCategoryDescription("Hiển thị tất cả các sản phẩm.");
+        onchangeCategories(null, 0, "Tất cả sản phẩm", "");
     };
 
     return (
@@ -65,6 +77,13 @@ const CategoryFilter = ({
             <h2 className="font-semibold text-lg">DANH MỤC SẢN PHẨM</h2>
             <Radio.Group onChange={onChangeCategory} value={valueCategory}>
                 <ul className="mt-4 space-y-2">
+                    {/* All Products Option */}
+                    <li className="flex items-center justify-between">
+                        <Radio className="text-base font-normal" value={null}>
+                            Tất cả sản phẩm
+                        </Radio>
+                    </li>
+                    {/* Dynamic Category Options */}
                     {category?.map((item: any) => (
                         <li
                             key={item._id}

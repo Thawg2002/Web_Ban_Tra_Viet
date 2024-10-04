@@ -1,4 +1,3 @@
-import BlogForm from "@/pages/(dashboard)/blog/add/page";
 import BlogList from "@/pages/(dashboard)/blog/page";
 import CategoryAdd from "@/pages/(dashboard)/category/add/page";
 import CategoryEdit from "@/pages/(dashboard)/category/edit/page";
@@ -12,6 +11,8 @@ import ProductManagement from "@/pages/(dashboard)/product/page";
 import UserList from "@/pages/(dashboard)/user/page";
 import NotFound from "@/pages/(website)/404/page";
 import AboutPage from "@/pages/(website)/about/page";
+import LayoutAccount from "@/pages/(website)/account/layout";
+import PurchaseIndex from "@/pages/(website)/account/purchase/PurchaseIndex";
 import ShoppingCart from "@/pages/(website)/cart/page";
 
 import HomePage from "@/pages/(website)/home/page";
@@ -69,6 +70,12 @@ const Router = () => {
                     <Route path="order-success" element={<OrderSuccess />} />
 
                     <Route path="checkout" element={<CheckoutPage />} />
+                    <Route path="account" element={<LayoutAccount />}>
+                        <Route
+                            path="purchase"
+                            element={<PurchaseIndex />}
+                        />
+                    </Route>
                     <Route
                         path="forgot-password"
                         element={<ForgotPassword />}

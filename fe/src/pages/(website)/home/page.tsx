@@ -43,7 +43,7 @@ const HomePage = () => {
 
     // Sắp xếp sản phẩm theo ngày tạo giảm dần (sản phẩm mới nhất trước)
     const sortedProducts = [...data?.data]
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .sort((a, b) => new Date(b.createdAt) as any - (new Date(a.createdAt) as any))
         .slice(0, 4);
 
     if (isLoading) return <div>Loading...</div>;
@@ -104,7 +104,7 @@ const HomePage = () => {
                     <div className="container">
                         {/* list */}
                         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-                            {sortedProducts.map((product) => (
+                            {sortedProducts && sortedProducts.map((product) => (
                                 <div key={product._id} className="">
                                     <a href={`products/${product._id}`}>
                                         {" "}
@@ -141,9 +141,9 @@ const HomePage = () => {
                                                     <span className="text-[#302e2e] ">
                                                         {Number(
                                                             product.regular_price *
-                                                                (1 -
-                                                                    product.discount /
-                                                                        100),
+                                                            (1 -
+                                                                product.discount /
+                                                                100),
                                                         ).toLocaleString()}{" "}
                                                         đ
                                                     </span>

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-
+import { useLocation, useNavigate } from "react-router-dom";
 import { banner_banh_trung_thu_5, banner_qua_tet_scaled } from "@/assets/img";
 import { useQuery } from "@tanstack/react-query";
-
 import { getAllCategories } from "@/services/categories";
 import CategoryFilter from "../_components/categoryFilter";
 import { getAllProducts } from "@/services/product";
@@ -11,28 +10,73 @@ import { Link } from "react-router-dom";
 import { Spin } from "antd";
 
 const ProductCategory = () => {
+    const toggleDropdown = () => {
+     setIsOpen(!isOpen);
+ };
     const [isOpen, setIsOpen] = useState(false);
     const [price, setPrice] = useState(0);
-    const [categorifilter, setCategorifilter] = useState<string | null>(null);
+    const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
     const productListRef = useRef<HTMLDivElement>(null);
     const [sortOption, setSortOption] = useState<string>("default");
     const [categoryName, setCategoryName] = useState<string>("Trà Xanh");
     const [categoryDescription, setCategoryDescription] = useState<string>("");
 
-    // Hàm xử lý khi giá trị của thanh trượt thay đổi
-    // const handleRangeChange = (event: any) => {
-    //     setPrice(event.target.value);
-    // };
+    const navigate = useNavigate();
+    const location = useLocation();
 
-    const toggleDropdown = () => {
-        setIsOpen(!isOpen);
+    // Parse query parameters from the URL
+    const params = new URLSearchParams(location.search);
+
+    useEffect(() => {
+        // Set the filter state based on the URL query parameters when the component mounts
+        const categoryFromParams = params.get("category");
+        const priceFromParams = params.get("price");
+        const sortFromParams = params.get("sort");
+
+        if (categoryFromParams) setCategoryFilter(categoryFromParams);
+        if (priceFromParams) setPrice(Number(priceFromParams));
+        if (sortFromParams) setSortOption(sortFromParams);
+
+        window.scrollTo(0, 0);
+    }, [location.search]);
+
+    // Handle category and price changes
+    const onhandleCategories = (
+        valueCategory: string | null,
+        inputValue: number,
+        categoryDisplayName: string,
+        categoryDisplayDescription: string,
+    ) => {
+        setCategoryFilter(valueCategory);
+        setPrice(inputValue);
+        setCategoryName(categoryDisplayName || "Trà Xanh");
+        setCategoryDescription(categoryDisplayDescription || "");
+
+        // Update the URL with the new filter options
+        const newParams = new URLSearchParams(location.search);
+        if (valueCategory) newParams.set("category", valueCategory);
+        if (inputValue) newParams.set("price", inputValue.toString());
+        navigate({ search: newParams.toString() });
     };
 
     const handleSortOptionChange = (option: string) => {
         setSortOption(option);
-        setIsOpen(false); // Đóng dropdown sau khi chọn
+
+        // Update the URL with the selected sort option
+        const newParams = new URLSearchParams(location.search);
+        newParams.set("sort", option);
+        navigate({ search: newParams.toString() });
+
+        setIsOpen(false); // Close dropdown after selecting
     };
 
+    const handleScrollToProductList = () => {
+        if (productListRef.current) {
+            productListRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
+    // Fetch products and categories using React Query
     const {
         data: products,
         isLoading,
@@ -43,6 +87,7 @@ const ProductCategory = () => {
         queryFn: async () => getAllProducts(),
         staleTime: 5 * 60 * 60,
     });
+
     const {
         data: category,
         isLoading: isLoadingCategory,
@@ -50,35 +95,15 @@ const ProductCategory = () => {
         error: errorCategory,
     } = useQuery({
         queryKey: ["categories"],
-        staleTime: 5 * 60 * 60,
         queryFn: getAllCategories,
+        staleTime: 5 * 60 * 60,
     });
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
 
-    const onhandleCategories = (
-        valueCategory: string | null,
-        inputValue: number,
-        categoryDisplayName: string,
-        categoryDisplayDescription: string, // Thêm tham số cho mô tả
-    ) => {
-        setCategorifilter(valueCategory);
-        setPrice(inputValue);
-        setCategoryName(categoryDisplayName || "Trà Xanh");
-        setCategoryDescription(categoryDisplayDescription || ""); // Cập nhật mô tả
-    };
-
-    const handleScrollToProductList = () => {
-        if (productListRef.current) {
-            productListRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    };
     const filteredProducts = products?.data
         .filter((product: any) => {
             return (
-                (!categorifilter ||
-                    product.category.includes(categorifilter)) &&
+                (!categoryFilter ||
+                    product.category.includes(categoryFilter)) &&
                 (price === 0 || product.regular_price <= price)
             );
         })
@@ -93,19 +118,13 @@ const ProductCategory = () => {
             } else if (sortOption === "highToLow") {
                 return b.regular_price - a.regular_price;
             } else if (sortOption === "bestRating") {
-                return b.rating - a.rating; // Giả sử có trường 'rating'
+                return b.rating - a.rating; // Assuming there's a 'rating' field
             } else {
-                return 0; // Mặc định không sắp xếp
+                return 0; // Default sorting (no sorting)
             }
         });
 
-    if (isLoadingCategory) {
-        return (
-            <Spin tip="Đang tải..." size="large" className="text-blue-500" />
-        );
-    }
-    if (isErrorCategory) return <div>{errorCategory.message}</div>;
-    if (isLoading) {
+    if (isLoading || isLoadingCategory) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
                 <Spin
@@ -116,7 +135,10 @@ const ProductCategory = () => {
             </div>
         );
     }
-    if (isError) return <div>{error.message}</div>;
+
+    if (isError || isErrorCategory) {
+        return <div>{error?.message || errorCategory?.message}</div>;
+    }
 
     return (
         <div>
@@ -220,42 +242,55 @@ const ProductCategory = () => {
                         </div>
                     </div>
 
-                    <div
-                        ref={productListRef}
-                        className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-5 mb-5"
-                    >
-                        {filteredProducts?.map((product: any) => (
-                            <div key={product._id} className="text-center">
-                                <div className="relative cursor-pointer">
-                                    <a
-                                        href={`products/${product._id}`}
-                                        className="text-red-600 text-sm font-medium"
-                                    >
-                                        <img
-                                            src={product.image}
-                                            alt={product.name}
-                                            className="w-full transition-opacity duration-300 opacity-100 hover:opacity-0"
-                                        />
-                                        <img
-                                            src={product.gallery[0]}
-                                            alt={`${product.name} Hover`}
-                                            className="w-full transition-opacity duration-300 opacity-0 hover:opacity-100 absolute top-0 left-0"
-                                        />
-                                    </a>
-                                </div>
-                                <h3 className="mt-4 text-gray-800 text-sm capitalize">
-                                    {product.name}
-                                </h3>
-                                <p className="text-red-600">★★★★★</p>
-                                <Link
-                                    to={`products/${product._id}`}
-                                    className="text-red-600 text-sm font-medium"
+                    {filteredProducts && filteredProducts.length === 0 ? (
+                        <div className="text-center mt-10 text-gray-600">
+                            <h2 className="text-2xl font-semibold">
+                                Không tìm thấy sản phẩm nào
+                            </h2>
+                        </div>
+                    ) : (
+                        <div
+                            ref={productListRef}
+                            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 mb-8 px-4"
+                        >
+                            {filteredProducts?.map((product: any) => (
+                                <div
+                                    key={product._id}
+                                    className="text-center group"
                                 >
-                                    ĐỌC TIẾP
-                                </Link>
-                            </div>
-                        ))}
-                    </div>
+                                    <div className="relative cursor-pointer overflow-hidden rounded-lg shadow-lg">
+                                        <a
+                                            href={`products/${product._id}`}
+                                            className="block w-full h-full"
+                                        >
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="w-full h-auto transition-opacity duration-300 opacity-100 group-hover:opacity-0"
+                                            />
+                                            <img
+                                                src={product.gallery[0]}
+                                                alt={`${product.name} Hover`}
+                                                className="absolute inset-0 w-full h-auto transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                                            />
+                                        </a>
+                                    </div>
+                                    <h3 className="mt-4 text-gray-800 text-sm capitalize font-medium group-hover:text-red-500 transition-colors">
+                                        {product.name}
+                                    </h3>
+                                    <p className="text-red-600 text-sm mt-1">
+                                        ★★★★★
+                                    </p>
+                                    <Link
+                                        to={`${product._id}`}
+                                        className="inline-block mt-2 text-red-600 text-sm font-semibold transition-colors hover:text-red-500"
+                                    >
+                                        ĐỌC TIẾP
+                                    </Link>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

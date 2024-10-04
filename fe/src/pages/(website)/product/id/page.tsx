@@ -24,7 +24,7 @@ const ProductDetail = () => {
         queryKey: ["getProductById", id],
         queryFn: () => getProductById(id),
     });
-console.log(data);
+    console.log(data);
     const { data: relatedProduct } = useQuery({
         queryKey: ["relatedProducts", id],
         queryFn: () => getRelatedProduct(id),
@@ -102,13 +102,17 @@ console.log(data);
     const product = data?.product;
     const images = product ? [product.image, ...(product.gallery || [])] : [];
 
-   if (isLoading) {
-       return (
-           <div className="flex items-center justify-center min-h-screen bg-gray-100">
-               <Spin tip="Đang tải..." size="large" className="text-blue-500" />
-           </div>
-       );
-   }
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <Spin
+                    tip="Đang tải..."
+                    size="large"
+                    className="text-blue-500"
+                />
+            </div>
+        );
+    }
 
     if (isError) return <div>{error.message}</div>;
     return (
