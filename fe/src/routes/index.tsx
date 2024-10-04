@@ -1,3 +1,5 @@
+
+import BlogList from "@/pages/(dashboard)/blog/page";
 import CategoryAdd from "@/pages/(dashboard)/category/add/page";
 import CategoryEdit from "@/pages/(dashboard)/category/edit/page";
 import CategoryList from "@/pages/(dashboard)/category/page";
@@ -16,6 +18,9 @@ import ShoppingCart from "@/pages/(website)/cart/page";
 
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
+import ForgotPassword from "@/pages/(website)/login/ForgotPassword";
+import ResetPassword from "@/pages/(website)/login/ResetPassword";
+
 import LoginPage from "@/pages/(website)/login/page";
 import OrderSuccess from "@/pages/(website)/order-success/page";
 
@@ -52,6 +57,7 @@ const Router = () => {
                         />
                         <Route path="user" element={<UserList />} />
                         <Route path="order" element={<OrderList />} />
+                        <Route path="blog" element={<BlogList />} />
                     </Route>
                 </Route>
 
@@ -64,6 +70,14 @@ const Router = () => {
                     <Route path="cart" element={<ShoppingCart />} />
                     <Route path="order-success" element={<OrderSuccess />} />
                     <Route path="checkout" element={<CheckoutPage />} />
+                    <Route
+                        path="forgot-password"
+                        element={<ForgotPassword />}
+                    />
+                    <Route
+                        path="reset-password/:token"
+                        element={<ResetPassword />}
+                    />
                     <Route path="account" element={<LayoutAccount />}>
                         <Route path="/account/purchase" element={<PurchaseIndex />} />
                     </Route>

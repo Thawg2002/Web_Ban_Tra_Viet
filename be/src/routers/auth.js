@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllUsers, logout, refreshToken, signin, signup, updateUserRole } from "../controllers/auth";
+import { forgotPassword, getAllUsers, logout, refreshToken, signin, signup, updateUserRole } from "../controllers/auth";
 const router = express.Router();
 
 router.post("/auth/signup", signup);
@@ -8,4 +8,5 @@ router.post("/refresh-token", refreshToken);
 router.post("/logout", logout);
 router.get("/auth/users", getAllUsers);
 router.put("/auth/users/:userId", updateUserRole);
+router.post("/auth/forgot-password", forgotPassword);
 export default router;

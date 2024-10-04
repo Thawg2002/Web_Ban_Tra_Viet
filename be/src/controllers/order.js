@@ -149,15 +149,8 @@ export const updateOrder = async (req, res) => {
 export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { status } = req.body;
+    const { status, cancellationReason } = req.body;
 
-    // const validStatus = [
-    //   "pending",
-    //   "confirmed",
-    //   "shipped",
-    //   "delivered",
-    //   "cancelled",
-    // ];
     const validStatus = [
       "Chờ xác nhận",
       "Đã xác nhận",
@@ -189,6 +182,9 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     order.status = status;
+    if (status === "đã hủy" && cancellationReason) {
+      order.cancellationReason = cancellationReason;
+    }
     await order.save();
 
     return res

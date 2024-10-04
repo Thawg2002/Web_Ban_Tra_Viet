@@ -2,7 +2,7 @@ import { toast } from "@/components/ui/use-toast";
 import { deleteCategories, getAllCategories } from "@/services/categories";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { TableProps } from "antd";
-import { Button, Popconfirm, Table, Input } from "antd";
+import { Button, Popconfirm, Table, Input, Spin } from "antd";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -147,7 +147,7 @@ const CategoryList = () => {
         },
     ];
 
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) return <Spin tip="Đang tải danh mục..." />;
     if (isError) return <div>{error.message}</div>;
     if (isErrorDelete) return <div>{errorDelete.message}</div>;
 

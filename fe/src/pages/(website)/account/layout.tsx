@@ -3,7 +3,6 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { MdEdit } from "react-icons/md";
 import { FaRegUser } from "react-icons/fa";
 import { motion, Variants } from "framer-motion";
-
 import { useMediaQuery } from "usehooks-ts";
 import { cn } from "@/common/lib/utils";
 import sidebarAccount from "@/configs/sidebarConfig";

@@ -8,6 +8,7 @@ import { IoStar } from "react-icons/io5";
 import { useParams } from "react-router-dom";
 import SimilarProducts from "./similarProducts";
 import { getAllCategories } from "@/services/categories";
+import { Spin } from "antd";
 const ProductDetail = () => {
     const [isActive, setIsActive] = useState(1);
     const [content, setContent] = useState("Mô tả sản phẩm");
@@ -100,7 +101,14 @@ const ProductDetail = () => {
     const product = data?.product;
     const images = product ? [product.image, ...(product.gallery || [])] : [];
 
-    if (isLoading) return <div>Loading...</div>;
+   if (isLoading) {
+       return (
+           <div className="flex items-center justify-center min-h-screen bg-gray-100">
+               <Spin tip="Đang tải..." size="large" className="text-blue-500" />
+           </div>
+       );
+   }
+
     if (isError) return <div>{error.message}</div>;
     return (
         <>

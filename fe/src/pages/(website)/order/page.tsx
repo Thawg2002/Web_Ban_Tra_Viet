@@ -1,14 +1,18 @@
 import useCart from "@/common/hooks/useCart";
 import instance from "@/configs/axios";
+import { getConfig } from "@/services/cart";
 import React, { useState, useEffect, useMemo } from "react";
 import { AiFillContainer } from "react-icons/ai";
 import { FaUserCircle } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { Alert, Spin } from "antd";
 const CheckoutPage = () => {
     const navigate = useNavigate();
     const [paymentMethod, setPaymentMethod] = useState("");
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const [user, setUser] = useState({
         userId: "",
         fullName: "",
@@ -17,37 +21,50 @@ const CheckoutPage = () => {
         phone: "",
         email: "",
     });
-    const [selectedProducts, setSelectedProducts] = useState([]);
-
+    const [userPaypal, setUserPaypal] = useState({
+        userId: "",
+        fullName: "",
+        address: "",
+        city: "",
+        phone: "",
+        email: "",
+    });
     useEffect(() => {
-        const user = localStorage.getItem("user");
         if (user) {
-            const userInfo = JSON.parse(user);
-            setUser((prevFormData) => ({
-                ...prevFormData,
-                userId: userInfo._id,
-                fullName: userInfo.fullName || prevFormData.fullName,
-                email: userInfo.email || prevFormData.email,
-            }));
+            setUserPaypal(user);
         }
-
-        // Đọc danh sách sản phẩm đã chọn từ localStorage
-        const products = JSON.parse(
-            localStorage.getItem("selectedProducts") || "[]",
-        );
-        setSelectedProducts(products);
-    }, []);
-
-    const { cart } = useCart(user.userId);
+    }, [user]);
+    console.log("user", user);
+    console.log("userPaypal", userPaypal);
+    const initialOptions = {
+        clientId: "test",
+        currency: "USD",
+        intent: "capture",
+    };
+    const {
+        cart,
+        isLoading,
+        isError,
+        error,
+        decreaseQuantity,
+        increaseQuantity,
+        removeItem,
+    } = useCart(user?.userId);
+    const listchecked =
+        cart?.cart?.cartData?.products?.filter((product) =>
+            selectedProducts.some(
+                (selected) => selected.productId === product.productId,
+            ),
+        ) || [];
 
     const totalPriceChecked = useMemo(() => {
         if (!selectedProducts.length) {
-            console.log("No items selected for checkout.");
+            console.log("No items in the cart.");
             return 0;
         }
 
         console.log("Selected products:", selectedProducts);
-        const result = selectedProducts.reduce((total, item) => {
+        const result = selectedProducts.reduce((total: any, item: any) => {
             return total + (item.price || 0) * (item.quantity || 1);
         }, 0);
         console.log("Total Price Checked:", result);
@@ -57,16 +74,16 @@ const CheckoutPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        console.log("Payment Method:", paymentMethod);
+        console.log("Payment Method:", paymentMethod); // Thêm dòng này để kiểm tra giá trị paymentMethod
 
-        if (selectedProducts.length === 0) {
-            toast.error("No items selected for checkout.");
+        if (listchecked.length === 0) {
+            // toast.error("No items in the cart.");
             return;
         }
 
         const orderData = {
             userId: user.userId,
-            items: selectedProducts.map((item) => ({
+            items: selectedProducts.map((item: any) => ({
                 productId: item.productId,
                 quantity: item.quantity,
             })),
@@ -97,15 +114,17 @@ const CheckoutPage = () => {
             });
 
             console.log(response?.data);
-
-            // Xóa danh sách sản phẩm đã chọn khỏi localStorage sau khi đặt hàng thành công
-            localStorage.removeItem("selectedProducts");
-
+            for (const item of listchecked) {
+                await removeItem.mutateAsync({
+                    userId: user.userId,
+                    productIds: item.productId,
+                });
+            }
             setTimeout(() => {
                 navigate("/order-success", {
                     state: {
                         orderNumber: response.data.orderNumber,
-                        products: selectedProducts,
+                        products: listchecked,
                         totalPrice: totalPriceChecked,
                     },
                 });
@@ -127,6 +146,101 @@ const CheckoutPage = () => {
         }
     };
 
+    const onSuccessPaypal = async (details: any, data: any) => {
+        if (selectedProducts.length === 0) {
+            return;
+        }
+
+        const orderData = {
+            userId: user.userId,
+            items: selectedProducts.map((item: any) => ({
+                productId: item.productId,
+                quantity: item.quantity,
+            })),
+            totalPrice: totalPriceChecked,
+            customerInfo: {
+                fullName: userPaypal?.fullName,
+                address: userPaypal?.address,
+                city: userPaypal?.city,
+                phone: userPaypal?.phone,
+                email: user.email,
+            },
+            paymentMethod: "bank transfer",
+        };
+
+        try {
+            const response = await instance.post("orders", orderData);
+            navigate("/order-success", {
+                state: {
+                    orderNumber: response.data.orderNumber,
+                    products: selectedProducts, // Only selected products
+                    totalPrice: totalPriceChecked,
+                },
+            });
+
+            for (const item of selectedProducts) {
+                await removeItem.mutateAsync({
+                    userId: user.userId,
+                    productIds: item.productId,
+                });
+            }
+        } catch (error) {
+            console.error("Order failed:", error);
+        }
+    };
+
+    const addPaypalScript = async () => {
+        try {
+            const { data } = await getConfig();
+            const script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = `https://www.paypal.com/sdk/js?client-id=${data}`;
+            script.async = true;
+            script.onload = () => {
+                // setSdkReady(true);
+            };
+            document.body.appendChild(script);
+        } catch (err) {
+            console.error("Failed to load PayPal script:", err);
+        }
+    };
+
+    useEffect(() => {
+        addPaypalScript();
+    }, []);
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+        if (user) {
+            const userInfo = JSON.parse(user);
+            setUser((prevFormData) => ({
+                ...prevFormData,
+                userId: userInfo._id,
+                fullName: userInfo.fullName || prevFormData.fullName,
+                email: userInfo.email || prevFormData.email,
+            }));
+        }
+
+        // Đọc danh sách sản phẩm đã chọn từ localStorage
+        const products = JSON.parse(
+            localStorage.getItem("selectedProducts") || "[]",
+        );
+        setSelectedProducts(products);
+    }, []);
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <Spin
+                    tip="Đang tải..."
+                    size="large"
+                    className="text-blue-500"
+                />
+            </div>
+        );
+    }
+    if (isError)
+        return (
+            <Alert message="Lỗi" description={isError} type="error" showIcon />
+        );
     return (
         <div className="pt-[40px]">
             <ToastContainer />
@@ -352,6 +466,7 @@ const CheckoutPage = () => {
                                 </h3>
                             </div>
                         </div>
+
                         {/* <div className="grid grid-cols-2 py-[10px] *:text-[#424242]">
                             <div>
                                 <h3>THUẾ VAT 8%</h3>
@@ -439,15 +554,60 @@ const CheckoutPage = () => {
                                 được mô tả trong chính sách riêng tư của chúng
                                 tôi.
                             </p>
-
-                            <button
-                                style={{
-                                    backgroundColor: "rgb(216, 34, 83)",
-                                }}
-                                className="mt-[10px] w-full text-[#fff] pt-[18px] pb-[15px] px-[16px]"
-                            >
-                                ĐẶT HÀNG
-                            </button>
+                            {paymentMethod === "bank transfer" ? (
+                                <>
+                                    <PayPalScriptProvider
+                                        options={initialOptions}
+                                    >
+                                        <PayPalButtons
+                                            createOrder={(data, actions) => {
+                                                return actions.order.create({
+                                                    purchase_units: [
+                                                        {
+                                                            amount: {
+                                                                value: (
+                                                                    totalPriceChecked *
+                                                                    1.08
+                                                                ).toFixed(2),
+                                                            },
+                                                        },
+                                                    ],
+                                                });
+                                            }}
+                                            onApprove={(data, actions: any) => {
+                                                return actions.order
+                                                    .capture()
+                                                    .then((details: any) => {
+                                                        onSuccessPaypal(
+                                                            details,
+                                                            data,
+                                                        );
+                                                    });
+                                            }}
+                                            onError={(err) => {
+                                                alert(
+                                                    "Thanh toán thất bại. Vui lòng thử lại.",
+                                                );
+                                                console.error(
+                                                    "Lỗi thanh toán:",
+                                                    err,
+                                                );
+                                            }}
+                                        />
+                                    </PayPalScriptProvider>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        style={{
+                                            backgroundColor: "rgb(216, 34, 83)",
+                                        }}
+                                        className="mt-[10px] w-full text-[#fff] pt-[18px] pb-[15px] px-[16px]"
+                                    >
+                                        ĐẶT HÀNG
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

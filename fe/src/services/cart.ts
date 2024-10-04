@@ -1,21 +1,25 @@
 // Import các kiểu dữ liệu cần thiết (nếu có)
 
 import instance from "@/configs/axios";
+import axios from "axios";
 
-
+export const getConfig = async () => {
+    const res = await axios.get(`http://localhost:8080/api/payment/config`);
+    return res.data;
+};
 
 // Hàm đặt hàng với TypeScript
 export const placeOrder = async (orderData: any): Promise<Order> => {
-    const response = await fetch('/api/order', {
-        method: 'POST',
+    const response = await fetch("/api/order", {
+        method: "POST",
         body: JSON.stringify(orderData),
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
     });
 
     if (!response.ok) {
-        throw new Error('Đặt hàng thất bại!');
+        throw new Error("Đặt hàng thất bại!");
     }
 
     return await response.json();
