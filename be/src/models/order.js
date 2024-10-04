@@ -54,11 +54,6 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["bank transfer", "cash on delivery"],
     },
-    // status: {
-    //   type: String,
-    //   enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
-    //   default: "pending",
-    // },
     status: {
       type: String,
       enum: [
