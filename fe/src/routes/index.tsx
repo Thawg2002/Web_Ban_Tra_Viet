@@ -1,4 +1,3 @@
-
 import BlogList from "@/pages/(dashboard)/blog/page";
 import CategoryAdd from "@/pages/(dashboard)/category/add/page";
 import CategoryEdit from "@/pages/(dashboard)/category/edit/page";
@@ -35,7 +34,7 @@ const Router = () => {
     return (
         <>
             <Routes>
-                <Route >
+                <Route element={<PrivateRouter />}>
                     <Route path="admin" element={<LayoutAdmin />}>
                         <Route
                             path="products"
@@ -69,7 +68,14 @@ const Router = () => {
                     <Route path="login" element={<LoginPage />} />
                     <Route path="cart" element={<ShoppingCart />} />
                     <Route path="order-success" element={<OrderSuccess />} />
+
                     <Route path="checkout" element={<CheckoutPage />} />
+                    <Route path="account" element={<LayoutAccount />}>
+                        <Route
+                            path="purchase"
+                            element={<PurchaseIndex />}
+                        />
+                    </Route>
                     <Route
                         path="forgot-password"
                         element={<ForgotPassword />}
@@ -78,9 +84,6 @@ const Router = () => {
                         path="reset-password/:token"
                         element={<ResetPassword />}
                     />
-                    <Route path="account" element={<LayoutAccount />}>
-                        <Route path="/account/purchase" element={<PurchaseIndex />} />
-                    </Route>
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

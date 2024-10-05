@@ -285,14 +285,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { fetchBlogs } from "@/services/blogApi";
-import {
-    dinh_ngoc_dung,
-    gioi_thieu_tra1,
-    gioi_thieu_tra2,
-    mong_kieu,
-    phu_bw,
-    thanh_huyen,
-} from "@/assets/img";
+import { gioi_thieu_tra1, gioi_thieu_tra2 } from "@/assets/img";
 import { Spin } from "antd";
 const AboutPage = () => {
     // Fetch data using useQuery (React Query v5 object form)
@@ -302,13 +295,17 @@ const AboutPage = () => {
     });
 
     // Handle loading and error states
-   if (isLoading) {
-       return (
-           <div className="flex items-center justify-center min-h-screen bg-gray-100">
-               <Spin tip="Đang tải..." size="large" className="text-blue-500" />
-           </div>
-       );
-   }
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <Spin
+                    tip="Đang tải..."
+                    size="large"
+                    className="text-blue-500"
+                />
+            </div>
+        );
+    }
 
     if (isError) {
         return <div>Error: {error.message}</div>;
@@ -371,33 +368,49 @@ const AboutPage = () => {
                         <p>Không có đoạn giới thiệu</p>
                     )}
                 </div>
-            </div>
-
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-8">
-                <img
-                    src={phu_bw}
-                    alt="Chairman"
-                    className="rounded-full w-24 h-24 sm:w-12 sm:h-12"
-                />
-                <div>
-                    <p className="text-gray-900 font-semibold">
-                        Đinh Minh Phú –{" "}
-                        <span className="font-normal">Founder, Chairman</span>
-                    </p>
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-5">
+                    {blogData?.team && blogData.team.length > 0 && (
+                        <>
+                            {/* Ảnh của người đầu tiên trong team */}
+                            {blogData.team[0].gallery &&
+                                blogData.team[0].gallery.length > 0 && (
+                                    <img
+                                        src={blogData.team[0].gallery[0]}
+                                        alt={
+                                            blogData.team[0].name || "Chairman"
+                                        }
+                                        className="rounded-full w-24 h-24 sm:w-12 sm:h-12"
+                                    />
+                                )}
+                            <div>
+                                {/* Tên và chức vụ của người đầu tiên */}
+                                <p className="text-gray-900 font-semibold">
+                                    {blogData.team[0].name || "Đinh Minh Phú"} –{" "}
+                                    <span className="font-normal">
+                                        {blogData.team[0].role ||
+                                            "Founder, Chairman"}
+                                    </span>
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 
             <div className="flex flex-col md:flex-row justify-center items-center gap-10 mt-5">
-                <img
-                    className="w-full md:w-[700px] md:h-[430px] object-cover"
-                    src={gioi_thieu_tra1}
-                    alt=""
-                />
-                <img
-                    className="w-full md:w-[700px] object-cover"
-                    src={gioi_thieu_tra2}
-                    alt=""
-                />
+                {Array.isArray(blogData?.image) &&
+                blogData?.image.length > 0 ? (
+                    blogData.image.map((images, index) => (
+                        <img
+                            key={index}
+                            className="w-full max-w-full md:w-[700px] md:h-[430px] object-cover"
+                            src={images}
+                            alt={`Blog Image ${index + 1}`}
+                        />
+                    ))
+                ) : (
+                    <p>Không có hình ảnh để hiển thị</p>
+                )}
             </div>
 
             {blogData?.mission && (
@@ -538,8 +551,8 @@ const AboutPage = () => {
                         blogData.team.map((member, index) => (
                             <div key={index} className="text-center max-w-xs">
                                 <img
-                                    src={phu_bw}
-                                    alt="Đinh Minh Phú"
+                                    src={member.gallery}
+                                    alt={member.name}
                                     className="w-32 h-32 mx-auto rounded-full object-cover mb-4 sm:w-40 sm:h-40 lg:w-48 lg:h-48"
                                 />
                                 <h3 className="text-xl font-semibold text-gray-800">

@@ -1,12 +1,13 @@
-import useCart from "@/common/hooks/useCart";
+import React, { useEffect, useState } from "react";
+import { IoStar } from "react-icons/io5";
 import { cn } from "@/common/lib/utils";
-import { toast } from "@/components/ui/use-toast";
+import { useParams } from "react-router-dom";
 import { getProductById, getRelatedProduct } from "@/services/product";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { IoStar } from "react-icons/io5";
-import { useParams } from "react-router-dom";
 import SimilarProducts from "./similarProducts";
+import { IProduct } from "@/common/types/product";
+import useCart from "@/common/hooks/useCart";
+import { toast } from "@/components/ui/use-toast";
 import { getAllCategories } from "@/services/categories";
 import { Spin } from "antd";
 const ProductDetail = () => {
@@ -21,12 +22,12 @@ const ProductDetail = () => {
 
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ["getProductById", id],
-        queryFn: () => getProductById(id as string),
+        queryFn: () => getProductById(id),
     });
-
+    console.log(data);
     const { data: relatedProduct } = useQuery({
         queryKey: ["relatedProducts", id],
-        queryFn: () => getRelatedProduct(id as string),
+        queryFn: () => getRelatedProduct(id),
     });
     const { data: category } = useQuery({
         queryKey: ["categories"],
@@ -101,20 +102,24 @@ const ProductDetail = () => {
     const product = data?.product;
     const images = product ? [product.image, ...(product.gallery || [])] : [];
 
-   if (isLoading) {
-       return (
-           <div className="flex items-center justify-center min-h-screen bg-gray-100">
-               <Spin tip="Đang tải..." size="large" className="text-blue-500" />
-           </div>
-       );
-   }
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <Spin
+                    tip="Đang tải..."
+                    size="large"
+                    className="text-blue-500"
+                />
+            </div>
+        );
+    }
 
     if (isError) return <div>{error.message}</div>;
     return (
         <>
             <div className="padding py-16 lg:py-20">
                 {/* head */}
-                <div className=" mx-auto ">
+                <div className="max-w-[1200px] mx-auto ">
                     <div className=" grid grid-cols-1 lg:grid-cols-2 gap-y-20  gap-x-16 ">
                         {/*   left */}
                         <div className="">
@@ -123,10 +128,11 @@ const ProductDetail = () => {
                                     {images.map((image, index) => (
                                         <div
                                             key={index}
-                                            className={`w-[20%] lg:w-full border border-gray-200 shadow-xl cursor-pointer transition-opacity duration-300 ${activeIndex === index
-                                                ? "opacity-50"
-                                                : "opacity-100"
-                                                }`}
+                                            className={`w-[20%] lg:w-full border border-gray-200 shadow-xl cursor-pointer transition-opacity duration-300 ${
+                                                activeIndex === index
+                                                    ? "opacity-50"
+                                                    : "opacity-100"
+                                            }`}
                                             onClick={() => {
                                                 setMainImage(image);
                                                 setActiveIndex(index);
@@ -140,7 +146,7 @@ const ProductDetail = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="order-1 lg:order-2 w-[100%] h-[500px] lg:w-[85%] border-gray-200 overflow-hidden rounded-[6px] shadow-md">
+                                <div className="order-1 lg:order-2 w-[100%] lg:w-[85%] border-gray-200 overflow-hidden rounded-[6px] shadow-md">
                                     <img
                                         src={mainImage || product.image}
                                         className="w-full h-full object-cover transition-opacity duration-300 ease-in-out"
@@ -199,7 +205,7 @@ const ProductDetail = () => {
                                     <span className="font-medium text-[#EB2606] lg:text-xl lg:tracking-[0.7px] mb:text-base flex items-center lg:gap-x-3 lg:mt-0.5 mb:gap-x-2">
                                         {Number(
                                             product.regular_price *
-                                            (1 - product.discount / 100),
+                                                (1 - product.discount / 100),
                                         ).toLocaleString()}{" "}
                                         đ
                                         <del className="font-light lg:text-sm mb:text-sm text-[#9D9EA2]">
@@ -212,32 +218,15 @@ const ProductDetail = () => {
                                 </div>
 
                                 <div className="*:font-medium">
-
-                                    {/* <ul className="list-disc pl-5 *:leading-[160%]">
-                                        <li className="">
-                                            Lên men 30%, vị chát nhẹ và không
-                                            gắt, mang đến một trà Ô Long thưởng
-                                            thức êm dịu và tinh tế.
-                                        </li>
-                                        <li className="">
-                                            Màu nước vàng sóng sánh, tạo điểm
-                                            nhấn đẹp mắt cho ly trà.
-                                        </li>
-                                        <li className="">
-                                            Hương thơm mạnh mẽ và hậu vị đậm đà,
-                                            mang đến một trải nghiệm thưởng thức
-                                            trà độc đáo.
-                                        </li>
-                                        <li className="">
-                                            Pha được nhiều lần nước mà vẫn giữ
-                                            nguyên hương vị đặc trưng.
-                                        </li>
-                                        <li className="">
-                                            Là một lựa chọn tuyệt vời để tặng
-                                            những người yêu thích hương vị trà
-                                            đậm đà và trải nghiệm trà độc đáo
-                                        </li>
-                                    </ul> */}
+                                    <ul className="list-disc pl-5 *:leading-[160%] mt-5">
+                                        <li
+                                            className=""
+                                            dangerouslySetInnerHTML={{
+                                                __html:
+                                                    product?.description || "",
+                                            }}
+                                        ></li>
+                                    </ul>
                                 </div>
                             </div>
                             {/*Thêm giỏ hàng */}
@@ -279,18 +268,8 @@ const ProductDetail = () => {
                         </div>
                     </div>
                 </div>
-                <div className="max-w-[900px] mx-auto pt-20 ">
-                    <div className="border-t border-gray-500 w-[60%] mx-auto"></div>
-                    <h3 className="text-sm md:text-lg font-semibold text-center my-5">Mô tả sản phẩm</h3>
-                    <p
-                        className="pb-4 leading-[150%]"
-                        dangerouslySetInnerHTML={{
-                            __html: product?.description || "",
-                        }}
-                    ></p>
-                </div>
                 {/*  */}
-                {/* <div className="pt-28">
+                <div className="pt-28">
                     <div className="flex gap-10 justify-center">
                         {menuList.map((item: any) => (
                             <span
@@ -299,7 +278,7 @@ const ProductDetail = () => {
                                 className={cn(
                                     `text-[rgba(66,66,66,0.55)] text-base py-2 font-semibold border-transparent border-t-[3px] hover:border-red-700`,
                                     isActive === item.index &&
-                                    `bborder-t-[3px] border-red-700 text-[#424242]`,
+                                        `bborder-t-[3px] border-red-700 text-[#424242]`,
                                 )}
                             >
                                 {item.name}
@@ -307,7 +286,7 @@ const ProductDetail = () => {
                         ))}
                     </div>
                     <div className="text-center pt-10">{content}</div>
-                </div> */}
+                </div>
                 {/* similar product */}
                 <SimilarProducts products={relatedProduct} />
             </div>

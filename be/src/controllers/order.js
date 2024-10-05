@@ -23,15 +23,31 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// Lấy tất cả đơn hàng
 // export const getOrders = async (req, res) => {
 //   try {
-//     const orders = await Order.find();
+//     const {
+//       status,
+//       customerName,
+//     } = req.query;
+
+//     // Build query object
+//     const query = {};
+
+//     if (status) query.status = status;
+//     if (customerName)
+//       query["customerInfo.fullName"] = { $regex: customerName, $options: "i" };
+
+//     const orders = await Order.find(query).populate({
+//       path: "items.productId",
+//       select: "name image regular_price discount countInStock",
+//     });
+
 //     if (orders.length === 0) {
 //       return res
 //         .status(StatusCodes.NOT_FOUND)
 //         .json({ error: "No orders found" });
 //     }
+
 //     return res.status(StatusCodes.OK).json(orders);
 //   } catch (error) {
 //     return res
@@ -41,10 +57,7 @@ export const createOrder = async (req, res) => {
 // };
 export const getOrders = async (req, res) => {
   try {
-    const {
-      status,
-      customerName,
-    } = req.query;
+    const { status, customerName } = req.query;
 
     // Danh sách trạng thái hợp lệ
     const statusList = [
@@ -72,9 +85,7 @@ export const getOrders = async (req, res) => {
     });
     // Nếu không có đơn hàng nào được tìm thấy
     if (orders.length === 0) {
-      return res
-        .status(StatusCodes.OK)
-        .json([]);
+      return res.status(StatusCodes.OK).json([]);
     }
     // Trả về danh sách đơn hàng
     return res.status(StatusCodes.OK).json(orders);
@@ -85,24 +96,7 @@ export const getOrders = async (req, res) => {
       .json({ error: "Lỗi khi lấy danh sách đơn hàng: " + error.message });
   }
 };
-// export const getOrders = async (req, res) => {
-//   try {
-//     const orders = await Order.find().populate({
-//       path: "items.productId",
-//       select: "name image regular_price discount countInStock",
-//     });
-//     if (orders.length === 0) {
-//       return res
-//         .status(StatusCodes.NOT_FOUND)
-//         .json({ error: "No orders found" });
-//     }
-//     return res.status(StatusCodes.OK).json(orders);
-//   } catch (error) {
-//     return res
-//       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-//       .json({ error: "Error fetching orders: " + error.message });
-//   }
-// };
+
 // Lấy đơn hàng theo ID
 export const getOrderById = async (req, res) => {
   try {
@@ -152,12 +146,11 @@ export const updateOrderStatus = async (req, res) => {
     const { status, cancellationReason } = req.body;
 
     const validStatus = [
-      "Chờ xác nhận",
-      "Đã xác nhận",
-      "Chờ lấy hàng",
-      "Đang giao hàng",
-      "Đã giao",
-      "Đã hủy",
+      "chờ xử lý",
+      "đã xác nhận",
+      "đang giao",
+      "đã giao",
+      "đã hủy",
     ];
 
     if (!validStatus.includes(status)) {

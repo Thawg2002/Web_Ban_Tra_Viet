@@ -4,7 +4,7 @@ import Joi from "joi";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
 import BlacklistedToken from "../models/black-listed-token";
-
+// const crypto = require('crypto')
 
 import nodemailer from "nodemailer";
 const signupSchema = Joi.object({

@@ -3,6 +3,9 @@
 import { BarChart, List, User } from "lucide-react";
 import SidebarItem from "./SidebarItem";
 import { FaBox } from "react-icons/fa6";
+import { FaFileAlt } from "react-icons/fa";
+import { ShoppingOutlined } from "@ant-design/icons";
+import { MdInventory } from "react-icons/md";
 
 const routes = [
     {
@@ -11,7 +14,7 @@ const routes = [
         href: "/admin",
     },
     {
-        icon: List,
+        icon: MdInventory,
         label: "Sản phẩm",
         href: "/admin/products",
     },
@@ -31,7 +34,7 @@ const routes = [
         href: "/admin/order",
     },
     {
-        icon: User,
+        icon: FaFileAlt,
         label: "Bài viết",
         href: "/admin/blog",
     },
