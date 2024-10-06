@@ -103,7 +103,7 @@ const Header = () => {
                       key: "2",
                       label: (
                           <Link to="/admin" rel="noopener noreferrer">
-                              Admin Page
+                              Quản trị Admin
                           </Link>
                       ),
                   },
@@ -112,28 +112,33 @@ const Header = () => {
         {
             key: "4",
             danger: true,
-            label: "Logout",
+            label: "Đăng xuất",
             onClick: handleLogout,
+        },
+        {
+            key: "5",
+            label: (
+                <Link to="account/purchase" rel="noopener noreferrer">
+                    Theo dõi đơn hàng
+                </Link>
+            ),
         },
     ];
     const { cart } = useCart(user?._id);
     const listchecked = cart?.cart?.cartData?.products || [];
     const totalPriceChecked = useMemo(() => {
-        console.log("List checked:", listchecked);
-        const result = listchecked?.reduce((total, item: any) => {
+        const result = listchecked?.reduce((total: any, item: any) => {
             return total + (item.price || 0) * (item.quantity || 1);
         }, 0);
-        console.log("Total Price Checked:", result);
         return result;
     }, [listchecked]);
-    console.log(totalPriceChecked);
 
     return (
         <header
             className={` ${isScrolled ? "bg-[#f6f6f6]" : "bg-transparent"} transition-colors duration-300`}
         >
             <div className="padding py-[10px]">
-                <div className=" flex justify-between lg:mx-[69px]">
+                <div className=" flex justify-between ">
                     <div className="flex">
                         {/* logo */}
                         <div className="">

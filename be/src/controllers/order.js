@@ -23,15 +23,31 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// Lấy tất cả đơn hàng
 // export const getOrders = async (req, res) => {
 //   try {
-//     const orders = await Order.find();
+//     const {
+//       status,
+//       customerName,
+//     } = req.query;
+
+//     // Build query object
+//     const query = {};
+
+//     if (status) query.status = status;
+//     if (customerName)
+//       query["customerInfo.fullName"] = { $regex: customerName, $options: "i" };
+
+//     const orders = await Order.find(query).populate({
+//       path: "items.productId",
+//       select: "name image regular_price discount countInStock",
+//     });
+
 //     if (orders.length === 0) {
 //       return res
 //         .status(StatusCodes.NOT_FOUND)
 //         .json({ error: "No orders found" });
 //     }
+
 //     return res.status(StatusCodes.OK).json(orders);
 //   } catch (error) {
 //     return res
@@ -41,56 +57,46 @@ export const createOrder = async (req, res) => {
 // };
 export const getOrders = async (req, res) => {
   try {
-    const {
-      status,
+    const { status, customerName } = req.query;
 
-      customerName,
-    } = req.query;
-
-    // Build query object
+    // Danh sách trạng thái hợp lệ
+    const statusList = [
+      "Chờ xác nhận",
+      "Đã xác nhận",
+      "Chờ lấy hàng",
+      "Đang giao hàng",
+      "Đã giao",
+      "Đã hủy",
+    ];
+    // Tạo object để lưu query
     const query = {};
-
-    if (status) query.status = status;
-    if (customerName)
+    // Kiểm tra xem status có nằm trong statusList hay không
+    if (status && statusList.includes(status)) {
+      query.status = status;
+    }
+    // Nếu có customerName, sử dụng regex để tìm kiếm khách hàng theo tên
+    if (customerName) {
       query["customerInfo.fullName"] = { $regex: customerName, $options: "i" };
-
+    }
+    // Tìm kiếm đơn hàng dựa trên điều kiện đã xây dựng
     const orders = await Order.find(query).populate({
       path: "items.productId",
       select: "name image regular_price discount countInStock",
     });
-
+    // Nếu không có đơn hàng nào được tìm thấy
     if (orders.length === 0) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ error: "No orders found" });
+      return res.status(StatusCodes.OK).json([]);
     }
-
+    // Trả về danh sách đơn hàng
     return res.status(StatusCodes.OK).json(orders);
   } catch (error) {
+    // Xử lý lỗi và trả về mã lỗi 500 nếu có vấn đề
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Error fetching orders: " + error.message });
+      .json({ error: "Lỗi khi lấy danh sách đơn hàng: " + error.message });
   }
 };
 
-// export const getOrders = async (req, res) => {
-//   try {
-//     const orders = await Order.find().populate({
-//       path: "items.productId",
-//       select: "name image regular_price discount countInStock",
-//     });
-//     if (orders.length === 0) {
-//       return res
-//         .status(StatusCodes.NOT_FOUND)
-//         .json({ error: "No orders found" });
-//     }
-//     return res.status(StatusCodes.OK).json(orders);
-//   } catch (error) {
-//     return res
-//       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-//       .json({ error: "Error fetching orders: " + error.message });
-//   }
-// };
 // Lấy đơn hàng theo ID
 export const getOrderById = async (req, res) => {
   try {

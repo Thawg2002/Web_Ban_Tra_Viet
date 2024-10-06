@@ -1,6 +1,6 @@
 import useCart from "@/common/hooks/useCart";
 import { toast } from "@/components/ui/use-toast";
-import { Checkbox } from "antd";
+import { Checkbox, Spin } from "antd";
 
 import React, { useMemo, useState, useEffect } from "react";
 import { MdDeleteSweep } from "react-icons/md";
@@ -105,28 +105,40 @@ const ShoppingCart = () => {
         }
     };
 
-    const handleCheckout = () => {
-        if (listchecked.length === 0) {
-            toast({
-                variant: "error",
-                title: "Vui lòng chọn ít nhất một sản phẩm để thanh toán.",
-            });
-            return;
-        }
+   const handleCheckout = () => {
+       if (listchecked.length === 0) {
+           toast({
+               variant: "error",
+               title: "Vui lòng chọn ít nhất một sản phẩm để thanh toán.",
+           });
+           return;
+       }
 
-        const selectedProducts = cart?.cart?.cartData?.products.filter(
-            (item: any) => listchecked.includes(item.productId),
-        );
+       const selectedProducts = cart?.cart?.cartData?.products.filter(
+           (item: any) => listchecked.includes(item.productId),
+       );
 
-        localStorage.setItem(
-            "selectedProducts",
-            JSON.stringify(selectedProducts),
-        );
+       localStorage.setItem(
+           "selectedProducts",
+           JSON.stringify(selectedProducts),
+       );
 
-        navigate("/checkout");
-    };
+       // Navigate to checkout with selected products
+       navigate("/checkout", {
+           state: {
+               selectedProducts,
+           },
+       });
+   };
 
-    if (isLoading) return <p>Loading...</p>;
+
+   if (isLoading) {
+       return (
+           <div className="flex items-center justify-center min-h-screen bg-gray-100">
+               <Spin tip="Đang tải giỏ hàng..." size="large" className="text-blue-500" />
+           </div>
+       );
+   }
     if (error) return <p>Error loading cart data</p>;
 
     return (

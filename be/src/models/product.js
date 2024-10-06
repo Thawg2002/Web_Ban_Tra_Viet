@@ -94,10 +94,6 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: 0,
     },
-    sale_price: {
-      type: Number, // Thay vì kiểu Number, bạn có thể sử dụng kiểu khác tùy vào yêu cầu
-      default: 0, // Giá sale mặc định là 0
-    },
     image: {
       type: String,
     },
