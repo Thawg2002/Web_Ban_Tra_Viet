@@ -46,7 +46,7 @@ const PurchaseIndex = () => {
         setActive(item.name);
         setStatus(item.name === "Tất cẩ" ? null : item.name);
     };
-    console.log("status", status);
+    // console.log("status", status);
     const { data, isLoading, refetch } = useQuery({
         queryKey: ["purchase"],
         queryFn: async () => {
@@ -75,13 +75,13 @@ const PurchaseIndex = () => {
                     <ul className="flex scroll-custom  no-scrollbar text-base bg-white md:border md:border-gray-200 rounded box-shadow scroll-custom overflow-x-auto">
                         {menuList.map((item: any) => (
                             <li
-                                key={item.index}
+                                key={item.name}
                                 onClick={() => handleMenuClick(item)}
                                 className={cn(
                                     `flex-1 text-nowrap text-sm md:text-base px-5 cursor-pointer font-medium flex justify-center py-3 md:py-5 border-b-2 border-gray-200 hover:border-b-2
                                  hover:border-blue-500 hover:text-blue-500 transition-all duration-300 `,
-                                    active === item.index &&
-                                        `border-blue-500 text-blue-500`,
+                                    active === item.name &&
+                                    `border-blue-500 text-blue-500`,
                                 )}
                             >
                                 {item.name}
@@ -187,11 +187,11 @@ const PurchaseIndex = () => {
                                                                                         orderItem
                                                                                             ?.productId
                                                                                             .regular_price *
-                                                                                            (1 -
-                                                                                                orderItem
-                                                                                                    ?.productId
-                                                                                                    .discount /
-                                                                                                    100),
+                                                                                        (1 -
+                                                                                            orderItem
+                                                                                                ?.productId
+                                                                                                .discount /
+                                                                                            100),
                                                                                     ).toLocaleString()}{" "}
                                                                                     đ
                                                                                 </span>
@@ -208,14 +208,14 @@ const PurchaseIndex = () => {
                                                     {["Chờ xác nhận"].includes(
                                                         orderList?.status,
                                                     ) && (
-                                                        <button
-                                                            className="px-3 py-3 cursor-pointer text-white border 
+                                                            <button
+                                                                className="px-3 py-3 cursor-pointer text-white border 
                                                 border-[#ee4d2d] rounded-[6px] bg-[#ee4d2d] hover:bg-[#cd3011]
                                                  transition-all duration-300  text-xs lg:text-[16px]"
-                                                        >
-                                                            Hủy đơn hàng
-                                                        </button>
-                                                    )}
+                                                            >
+                                                                Hủy đơn hàng
+                                                            </button>
+                                                        )}
                                                     <button className=""></button>
                                                     <p className="text-right text-sm md:text-base lg:font-medium lg:flex gap-x-3">
                                                         Tổng số tiền:

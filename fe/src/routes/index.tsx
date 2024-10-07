@@ -34,7 +34,7 @@ const Router = () => {
     return (
         <>
             <Routes>
-                <Route element={<PrivateRouter />}>
+                <Route >
                     <Route path="admin" element={<LayoutAdmin />}>
                         <Route
                             path="products"
