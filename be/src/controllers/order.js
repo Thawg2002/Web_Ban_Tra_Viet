@@ -144,13 +144,13 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status, cancellationReason } = req.body;
-
     const validStatus = [
-      "chờ xử lý",
-      "đã xác nhận",
-      "đang giao",
-      "đã giao",
-      "đã hủy",
+      "Chờ xác nhận",
+      "Đã xác nhận",
+      "Chờ lấy hàng",
+      "Đang giao hàng",
+      "Đã giao",
+      "Đã hủy",
     ];
 
     if (!validStatus.includes(status)) {
@@ -168,14 +168,14 @@ export const updateOrderStatus = async (req, res) => {
 
     console.log(`Current Status: ${order.status}`); // Debug current status
 
-    if (order.status === "đã giao" || order.status === "đã hủy") {
+    if (order.status === "Đã giao" || order.status === "Đã hủy") {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ error: "Order cannot be updated" });
     }
 
     order.status = status;
-    if (status === "đã hủy" && cancellationReason) {
+    if (status === "Đã hủy" && cancellationReason) {
       order.cancellationReason = cancellationReason;
     }
     await order.save();

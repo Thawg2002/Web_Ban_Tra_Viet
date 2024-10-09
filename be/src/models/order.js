@@ -54,11 +54,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["bank transfer", "cash on delivery"],
     },
-
     status: {
       type: String,
-      enum: ["chờ xử lý", "đã xác nhận", "đang giao", "đã giao", "đã hủy"],
-      default: "chờ xử lý",
+      enum: ["Chờ xử lý", "Đã xác nhận", "Đang giao", "Đã giao", "Đã hủy"],
+      default: "Chờ xử lý",
     },
     paymentId: String,
     cancellationReason: {
