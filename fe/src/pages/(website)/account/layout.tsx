@@ -7,7 +7,6 @@ import { useMediaQuery } from "usehooks-ts";
 import { cn } from "@/common/lib/utils";
 import sidebarAccount from "@/configs/sidebarConfig";
 
-
 const itemVariants: Variants = {
     open: {
         opacity: 1,
@@ -20,7 +19,7 @@ const itemVariants: Variants = {
 const AccountLayout = () => {
     const [isOpen, setIsOpen] = useState(true);
     const isMobile = useMediaQuery("(max-width: 1024px)");
-    const router = useNavigate()
+    const router = useNavigate();
 
     useEffect(() => {
         if (isMobile) {
@@ -45,12 +44,21 @@ const AccountLayout = () => {
                                 <motion.button className="w-full border-b flex items-center border-blue-400 px-2 ">
                                     <div className="p-2 sm:pb-4 w-full flex gap-2 items-center flex-1">
                                         <div className="size-8 sm:size-12 rounded-full border overflow-hidden">
-                                            <img src="/avatar_25.jpg" className="w-full h-full " />
+                                            <img
+                                                src="/avatar_25.jpg"
+                                                className="w-full h-full "
+                                            />
                                         </div>
                                         <div className="">
-                                            <p className="font-semibold">Đỗ Hữu Trung</p>
+                                            <p className="font-semibold">
+                                                Nguyễn Tuấn Đức
+                                            </p>
                                             <p className="md:flex items-center text-sm text-gray-400 cursor-pointer font-medium hidden">
-                                                <MdEdit className=" mr-1" size={16} /> Sửa hồ sơ
+                                                <MdEdit
+                                                    className=" mr-1"
+                                                    size={16}
+                                                />{" "}
+                                                Sửa hồ sơ
                                             </p>
                                         </div>
                                     </div>
@@ -77,7 +85,8 @@ const AccountLayout = () => {
                                 <motion.ul
                                     variants={{
                                         open: {
-                                            clipPath: "inset(0% 0% 0% 0% round 10px)",
+                                            clipPath:
+                                                "inset(0% 0% 0% 0% round 10px)",
                                             transition: {
                                                 type: "spring",
                                                 bounce: 0,
@@ -88,7 +97,8 @@ const AccountLayout = () => {
                                             height: "auto",
                                         },
                                         closed: {
-                                            clipPath: "inset(10% 50% 90% 50% round 10px)",
+                                            clipPath:
+                                                "inset(10% 50% 90% 50% round 10px)",
                                             transition: {
                                                 type: "spring",
                                                 bounce: 0,
@@ -103,22 +113,30 @@ const AccountLayout = () => {
                                     )}
                                 >
                                     {sidebarAccount?.map((item) => {
-                                        const isCheck = location.includes(item.path);
+                                        const isCheck = location.includes(
+                                            item.path,
+                                        );
                                         return (
                                             <motion.li
                                                 variants={itemVariants}
                                                 className={cn(
                                                     "w-full px-2 py-1 h-10 hover:bg-slate-50/40 cursor-pointer lg:rounded-md flex items-center hover:text-blue-500",
-                                                    isCheck && "text-blue-500 bg-slate-50/40",
+                                                    isCheck &&
+                                                        "text-blue-500 bg-slate-50/40",
                                                 )}
                                                 onClick={() => {
                                                     if (isMobile) {
-                                                        setIsOpen(false)
+                                                        setIsOpen(false);
                                                     }
-                                                    router(item.path)
+                                                    router(item.path);
                                                 }}
                                             >
-                                                {<item.icon size={20} className="mr-4" />}{" "}
+                                                {
+                                                    <item.icon
+                                                        size={20}
+                                                        className="mr-4"
+                                                    />
+                                                }{" "}
                                                 <span>{item.name}</span>
                                             </motion.li>
                                         );

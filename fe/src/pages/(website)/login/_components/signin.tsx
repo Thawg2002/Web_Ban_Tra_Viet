@@ -89,7 +89,7 @@ const Signin = () => {
                         />
                         {errors.email && (
                             <p className="text-red-500 text-xs mt-2">
-                                {errors.email.message}
+                                {errors.email.message as string}
                             </p>
                         )}
                     </div>
@@ -142,7 +142,7 @@ const Signin = () => {
                         </div>
                         {errors.password && (
                             <p className="text-red-500 text-xs mt-2">
-                                {errors.password.message}
+                                {errors.password.message as string}
                             </p>
                         )}
                     </div>
