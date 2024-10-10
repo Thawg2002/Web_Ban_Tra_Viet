@@ -56,7 +56,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Chờ xử lý", "Đã xác nhận", "Đang giao", "Đã giao", "Đã hủy"],
+      enum: ["Chờ xử lý", "Đã xác nhận", "Đang giao hàng", "Đã giao", "Đã hủy"],
       default: "Chờ xử lý",
     },
     paymentId: String,

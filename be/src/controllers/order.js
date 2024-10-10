@@ -140,10 +140,61 @@ export const updateOrder = async (req, res) => {
 };
 
 // Cập nhật trạng thái đơn hàng
+// export const updateOrderStatus = async (req, res) => {
+//   try {
+//     const { orderId } = req.params;
+//     const { status, cancellationReason } = req.body;
+//     const validStatus = [
+//       "Chờ xác nhận",
+//       "Đã xác nhận",
+//       "Chờ lấy hàng",
+//       "Đang giao hàng",
+//       "Đã giao",
+//       "Đã hủy",
+//     ];
+
+//     if (!validStatus.includes(status)) {
+//       return res
+//         .status(StatusCodes.BAD_REQUEST)
+//         .json({ error: "Invalid status" });
+//     }
+
+//     const order = await Order.findById(orderId);
+//     if (!order) {
+//       return res
+//         .status(StatusCodes.NOT_FOUND)
+//         .json({ error: "Order not found" });
+//     }
+
+//     console.log(`Current Status: ${order.status}`); // Debug current status
+
+//     if (order.status === "Đã giao" || order.status === "Đã hủy") {
+//       return res
+//         .status(StatusCodes.BAD_REQUEST)
+//         .json({ error: "Order cannot be updated" });
+//     }
+
+//     order.status = status;
+//     if (status === "Đã hủy" && cancellationReason) {
+//       order.cancellationReason = cancellationReason;
+//     }
+//     await order.save();
+
+//     return res
+//       .status(StatusCodes.OK)
+//       .json({ message: "Order status updated successfully" });
+//   } catch (error) {
+//     console.error("Error updating order status:", error);
+//     return res
+//       .status(StatusCodes.INTERNAL_SERVER_ERROR)
+//       .json({ error: "Error updating order status: " + error.message });
+//   }
+// };
 export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status, cancellationReason } = req.body;
+
     const validStatus = [
       "Chờ xác nhận",
       "Đã xác nhận",
@@ -153,31 +204,44 @@ export const updateOrderStatus = async (req, res) => {
       "Đã hủy",
     ];
 
+    // Hàm xử lý trả về lỗi
+    const sendError = (statusCode, message) => {
+      return res.status(statusCode).json({ error: message });
+    };
+
+    // Kiểm tra trạng thái hợp lệ
     if (!validStatus.includes(status)) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ error: "Invalid status" });
+      return sendError(StatusCodes.BAD_REQUEST, "Invalid status");
     }
 
     const order = await Order.findById(orderId);
+
     if (!order) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ error: "Order not found" });
+      return sendError(StatusCodes.NOT_FOUND, "Order not found");
     }
 
-    console.log(`Current Status: ${order.status}`); // Debug current status
+    console.log(`Current Status: ${order.status}`); // Debug trạng thái hiện tại
 
-    if (order.status === "Đã giao" || order.status === "Đã hủy") {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ error: "Order cannot be updated" });
+    // Kiểm tra trạng thái đơn hàng có thể cập nhật hay không
+    if (["Đã giao", "Đã hủy"].includes(order.status)) {
+      return sendError(StatusCodes.BAD_REQUEST, "Order cannot be updated");
     }
 
+    // Cập nhật trạng thái
     order.status = status;
-    if (status === "Đã hủy" && cancellationReason) {
+
+    // Nếu đơn hàng bị hủy, yêu cầu phải có lý do
+    if (status === "Đã hủy") {
+      if (!cancellationReason) {
+        return sendError(
+          StatusCodes.BAD_REQUEST,
+          "Cancellation reason is required"
+        );
+      }
       order.cancellationReason = cancellationReason;
     }
+
+    // Lưu lại đơn hàng
     await order.save();
 
     return res
@@ -187,7 +251,7 @@ export const updateOrderStatus = async (req, res) => {
     console.error("Error updating order status:", error);
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Error updating order status: " + error.message });
+      .json({ error: `Error updating order status: ${error.message}` });
   }
 };
 

@@ -94,7 +94,7 @@ const OrderList = () => {
             return;
         }
 
-        const nonCancelableStatuses = ["đang giao", "đã giao", "đã hủy"];
+        const nonCancelableStatuses = ["Đang giao hàng", "Đã giao", "Đã hủy"];
 
         if (nonCancelableStatuses.includes(order.status)) {
             message.error("Đơn hàng này không thể hủy.");
@@ -113,13 +113,13 @@ const OrderList = () => {
 
         try {
             await instance.put(`/orders/${orderToCancel._id}/status`, {
-                status: "đã hủy",
+                status: "Đã hủy",
                 cancellationReason,
             });
             setOrders(
                 orders.map((order) =>
                     order._id === orderToCancel._id
-                        ? { ...order, status: "đã hủy", cancellationReason }
+                        ? { ...order, status: "Đã hủy", cancellationReason }
                         : order,
                 ),
             );
@@ -150,7 +150,7 @@ const OrderList = () => {
             title: "Tổng giá (VND)",
             dataIndex: "totalPrice",
             key: "totalPrice",
-            render: (text) =>
+            render: (text: any) =>
                 `${new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",
@@ -167,33 +167,33 @@ const OrderList = () => {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
-            render: (text, record) => (
+            render: (text: string, record: any) => (
                 <Select
                     className="w-[150px]"
                     defaultValue={text}
                     onChange={(value) => handleStatusChange(record._id, value)}
                     disabled={
-                        record.status === "đã giao" ||
-                        record.status === "đã hủy"
+                        record.status === "Đã giao" ||
+                        record.status === "Đã hủy"
                     }
                 >
                     <Option
-                        value="chờ xử lý"
-                        disabled={record.status === "đang giao"}
+                        value="Chờ xử lý"
+                        disabled={record.status === "Đang giao hàng"}
                     >
                         Chờ xử lý
                     </Option>
                     <Option
-                        value="đã xác nhận"
-                        disabled={record.status === "đang giao"}
+                        value="Đã xác nhận"
+                        disabled={record.status === "Đang giao hàng"}
                     >
                         Đã xác nhận
                     </Option>
-                    <Option value="đang giao">Đang giao</Option>
-                    <Option value="đã giao">Đã giao</Option>
+                    <Option value="Đang giao hàng">Đang giao</Option>
+                    <Option value="Đã giao">Đã giao</Option>
                     <Option
-                        value="đã hủy"
-                        disabled={record.status === "đang giao"}
+                        value="Đã hủy"
+                        disabled={record.status === "Đang giao hàng"}
                     >
                         Đã hủy
                     </Option>
@@ -204,7 +204,7 @@ const OrderList = () => {
         {
             title: "Thao tác",
             key: "actions",
-            render: (_, record) => (
+            render: (_: any, record: any) => (
                 <div>
                     <Button
                         type="link"
@@ -213,7 +213,7 @@ const OrderList = () => {
                         Xem chi tiết
                     </Button>
 
-                    {record.status !== "đã hủy" && (
+                    {record.status !== "Đã hủy" && (
                         <Button onClick={() => handleCancelOrder(record)}>
                             Hủy
                         </Button>
@@ -327,7 +327,7 @@ const OrderList = () => {
                             Trạng thái:
                         </strong>{" "}
                         {selectedOrder.status}
-                        {selectedOrder.status === "đã hủy" && (
+                        {selectedOrder.status === "Đã hủy" && (
                             <span className="ml-2 text-red-600 font-medium">
                                 (Đơn hàng đã bị hủy) - Lý do:{" "}
                                 {selectedOrder.cancellationReason
