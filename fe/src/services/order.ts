@@ -6,11 +6,22 @@ import instance from "@/configs/axios";
 // // }
 export const fetchOrders = (status: string | null) => {
     // Tạo URI với query parameter nếu có status, nếu không bỏ qua status
-    const uri = status ? `/orders?status=${encodeURIComponent(status)}` : '/orders';
+    const uri = status
+        ? `/orders?status=${encodeURIComponent(status)}`
+        : "/orders";
     return instance.get(uri);
-}
-
-
+};
+export const cancelOrder = async (
+    id: string,
+    note: string,
+    cancelBy: string,
+) => {
+    const data = await instance.put(`/orders/cancelOrder/${id}`, {
+        note: note,
+        cancelBy: cancelBy,
+    });
+    return data;
+};
 // import instance from "@/configs/axios";
 
 // export const fetchOrders = (userId: string, status: string | null = null) => {
@@ -24,4 +35,3 @@ export const fetchOrders = (status: string | null) => {
 
 //     return instance.get(uri);
 // };
-

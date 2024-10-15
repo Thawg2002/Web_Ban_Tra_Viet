@@ -134,7 +134,7 @@ const CheckoutPage = () => {
         } catch (error) {
             console.error("Đặt hàng thất bại:", error);
 
-            toast.error("Failed to create order.", {
+            toast.error("Đặt hàng thất bại.", {
                 position: "top-right",
                 autoClose: 2000,
                 hideProgressBar: false,

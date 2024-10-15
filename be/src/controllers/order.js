@@ -93,7 +93,7 @@ export const getOrders = async (req, res) => {
     // Xử lý lỗi và trả về mã lỗi 500 nếu có vấn đề
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Lỗi khi lấy danh sách đơn hàng: " + error.message });
+      .json({ message: error.message });
   }
 };
 
@@ -102,6 +102,7 @@ export const getOrderById = async (req, res) => {
   try {
     const { userId, orderId } = req.params;
     const order = await Order.findOne({ userId, _id: orderId });
+    console.log("1");
     if (!order) {
       return res
         .status(StatusCodes.NOT_FOUND)
@@ -111,7 +112,7 @@ export const getOrderById = async (req, res) => {
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Error fetching order: " + error.message });
+      .json({ message: error.message });
   }
 };
 
@@ -255,24 +256,65 @@ export const updateOrderStatus = async (req, res) => {
   }
 };
 
-// Xóa đơn hàng theo ID
-export const deleteOrder = async (req, res) => {
+// cancel order
+export const cancelOrder = async (req, res) => {
   try {
-    const { orderId } = req.params;
+    const { id } = req.params;
+    const user = req.user;
+    const { note, cancelBy } = req.body;
+    let noteCancel = note || "";
+    if (cancelBy !== "user" && cancelBy !== "admin" && cancelBy !== "shipper") {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ error: "Truyền dữ liệu không thỏa mãn" });
+    }
+    if (!note) {
+      if (cancelBy === "admin") {
+        noteCancel =
+          "GSản phẩm của chúng tôi không cung cấp được xin lỗi quý kháchao ";
+      } else if (cancelBy === "shipper") {
+        noteCancel =
+          "Giao hàng thất bại bởi không liên lạc được với người dùng";
+      }
+      console.log("1");
+    }
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Bạn chưa chọn đơn hàng" });
+    }
+    const existingOrder = await Order.findById(id);
+    console.log("order", existingOrder);
 
-    const result = await Order.deleteOne({ _id: orderId });
-
-    if (result.deletedCount === 0) {
+    if (!existingOrder) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ error: "Order not found" });
+        .json({ error: "Không có đơn hàng" });
     }
-
-    return res.status(StatusCodes.NO_CONTENT).send(); // Trả về 204 No Content
+    console.log("2");
+    if (existingOrder.status !== "Chờ xác nhận") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Đơn hàng không thể hủy" });
+    }
+    const cancelSuccess = await Order.findByIdAndUpdate(
+      id,
+      {
+        status: "Đã hủy",
+        note: noteCancel,
+        cancelBy: cancelBy,
+        cancelOrderDate: Date.now(),
+      },
+      { new: true }
+    );
+    console.log("success", cancelSuccess);
+    return res.status(StatusCodes.OK).json({
+      message: "Hủy đơn hàng thành công",
+    });
   } catch (error) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Error deleting order: " + error.message });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message,
+    });
   }
 };
 export const mergeOrders = async (req, res) => {

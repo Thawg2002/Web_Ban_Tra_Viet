@@ -3,11 +3,23 @@ import { fetchOrders } from "@/services/order";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import LoadingTable from "./TableLoading";
-
+import CancelConfirm from "../_components/CancelConfirm";
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 const PurchaseIndex = () => {
-    const queryCLient = useQueryClient();
-    const [active, setActive] = useState(7);
+    const [active, setActive] = useState("Tất cả");
     const [status, setStatus] = useState<string | null>(null);
+    const [openCancel, setOpenCancel] = useState<boolean | string>(false);
     const menuList = [
         {
             index: 7,
@@ -47,17 +59,18 @@ const PurchaseIndex = () => {
         setStatus(item.name === "Tất cẩ" ? null : item.name);
     };
     // console.log("status", status);
+    const handleFetchOrder = async () => {
+        try {
+            const { data } = await fetchOrders(status);
+            // console.log("dadadadada00", data);
+            return data;
+        } catch (error) {
+            throw new Error("Error");
+        }
+    };
     const { data, isLoading, refetch } = useQuery({
         queryKey: ["purchase"],
-        queryFn: async () => {
-            try {
-                const { data } = await fetchOrders(status);
-                // console.log("dadadadada00", data);
-                return data;
-            } catch (error) {
-                throw new Error("Error");
-            }
-        },
+        queryFn: handleFetchOrder,
         staleTime: 5 * 60 * 60,
         enabled: !!status,
     });
@@ -70,8 +83,8 @@ const PurchaseIndex = () => {
     }, [status, refetch]);
     return (
         <>
-            <div className="w-full bg-gray-100/60">
-                <div className="sticky top-0">
+            <div className="w-full bg-gray-100/60 z-0">
+                <div className="">
                     <ul className="flex scroll-custom  no-scrollbar text-base bg-white md:border md:border-gray-200 rounded box-shadow scroll-custom overflow-x-auto">
                         {menuList.map((item: any) => (
                             <li
@@ -209,6 +222,11 @@ const PurchaseIndex = () => {
                                                         orderList?.status,
                                                     ) && (
                                                         <button
+                                                            onClick={() =>
+                                                                setOpenCancel(
+                                                                    orderList?._id,
+                                                                )
+                                                            }
                                                             className="px-3 py-3 cursor-pointer text-white border 
                                                 border-[#ee4d2d] rounded-[6px] bg-[#ee4d2d] hover:bg-[#cd3011]
                                                  transition-all duration-300  text-xs lg:text-[16px]"
@@ -247,6 +265,14 @@ const PurchaseIndex = () => {
                     )}
                 </div>
             </div>
+
+            {!!openCancel && (
+                <CancelConfirm
+                    open={openCancel}
+                    handleClose={() => setOpenCancel(false)}
+                    handleFetchOrder={handleFetchOrder}
+                />
+            )}
         </>
     );
 };
