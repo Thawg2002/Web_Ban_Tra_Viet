@@ -1,7 +1,7 @@
 import instance from "@/configs/axios";
 import { IUser } from "@/interfaces/user";
 
-export const SigninUser = async (user: IUser) => {
+export const SigninUser = async (user: any) => {
     try {
         const response = await instance.post(`/auth/signin`, user);
         return response;
@@ -20,7 +20,7 @@ export const SigninUser = async (user: IUser) => {
         }
     }
 };
-export const SignupUser = async (user: IUser) => {
+export const SignupUser = async (user: any) => {
     try {
         const response = await instance.post(`/auth/signup`, user);
         return response;

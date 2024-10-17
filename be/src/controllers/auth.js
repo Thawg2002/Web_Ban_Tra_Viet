@@ -82,8 +82,8 @@ export const signin = async (req, res) => {
           messages: ["Mật khẩu không chính xác"],
         });
       }
-      const accessToken = generateAccessToken(user._id);
-      const refreshToken = generateRefreshToken(user._id); // Generate refresh token
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user); // Generate refresh token
       user.password = undefined;
       return res.status(StatusCodes.OK).json({
         user,
@@ -92,7 +92,31 @@ export const signin = async (req, res) => {
       });
     }
   } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
     console.error(`Error finding user with email ${email}:`, error);
+  }
+};
+export const currentUser = async (req, res) => {
+  try {
+    const user = req.user;
+    console.log("user", user);
+
+    const existUser = await User.findById(user?.id).select("-password");
+    if (!existUser) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: "User not found" });
+    }
+    return res.status(StatusCodes.OK).json({
+      message: "Lấy thông tin thành công",
+      data: existUser,
+    });
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
   }
 };
 export const logout = async (req, res) => {
