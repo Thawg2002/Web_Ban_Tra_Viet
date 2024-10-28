@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
 import { LoaderCircle } from "lucide-react";
 import { message } from "antd";
@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { SigninUser } from "@/services/auth";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "@/context/AuthContex";
+import { set } from "lodash";
 interface SignupFormData {
     name: string;
     email: string;
@@ -15,6 +17,7 @@ interface SignupFormData {
 const Signin = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
+    const { setAuthUser, setIsloggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
     const {
         register,
@@ -23,7 +26,10 @@ const Signin = () => {
     } = useForm();
     const { mutate, isPending } = useMutation({
         mutationFn: async (user: SignupFormData) => {
-            return await SigninUser(user);
+            const { data } = await SigninUser(user);
+            console.log("data", data);
+            setAuthUser?.(data?.user);
+            setIsloggedIn?.(true);
         },
         onSuccess: (response: any) => {
             // console.log("response", response);

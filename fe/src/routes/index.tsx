@@ -34,30 +34,22 @@ const Router = () => {
     return (
         <>
             <Routes>
-                <Route >
-                    <Route path="admin" element={<LayoutAdmin />}>
-                        <Route
-                            path="products"
-                            element={<ProductManagement />}
-                        />
-                        <Route
-                            path="products/add"
-                            element={<ProductAddPage />}
-                        />
-                        <Route
-                            path="products/:id/edit"
-                            element={<ProductEditPage />}
-                        />
-                        <Route path="category" element={<CategoryList />} />
-                        <Route path="category/add" element={<CategoryAdd />} />
-                        <Route
-                            path="category/:id/edit"
-                            element={<CategoryEdit />}
-                        />
-                        <Route path="user" element={<UserList />} />
-                        <Route path="order" element={<OrderList />} />
-                        <Route path="blog" element={<BlogList />} />
-                    </Route>
+                <Route path="admin" element={<LayoutAdmin />}>
+                    <Route path="products" element={<ProductManagement />} />
+                    <Route path="products/add" element={<ProductAddPage />} />
+                    <Route
+                        path="products/:id/edit"
+                        element={<ProductEditPage />}
+                    />
+                    <Route path="category" element={<CategoryList />} />
+                    <Route path="category/add" element={<CategoryAdd />} />
+                    <Route
+                        path="category/:id/edit"
+                        element={<CategoryEdit />}
+                    />
+                    <Route path="user" element={<UserList />} />
+                    <Route path="order" element={<OrderList />} />
+                    <Route path="blog" element={<BlogList />} />
                 </Route>
 
                 <Route path="/" element={<LayoutWebsite />}>
@@ -71,10 +63,7 @@ const Router = () => {
 
                     <Route path="checkout" element={<CheckoutPage />} />
                     <Route path="account" element={<LayoutAccount />}>
-                        <Route
-                            path="purchase"
-                            element={<PurchaseIndex />}
-                        />
+                        <Route path="purchase" element={<PurchaseIndex />} />
                     </Route>
                     <Route
                         path="forgot-password"

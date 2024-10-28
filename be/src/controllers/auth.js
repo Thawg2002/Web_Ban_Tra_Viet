@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/user";
 import BlacklistedToken from "../models/black-listed-token";
 // const crypto = require('crypto')
-
+import dotenv from "dotenv";
+dotenv.config();
 import nodemailer from "nodemailer";
 const signupSchema = Joi.object({
   name: Joi.string().min(3).max(30).messages({
@@ -31,11 +32,15 @@ const signupSchema = Joi.object({
     "string.uri": "Trường Avatar phải là đường dẫn hợp lệ",
   }),
 });
-const generateRefreshToken = (userId) => {
-  return jwt.sign({ userId }, "123456", { expiresIn: "10d" });
+const generateRefreshToken = (payload) => {
+  return jwt.sign(payload, process.env.SECRET_REFRESH_TOKEN, {
+    expiresIn: "10d",
+  });
 };
-const generateAccessToken = (userId) => {
-  return jwt.sign({ userId }, "123456", { expiresIn: "7d" });
+const generateAccessToken = (payload) => {
+  return jwt.sign(payload, process.env.SECRET_ACCESS_TOKEN, {
+    expiresIn: "7d",
+  });
 };
 export const signup = async (req, res) => {
   const { email, password } = req.body;
@@ -82,8 +87,16 @@ export const signin = async (req, res) => {
           messages: ["Mật khẩu không chính xác"],
         });
       }
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user); // Generate refresh token
+      const accessToken = generateAccessToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      });
+      const refreshToken = generateRefreshToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      }); // Generate refresh token
       user.password = undefined;
       return res.status(StatusCodes.OK).json({
         user,
@@ -106,7 +119,7 @@ export const currentUser = async (req, res) => {
     const existUser = await User.findById(user?.id).select("-password");
     if (!existUser) {
       return res
-        .status(StatusCodes.NOT_FOUND)
+        .status(StatusCodes.BAD_REQUEST)
         .json({ error: "User not found" });
     }
     return res.status(StatusCodes.OK).json({
@@ -147,16 +160,38 @@ export const logout = async (req, res) => {
 export const refreshToken = async (req, res) => {
   try {
     const oldToken = req.headers.authorization;
-    // Kiểm tra và xử lý oldToken để tạo refreshToken...
-    // Đảm bảo bạn đã kiểm tra xem oldToken có trong blacklist hay không
 
-    const userId = "userId từ oldToken"; // Giả sử bạn đã lấy được userId từ oldToken
-    const newToken = generateRefreshToken(userId); // Sử dụng hàm generateRefreshToken đã có
+    if (!oldToken) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ error: "No token provided" });
+    }
 
-    // Trả về refreshToken mới cho client
+    // Kiểm tra token có hợp lệ không và lấy userId
+    const decoded = verifyToken(oldToken);
+    if (!decoded) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ error: "Invalid token" });
+    }
+
+    const userId = decoded.userId;
+
+    // Kiểm tra xem token có nằm trong blacklist không
+    const isBlacklisted = await isTokenBlacklisted(oldToken);
+    if (isBlacklisted) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ error: "Token is blacklisted" });
+    }
+
+    // Tạo token mới
+    const newToken = generateRefreshToken(userId);
+
+    // Trả về token mới cho client
     res.status(StatusCodes.OK).json({ newToken });
   } catch (error) {
-    console.error(`Error during token refresh:`, error);
+    console.error("Error during token refresh:", error);
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: "Internal Server Error" });
