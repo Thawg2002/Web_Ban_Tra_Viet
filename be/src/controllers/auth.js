@@ -39,7 +39,7 @@ const generateRefreshToken = (payload) => {
 };
 const generateAccessToken = (payload) => {
   return jwt.sign(payload, process.env.SECRET_ACCESS_TOKEN, {
-    expiresIn: "7d",
+    expiresIn: "1d",
   });
 };
 export const signup = async (req, res) => {
@@ -159,37 +159,48 @@ export const logout = async (req, res) => {
 // be/src/controllers/auth.js
 export const refreshToken = async (req, res) => {
   try {
-    const oldToken = req.headers.authorization;
-
+    const oldToken = req.headers.authorization?.split(" ")[1];
+    console.log("token", oldToken);
     if (!oldToken) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json({ error: "No token provided" });
+        .json({ error: "Bạn chưa đăng nhập" });
     }
 
     // Kiểm tra token có hợp lệ không và lấy userId
-    const decoded = verifyToken(oldToken);
-    if (!decoded) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ error: "Invalid token" });
-    }
+    jwt.verify(oldToken, process.env.SECRET_ACCESS_TOKEN, async (err, user) => {
+      if (err) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({
+          message: "Token đã hết hạn, mời bạn đăng nhập lại",
+        });
+      }
+      if (!user) {
+        return;
+      }
 
-    const userId = decoded.userId;
+      // Kiểm tra xem token có nằm trong blacklist không
+      const isBlacklisted = await isTokenBlacklisted(oldToken);
+      if (isBlacklisted) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json({ error: "Token is blacklisted" });
+      }
 
-    // Kiểm tra xem token có nằm trong blacklist không
-    const isBlacklisted = await isTokenBlacklisted(oldToken);
-    if (isBlacklisted) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ error: "Token is blacklisted" });
-    }
+      const payload = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      };
+      const NewAccessToken = await generateAccessToken(payload);
+      const NewRefreshToken = await generateRefreshToken(payload);
 
-    // Tạo token mới
-    const newToken = generateRefreshToken(userId);
-
-    // Trả về token mới cho client
-    res.status(StatusCodes.OK).json({ newToken });
+      // Trả về token mới cho client
+      return res.status(StatusCodes.OK).json({
+        message: "Tạo token thành công",
+        accessToken: NewAccessToken,
+        refreshToken: NewRefreshToken,
+      });
+    });
   } catch (error) {
     console.error("Error during token refresh:", error);
     return res

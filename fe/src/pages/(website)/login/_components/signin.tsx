@@ -17,7 +17,7 @@ interface SignupFormData {
 const Signin = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
-    const { setAuthUser, setIsloggedIn } = useContext(AuthContext);
+    // const { setAuthUser, setIsloggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
     const {
         register,
@@ -28,8 +28,8 @@ const Signin = () => {
         mutationFn: async (user: SignupFormData) => {
             const { data } = await SigninUser(user);
             console.log("data", data);
-            setAuthUser?.(data?.user);
-            setIsloggedIn?.(true);
+            // setAuthUser?.(data?.user);
+            // setIsloggedIn?.(true);
         },
         onSuccess: (response: any) => {
             // console.log("response", response);
