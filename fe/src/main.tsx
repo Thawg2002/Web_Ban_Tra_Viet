@@ -10,9 +10,7 @@ const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-            <AuthProvider>
-                <App />
-            </AuthProvider>
+            <App />
         </BrowserRouter>
     </QueryClientProvider>,
 );

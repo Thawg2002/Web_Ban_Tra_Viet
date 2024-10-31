@@ -98,6 +98,13 @@ export const signin = async (req, res) => {
         role: user.role,
       }); // Generate refresh token
       user.password = undefined;
+      res.cookie("token", refreshToken, {
+        maxAge: 60 * 24 * 60 * 60 * 1000,
+        path: "/",
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+      });
       return res.status(StatusCodes.OK).json({
         user,
         accessToken,
@@ -111,6 +118,71 @@ export const signin = async (req, res) => {
     console.error(`Error finding user with email ${email}:`, error);
   }
 };
+export const refreshToken = async (req, res) => {
+  try {
+    // const oldToken = req.headers.authorization?.split(" ")[1];
+    const oldToken = req.cookies.token;
+    console.log("token", oldToken);
+    if (!oldToken) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ error: "Bạn chưa đăng nhập" });
+    }
+    // Kiểm tra token có hợp lệ không và lấy userId
+    jwt.verify(
+      oldToken,
+      process.env.SECRET_REFRESH_TOKEN,
+      async (err, user) => {
+        if (err) {
+          return res.status(StatusCodes.UNAUTHORIZED).json({
+            message: "Token đã hết hạn, mời bạn đăng nhập lại",
+          });
+        }
+        if (!user) {
+          return res
+            .status(StatusCodes.UNAUTHORIZED)
+            .json({ error: "Người dùng không hợp lệ" });
+        }
+        // Kiểm tra xem token có nằm trong blacklist không
+        const isBlacklisted = await isTokenBlacklisted(oldToken);
+        if (isBlacklisted) {
+          return res
+            .status(StatusCodes.UNAUTHORIZED)
+            .json({ error: "Token is blacklisted" });
+        }
+
+        // Tạo accessToken và refreshToken mới
+        const payload = {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        };
+        const newAccessToken = await generateAccessToken(payload);
+        const newRefreshToken = await generateRefreshToken(payload);
+
+        // Trả về accessToken mới và lưu refreshToken dưới dạng cookie httpOnly
+        res.cookie("refreshToken", newRefreshToken, {
+          maxAge: 24 * 60 * 60 * 1000 * 60,
+          httpOnly: true,
+          path: "/",
+          sameSite: "none",
+          secure: true,
+        });
+
+        return res.status(StatusCodes.OK).json({
+          message: "Tạo token thành công",
+          accessToken: newAccessToken,
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error during token refresh:", error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: "Internal Server Error" });
+  }
+};
+
 export const currentUser = async (req, res) => {
   try {
     const user = req.user;
@@ -157,57 +229,58 @@ export const logout = async (req, res) => {
 };
 
 // be/src/controllers/auth.js
-export const refreshToken = async (req, res) => {
-  try {
-    const oldToken = req.headers.authorization?.split(" ")[1];
-    console.log("token", oldToken);
-    if (!oldToken) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ error: "Bạn chưa đăng nhập" });
-    }
+// export const refreshToken = async (req, res) => {
+//   try {
+//     const oldToken = req.headers.authorization?.split(" ")[1];
+//     console.log("token", oldToken);
+//     if (!oldToken) {
+//       return res
+//         .status(StatusCodes.UNAUTHORIZED)
+//         .json({ error: "Bạn chưa đăng nhập" });
+//     }
 
-    // Kiểm tra token có hợp lệ không và lấy userId
-    jwt.verify(oldToken, process.env.SECRET_ACCESS_TOKEN, async (err, user) => {
-      if (err) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-          message: "Token đã hết hạn, mời bạn đăng nhập lại",
-        });
-      }
-      if (!user) {
-        return;
-      }
+//     // Kiểm tra token có hợp lệ không và lấy userId
+//     jwt.verify(oldToken, process.env.SECRET_ACCESS_TOKEN, async (err, user) => {
+//       if (err) {
+//         return res.status(StatusCodes.UNAUTHORIZED).json({
+//           message: "Token đã hết hạn, mời bạn đăng nhập lại",
+//         });
+//       }
+//       if (!user) {
+//         return;
+//       }
 
-      // Kiểm tra xem token có nằm trong blacklist không
-      const isBlacklisted = await isTokenBlacklisted(oldToken);
-      if (isBlacklisted) {
-        return res
-          .status(StatusCodes.UNAUTHORIZED)
-          .json({ error: "Token is blacklisted" });
-      }
+//       // Kiểm tra xem token có nằm trong blacklist không
+//       const isBlacklisted = await isTokenBlacklisted(oldToken);
+//       if (isBlacklisted) {
+//         return res
+//           .status(StatusCodes.UNAUTHORIZED)
+//           .json({ error: "Token is blacklisted" });
+//       }
 
-      const payload = {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      };
-      const NewAccessToken = await generateAccessToken(payload);
-      const NewRefreshToken = await generateRefreshToken(payload);
+//       const payload = {
+//         id: user.id,
+//         email: user.email,
+//         role: user.role,
+//       };
+//       const NewAccessToken = await generateAccessToken(payload);
+//       const NewRefreshToken = await generateRefreshToken(payload);
 
-      // Trả về token mới cho client
-      return res.status(StatusCodes.OK).json({
-        message: "Tạo token thành công",
-        accessToken: NewAccessToken,
-        refreshToken: NewRefreshToken,
-      });
-    });
-  } catch (error) {
-    console.error("Error during token refresh:", error);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Internal Server Error" });
-  }
-};
+//       // Trả về token mới cho client
+//       return res.status(StatusCodes.OK).json({
+//         message: "Tạo token thành công",
+//         accessToken: NewAccessToken,
+//         refreshToken: NewRefreshToken,
+//       });
+//     });
+//   } catch (error) {
+//     console.error("Error during token refresh:", error);
+//     return res
+//       .status(StatusCodes.INTERNAL_SERVER_ERROR)
+//       .json({ error: "Internal Server Error" });
+//   }
+// };
+
 export const isTokenBlacklisted = async (token) => {
   const tokenInBlacklist = await BlacklistedToken.findOne({ token });
   return !!tokenInBlacklist;

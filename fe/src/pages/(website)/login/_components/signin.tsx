@@ -17,7 +17,8 @@ interface SignupFormData {
 const Signin = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
-    // const { setAuthUser, setIsloggedIn } = useContext(AuthContext);
+    const { setAuthUser, setIsloggedIn } = useContext(AuthContext);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
     const {
         register,
@@ -28,8 +29,8 @@ const Signin = () => {
         mutationFn: async (user: SignupFormData) => {
             const { data } = await SigninUser(user);
             console.log("data", data);
-            // setAuthUser?.(data?.user);
-            // setIsloggedIn?.(true);
+            setAuthUser?.(data?.user);
+            setIsloggedIn?.(true);
         },
         onSuccess: (response: any) => {
             // console.log("response", response);
@@ -39,13 +40,13 @@ const Signin = () => {
                     JSON.stringify(response?.data.user),
                 );
                 localStorage.setItem("accessToken", response?.data.accessToken);
-                document.cookie = `refreshToken=${
-                    response?.data.refreshToken
-                }; path=/; secure; samesite=strict; expires=${new Date(
-                    Date.now() + 7 * 24 * 60 * 60 * 1000,
-                ).toUTCString()}`;
+                // document.cookie = `refreshToken=${
+                //     response?.data.refreshToken
+                // }; path=/; secure; samesite=strict; expires=${new Date(
+                //     Date.now() + 7 * 24 * 60 * 60 * 1000,
+                // ).toUTCString()}`;
             }
-
+            setIsLoggedIn(true);
             messageApi.success("Đăng nhập thành công");
             setTimeout(() => {
                 navigate("/");

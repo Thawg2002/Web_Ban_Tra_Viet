@@ -135,7 +135,7 @@ const Header = () => {
 
     return (
         <header
-            className={` ${isScrolled ? "bg-[#f6f6f6]" : "bg-transparent"} transition-colors duration-300 z-0`}
+            className={` ${isScrolled ? "bg-[#f6f6f6]" : "bg-transparent"} transition-colors duration-300 z-10`}
         >
             <div className="padding py-[10px]">
                 <div className=" flex justify-between ">
