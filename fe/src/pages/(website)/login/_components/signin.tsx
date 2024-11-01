@@ -17,46 +17,27 @@ interface SignupFormData {
 const Signin = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
-    // const { setAuthUser, setIsloggedIn } = useContext(AuthContext);
+    const { setAuthUser, setIsLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm();
-    const { mutate, isPending } = useMutation({
-        mutationFn: async (user: SignupFormData) => {
-            const { data } = await SigninUser(user);
+    const onSubmit = async (payload: any) => {
+        try {
+            const { data } = await SigninUser(payload);
             console.log("data", data);
-            // setAuthUser?.(data?.user);
-            // setIsloggedIn?.(true);
-        },
-        onSuccess: (response: any) => {
-            // console.log("response", response);
-            if (response) {
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify(response?.data.user),
-                );
-                localStorage.setItem("accessToken", response?.data.accessToken);
-                document.cookie = `refreshToken=${
-                    response?.data.refreshToken
-                }; path=/; secure; samesite=strict; expires=${new Date(
-                    Date.now() + 7 * 24 * 60 * 60 * 1000,
-                ).toUTCString()}`;
-            }
-
+            setAuthUser?.(data?.user);
+            setIsLoggedIn?.(true);
             messageApi.success("Đăng nhập thành công");
             setTimeout(() => {
                 navigate("/");
             }, 2000);
-        },
-        onError: () => {
+        } catch (error) {
+            console.log(error);
             messageApi.error("Đăng nhập thất bại");
-        },
-    });
-    const onSubmit = async (data: any) => {
-        mutate(data);
+        }
     };
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
@@ -168,7 +149,8 @@ const Signin = () => {
                             type="submit"
                             className="bg-pink-500 text-white font-bold py-2 px-4 rounded w-full hover:bg-pink-700 focus:outline-none focus:shadow-outline"
                         >
-                            {isPending ? <LoaderCircle /> : "Đăng nhập"}
+                            {/* {isPending ? <LoaderCircle /> : "Đăng nhập"} */}
+                            Đăng nhập
                         </button>
                     </div>
                     <div className="text-center">

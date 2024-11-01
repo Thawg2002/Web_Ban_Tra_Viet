@@ -12,7 +12,7 @@ type AuthContextType = {
     authUser?: IUser | undefined;
     setAuthUser?: Dispatch<SetStateAction<IUser | undefined>>;
     isLoggedIn?: boolean;
-    setIsloggedIn?: Dispatch<SetStateAction<boolean>>;
+    setIsLoggedIn?: Dispatch<SetStateAction<boolean>>;
 };
 
 const AuthContext = createContext<AuthContextType>({});
