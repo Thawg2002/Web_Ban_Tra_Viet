@@ -29,7 +29,6 @@ const userSchema = new Schema(
     }, // Thêm thời gian hết hạn của token
     avatar: {
       type: String,
-      default: "../upload/default-avatar.jpeg",
     },
   },
   { timestamps: true, versionKey: false }

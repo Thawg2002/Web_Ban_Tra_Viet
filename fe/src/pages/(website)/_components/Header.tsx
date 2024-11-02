@@ -1,4 +1,5 @@
 import { logo_traviet, logo_traviet_main, tra_o_long } from "@/assets/img";
+import { useAuth } from "@/common/hooks/useAuth";
 import useCart from "@/common/hooks/useCart";
 import { Dropdown, MenuProps } from "antd";
 import { Space } from "lucide-react";
@@ -13,12 +14,13 @@ import { FaRegUserCircle, FaUser } from "react-icons/fa";
 import { IoCartOutline, IoCloseCircleSharp } from "react-icons/io5";
 import { useMediaQuery } from "react-responsive";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import UserAction from "./UserAction";
 
 const Header = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [menuMoblie, setMenuMoblie] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-
+    const { isLoggedIn } = useAuth();
     // Hiệu ứng giỏ hàng
     const [isCartOpen, setIsCartOpen] = useState(false); // Ví dụ
     const [isVisible, setIsVisible] = useState(false); // Ví dụ
@@ -300,13 +302,7 @@ const Header = () => {
 
                         {user?._id ? (
                             <>
-                                <Dropdown menu={{ items }}>
-                                    <a onClick={(e) => e.preventDefault()}>
-                                        <Link to="/login">
-                                            <FaRegUserCircle className="ml-[20px] cursor-pointer" />
-                                        </Link>
-                                    </a>
-                                </Dropdown>
+                                <UserAction />
                             </>
                         ) : (
                             <Link to={"/login"}>
