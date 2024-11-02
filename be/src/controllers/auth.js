@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/user";
 import BlacklistedToken from "../models/black-listed-token";
 import crypto from "crypto";
-
+import dotenv from "dotenv";
+dotenv.config();
 import nodemailer from "nodemailer";
 const signupSchema = Joi.object({
   name: Joi.string().min(3).max(30).messages({
@@ -31,11 +32,15 @@ const signupSchema = Joi.object({
     "string.uri": "Trường Avatar phải là đường dẫn hợp lệ",
   }),
 });
-const generateRefreshToken = (userId) => {
-  return jwt.sign({ userId }, "123456", { expiresIn: "10d" });
+const generateRefreshToken = (payload) => {
+  return jwt.sign(payload, process.env.SECRET_REFRESH_TOKEN, {
+    expiresIn: "10d",
+  });
 };
-const generateAccessToken = (userId) => {
-  return jwt.sign({ userId }, "123456", { expiresIn: "7d" });
+const generateAccessToken = (payload) => {
+  return jwt.sign(payload, "123456", {
+    expiresIn: "7d",
+  });
 };
 export const signup = async (req, res) => {
   const { email, password } = req.body;
@@ -82,8 +87,16 @@ export const signin = async (req, res) => {
           messages: ["Mật khẩu không chính xác"],
         });
       }
-      const accessToken = generateAccessToken(user._id);
-      const refreshToken = generateRefreshToken(user._id); // Generate refresh token
+      const accessToken = generateAccessToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      });
+      const refreshToken = generateRefreshToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      }); // Generate refresh token
       user.password = undefined;
       return res.status(StatusCodes.OK).json({
         user,
@@ -92,19 +105,29 @@ export const signin = async (req, res) => {
       });
     }
   } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
     console.error(`Error finding user with email ${email}:`, error);
   }
 };
 export const logout = async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    if (!token) {
+    const accessToken = req.headers.authorization?.split(" ")[1];
+    if (!accessToken) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ error: "No token provided" });
     }
-    // Lưu token vào danh sách đen (blacklist) để ngăn không cho token đó được sử dụng nữa
-    const blacklistedToken = new BlacklistedToken({ token });
+    console.log("token", accessToken);
+    // Giải mã token để lấy thông tin, bao gồm cả thời gian hết hạn (expiry date)
+    const decodedToken = jwt.verify(accessToken, "123456");
+    console.log("decoded token", decodedToken);
+    const expiryDate = new Date(decodedToken.exp * 1000); // Chuyển thời gian hết hạn thành kiểu Date
+    console.log("1");
+    // Lưu token vào danh sách đen với `expiryDate`
+    const token = accessToken;
+    const blacklistedToken = new BlacklistedToken({ token, expiryDate });
     await blacklistedToken.save();
 
     // Gửi phản hồi thành công
@@ -118,7 +141,40 @@ export const logout = async (req, res) => {
       .json({ error: "Internal Server Error" });
   }
 };
-
+export const changeUser = async (req, res) => {
+  try {
+    const { name, avatar, phone, birthDay } = req.body;
+    const accessToken = req.headers.authorization?.split(" ")[1];
+    if (!accessToken) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "No token provided" });
+    }
+    console.log("token", accessToken);
+    // Giải mã token để lấy thông tin, bao gồm cả thời gian hết hạn (expiry date)
+    const decodedToken = jwt.verify(accessToken, "123456");
+    if (!name || !phone) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Name, phone, and birthDay are required" });
+    }
+    const updatedUser = await User.findByIdAndUpdate(decodedToken?.userId, {
+      name,
+      avatar,
+      phone,
+      birthDay,
+    });
+    return res.status(StatusCodes.OK).json({
+      message: "Cập nhật thông tin thành công!",
+      updatedUser,
+    });
+  } catch (error) {
+    console.error(`Error during logout:`, error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: "Internal Server Error" });
+  }
+};
 // be/src/controllers/auth.js
 export const refreshToken = async (req, res) => {
   try {

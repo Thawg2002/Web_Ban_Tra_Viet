@@ -11,6 +11,7 @@ import ProductManagement from "@/pages/(dashboard)/product/page";
 import UserList from "@/pages/(dashboard)/user/page";
 import NotFound from "@/pages/(website)/404/page";
 import AboutPage from "@/pages/(website)/about/page";
+import AccountIndex from "@/pages/(website)/account/AccountIndex";
 import LayoutAccount from "@/pages/(website)/account/layout";
 import PurchaseIndex from "@/pages/(website)/account/purchase/PurchaseIndex";
 import ShoppingCart from "@/pages/(website)/cart/page";
@@ -71,10 +72,8 @@ const Router = () => {
 
                     <Route path="checkout" element={<CheckoutPage />} />
                     <Route path="account" element={<LayoutAccount />}>
-                        <Route
-                            path="purchase"
-                            element={<PurchaseIndex />}
-                        />
+                        <Route path="profile" element={<AccountIndex />} />
+                        <Route path="purchase" element={<PurchaseIndex />} />
                     </Route>
                     <Route
                         path="forgot-password"

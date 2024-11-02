@@ -1,17 +1,39 @@
 import { useAuth } from "@/common/hooks/useAuth";
-import { DownOutlined } from "@ant-design/icons";
-import { Dropdown, MenuProps, Space } from "antd";
-import { FaSignOutAlt } from "react-icons/fa";
+import instance from "@/configs/axios";
+import { Dropdown, MenuProps, message, Space } from "antd";
 import { Link } from "react-router-dom";
 const UserAction = () => {
-    const { authUser } = useAuth();
+    const { authUser, setAuthUser, setIsLoggedIn } = useAuth();
+    const [messageApi, contextHolder] = message.useMessage();
+    const accessToken = localStorage.getItem("accessToken");
+    // console.log("accessToken: ", accessToken);
+    const handleLogout = async () => {
+        try {
+            await instance.post(
+                `/auth/logout`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                },
+            );
+            setAuthUser?.(undefined);
+            setIsLoggedIn?.(false);
+            window.localStorage.removeItem("user");
+            window.location.reload();
+            messageApi.success("Đăng xuất thành công");
+        } catch (error) {
+            console.log(error);
+        }
+    };
     const items: MenuProps["items"] = [
         {
-            label: <Link to="">Tài khoản của tôi</Link>,
+            label: <Link to="/account/profile">Tài khoản của tôi</Link>,
             key: "0",
         },
         {
-            label: <Link to="">Đăng xuất</Link>,
+            label: <button onClick={() => handleLogout()}>Đăng xuất</button>,
             key: "0",
         },
     ];
