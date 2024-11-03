@@ -156,14 +156,22 @@ export const changeUser = async (req, res) => {
     if (!name || !phone) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ error: "Name, phone, and birthDay are required" });
+        .json({ error: "Name, phone are required" });
     }
-    const updatedUser = await User.findByIdAndUpdate(decodedToken?.userId, {
-      name,
-      avatar,
-      phone,
-      birthDay,
-    });
+    console.log(">>>>User ID", decodedToken);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      decodedToken?.id,
+      {
+        name,
+        avatar,
+        phone,
+        birthDay,
+      },
+      { new: true }
+    );
+    console.log(">>> updatedUser", updatedUser);
+
     return res.status(StatusCodes.OK).json({
       message: "Cập nhật thông tin thành công!",
       updatedUser,

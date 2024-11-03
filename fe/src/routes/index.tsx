@@ -30,6 +30,7 @@ import ProductCategory from "@/pages/(website)/product/category/page";
 import ProductDetail from "@/pages/(website)/product/id/page";
 import PrivateRouter from "@/pages/PrivateRouter";
 import { Route, Routes } from "react-router-dom";
+import ProtectedRouter from "./ProtectedRouter";
 
 const Router = () => {
     return (
@@ -67,7 +68,14 @@ const Router = () => {
                     <Route path="products/:id" element={<ProductDetail />} />
                     <Route path="about" element={<AboutPage />} />
                     <Route path="login" element={<LoginPage />} />
-                    <Route path="cart" element={<ShoppingCart />} />
+                    <Route
+                        path="cart"
+                        element={
+                            <ProtectedRouter>
+                                <ShoppingCart />
+                            </ProtectedRouter>
+                        }
+                    />
                     <Route path="order-success" element={<OrderSuccess />} />
 
                     <Route path="checkout" element={<CheckoutPage />} />

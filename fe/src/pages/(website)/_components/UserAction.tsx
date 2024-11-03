@@ -20,8 +20,11 @@ const UserAction = () => {
             );
             setAuthUser?.(undefined);
             setIsLoggedIn?.(false);
-            window.localStorage.removeItem("user");
-            window.location.reload();
+            localStorage.removeItem("user");
+            localStorage.removeItem("accessToken");
+            location.reload();
+            document.cookie =
+                "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
             messageApi.success("Đăng xuất thành công");
         } catch (error) {
             console.log(error);
@@ -30,6 +33,10 @@ const UserAction = () => {
     const items: MenuProps["items"] = [
         {
             label: <Link to="/account/profile">Tài khoản của tôi</Link>,
+            key: "0",
+        },
+        {
+            label: <Link to="/account/purchase">Đơn mua</Link>,
             key: "0",
         },
         {
@@ -50,9 +57,12 @@ const UserAction = () => {
                                 alt=""
                             />
                         ) : (
-                            <img src={authUser?.avatar} alt="" />
+                            <img
+                                src={authUser?.avatar}
+                                className="size-[28px] border-2 border-slate-800 rounded-full"
+                                alt=""
+                            />
                         )}
-                        đa
                     </Space>
                 </a>
             </Dropdown>

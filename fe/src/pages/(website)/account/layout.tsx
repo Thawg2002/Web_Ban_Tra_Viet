@@ -6,6 +6,7 @@ import { motion, Variants } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 import { cn } from "@/common/lib/utils";
 import sidebarAccount from "@/configs/sidebarConfig";
+import { useAuth } from "@/common/hooks/useAuth";
 
 const itemVariants: Variants = {
     open: {
@@ -20,7 +21,7 @@ const AccountLayout = () => {
     const [isOpen, setIsOpen] = useState(true);
     const isMobile = useMediaQuery("(max-width: 1024px)");
     const router = useNavigate();
-
+    const { authUser } = useAuth();
     useEffect(() => {
         if (isMobile) {
             setIsOpen(false);
@@ -43,15 +44,15 @@ const AccountLayout = () => {
                             >
                                 <motion.button className="w-full border-b flex items-center border-blue-400 px-2 ">
                                     <div className="p-2 sm:pb-4 w-full flex gap-2 items-center flex-1">
-                                        <div className="size-8 sm:size-12 rounded-full border overflow-hidden">
+                                        <div className="size-8 sm:size-12 rounded-full border border-gray-400 overflow-hidden">
                                             <img
-                                                src="/avatar_25.jpg"
+                                                src={authUser?.avatar || ""}
                                                 className="w-full h-full "
                                             />
                                         </div>
                                         <div className="">
                                             <p className="font-semibold">
-                                                Nguyễn Tuấn Đức
+                                                {authUser?.name}
                                             </p>
                                             <p className="md:flex items-center text-sm text-gray-400 cursor-pointer font-medium hidden">
                                                 <MdEdit

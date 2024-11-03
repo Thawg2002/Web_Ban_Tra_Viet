@@ -16,24 +16,25 @@ const sidebarAccount = [
         icon: RiLockPasswordLine,
     },
     {
-        name: "Địa chỉ",
-        path: "/account/address",
-        icon: GrLocation,
-    },
-    {
         name: "Đơn hàng",
         path: "/account/purchase",
         icon: CgMenuBoxed,
     },
-    {
-        name: "Thông báo",
-        path: "/account/notification",
-        icon: IoNotificationsOutline,
-    },
-    {
-        name: "Giao dịch",
-        path: "/account/payment",
-        icon: RiSecurePaymentFill,
-    },
+    // {
+    //     name: "Địa chỉ",
+    //     path: "/account/address",
+    //     icon: GrLocation,
+    // },
+
+    // {
+    //     name: "Thông báo",
+    //     path: "/account/notification",
+    //     icon: IoNotificationsOutline,
+    // },
+    // {
+    //     name: "Giao dịch",
+    //     path: "/account/payment",
+    //     icon: RiSecurePaymentFill,
+    // },
 ];
 export default sidebarAccount;

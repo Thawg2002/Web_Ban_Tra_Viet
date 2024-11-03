@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post("/auth/signup", signup);
 router.post("/auth/signin", signin);
-router.put("/auth/change-user/:id", changeUser);
+router.put("/auth/change-user", changeUser);
 router.post("/refresh-token", refreshToken);
 router.post("/auth/logout", logout);
 router.get("/auth/users", getAllUsers);

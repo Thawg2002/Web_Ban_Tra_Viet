@@ -18,6 +18,8 @@ export interface IUser {
     _id: string;
     name: string;
     email: string;
+    phone?: string;
+    birthDay?: string;
     role?: string;
     avatar?: string;
     createdAt?: Date;
@@ -45,6 +47,9 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         if (storedUser) {
             setAuthUser(JSON.parse(storedUser));
             setIsLoggedIn(true);
+        } else {
+            setAuthUser(undefined);
+            setIsLoggedIn(false);
         }
     }, []);
     return (

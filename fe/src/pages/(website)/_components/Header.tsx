@@ -210,18 +210,19 @@ const Header = () => {
                         </div>
                     </div>
                     {/* icon header */}
-                    <div className="flex flex-row text-[25px] items-center">
+                    <div className="flex items-center gap-3 lg:gap-5">
                         <div className="relative">
                             <input
                                 className="hidden lg:block border rounded-xl font-serif text-[16px] w-[200px] h-[40px] p-2 mr-2"
                                 type="text"
-                                placeholder="Seach..."
+                                placeholder="Tìm kiếm..."
                             />
-                            <CiSearch className="hidden lg:block absolute top-0 right-0 mr-5 mt-2" />
+                            <CiSearch className="hidden text-[24px] lg:block absolute top-0 right-0 mr-5 mt-2" />
                         </div>
                         <div className="relative">
                             <IoCartOutline
-                                className="ml-[20px] cursor-pointer"
+                                size={24}
+                                className=" cursor-pointer"
                                 onClick={handleCartClick}
                             />
                             {/* Cart Dropdown */}
@@ -300,20 +301,23 @@ const Header = () => {
 
                         {/* Dropdown end  */}
 
-                        {user?._id ? (
-                            <>
-                                <UserAction />
-                            </>
-                        ) : (
-                            <Link to={"/login"}>
-                                <span className=" cursor-pointer">
-                                    <AiOutlineUserDelete />
-                                </span>{" "}
-                            </Link>
-                        )}
+                        <div className="">
+                            {user?._id ? (
+                                <>
+                                    <UserAction />
+                                </>
+                            ) : (
+                                <Link to={"/login"}>
+                                    <span className=" cursor-pointer">
+                                        <AiOutlineUserDelete size={24} />
+                                    </span>{" "}
+                                </Link>
+                            )}
+                        </div>
 
                         <CiMenuBurger
-                            className="ml-[20px] lg:hidden"
+                            size={24}
+                            className=" font-bold lg:hidden"
                             onClick={toggleMenu}
                         />
                     </div>

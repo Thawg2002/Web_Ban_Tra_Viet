@@ -1,4 +1,5 @@
 import { useAuth } from "@/common/hooks/useAuth";
+import { uploadFileCloudinary } from "@/common/lib/utils";
 import instance from "@/configs/axios";
 import { UploadOutlined, UserOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
@@ -16,27 +17,50 @@ import { useEffect, useState } from "react";
 
 const AccountIndex = () => {
     const { authUser, setAuthUser } = useAuth();
+    console.log("authUser", authUser);
     const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
-    const [imageUrl, setImageUrl] = useState(null);
-    console.log("auth", authUser);
+    const [imageUrl, setImageUrl] = useState("");
+    const accessToken = localStorage.getItem("accessToken");
+    console.log("imge", imageUrl);
+    // console.log("auth", authUser);
     useEffect(() => {
         if (authUser) {
             form.setFieldsValue({
                 name: authUser.name,
                 email: authUser.email,
+                phone: authUser?.phone,
+                birthDay: authUser?.birthDay,
             });
-            // setImageUrl(authUser?.avatar);
+            setImageUrl(authUser?.avatar || "");
         }
     }, []);
+
     const { mutate } = useMutation({
         mutationFn: async (data: any) => {
-            return await instance.put(`/auth/changeUser/${authUser?._id}`);
+            return await instance.put(`/auth/change-user`, data, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
         },
         onSuccess: (response) => {
             if (setAuthUser) {
                 setAuthUser(response.data);
             }
+            console.log("Response dâta", response?.data?.updatedUser);
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(response?.data?.updatedUser),
+            );
+            form.setFieldsValue({
+                name: response?.data?.updatedUser?.name,
+                email: response?.data?.updatedUser?.email,
+                phone: response?.data?.updatedUser?.phone,
+                birthDay: response?.data?.updatedUser?.birthDay,
+                avatar: response?.data?.updatedUser?.avatar,
+            });
             messageApi.success("Cập nhật thông tin thành công!");
         },
         onError: (error) => {
@@ -44,30 +68,19 @@ const AccountIndex = () => {
             console.log(error);
         },
     });
-    const onFinish = (values: any) => {
-        // Handle form submission
-        mutate(values);
-        console.log("Received values of form: ", values);
-    };
-    const handleUpload = (info) => {
-        if (info.file.status === "done") {
-            // Giả sử bạn sử dụng URL trực tiếp của file sau khi upload thành công
-            setImageUrl(URL.createObjectURL(info.file.originFileObj));
+    const handleUpload = async (file: File) => {
+        const url = await uploadFileCloudinary(file);
+        console.log("url", url.url);
+        if (url) {
+            setImageUrl(url?.url);
+            form.setFieldsValue({ avatar: url?.url }); // Optional: store URL in form data
         }
     };
 
-    // Hàm giới hạn kích thước và định dạng file
-    const beforeUpload = (file) => {
-        const isJpgOrPng =
-            file.type === "image/jpeg" || file.type === "image/png";
-        if (!isJpgOrPng) {
-            alert("Chỉ hỗ trợ file JPEG và PNG!");
-        }
-        const isLt1M = file.size / 1024 / 1024 < 1;
-        if (!isLt1M) {
-            alert("Dung lượng file phải nhỏ hơn 1MB!");
-        }
-        return isJpgOrPng && isLt1M;
+    const onFinish = (values: any) => {
+        const updatedValues = { ...values, avatar: imageUrl };
+        console.log("updated", updatedValues);
+        mutate(updatedValues);
     };
 
     const formItemLayout = {
@@ -82,6 +95,8 @@ const AccountIndex = () => {
     };
     return (
         <>
+            {contextHolder}
+
             <div className="px-5">
                 <div className="">
                     <h3 className="text-lg font-medium">Hồ Sơ Của Tôi </h3>
@@ -110,10 +125,6 @@ const AccountIndex = () => {
                                         </label>
                                     }
                                     rules={[
-                                        // {
-                                        //     type: "string",
-                                        //     message: "Email không hợp lệ!",
-                                        // },
                                         {
                                             required: true,
                                             message: "Vui lòng nhập tên!",
@@ -146,7 +157,7 @@ const AccountIndex = () => {
                                     }
                                     rules={[
                                         {
-                                            type: "number",
+                                            type: "string",
                                             message:
                                                 "Số điện thoại không hợp lệ!",
                                         },
@@ -167,14 +178,6 @@ const AccountIndex = () => {
                                             Ngày sinh
                                         </label>
                                     }
-                                    rules={
-                                        [
-                                            // {
-                                            //     type: "email",
-                                            //     message: "Email không hợp lệ!",
-                                            // },
-                                        ]
-                                    }
                                     className=" "
                                 >
                                     <DatePicker
@@ -187,39 +190,38 @@ const AccountIndex = () => {
                             <div className="col-span-12 lg:col-span-5  border-t lg:border-none border-gray-300 py-8 lg:py-0 ">
                                 <Form.Item>
                                     <div className="flex flex-col justify-center items-center gap-y-3">
-                                        <Avatar
-                                            size={128}
-                                            icon={<UserOutlined />}
-                                            src={imageUrl || authUser?.avatar}
-                                            style={{
-                                                backgroundColor: "#f5f5f5",
-                                                marginBottom: 10,
-                                            }}
-                                        />
+                                        <div className="">
+                                            <Avatar
+                                                size={128}
+                                                icon={<UserOutlined />}
+                                                src={imageUrl}
+                                                style={{
+                                                    backgroundColor: "#f5f5f5",
+                                                    marginBottom: 10,
+                                                }}
+                                            />
+                                        </div>
                                         <Upload
-                                            name="avatar"
-                                            showUploadList={false} // Ẩn danh sách file
-                                            beforeUpload={beforeUpload} // Kiểm tra file trước khi upload
-                                            onChange={handleUpload} // Gọi hàm khi có sự thay đổi
+                                            beforeUpload={(file) => {
+                                                handleUpload(file);
+                                                return false;
+                                            }}
+                                            showUploadList={false}
                                         >
                                             <Button icon={<UploadOutlined />}>
                                                 Chọn Ảnh
                                             </Button>
                                         </Upload>
-                                        <div className="flex flex-col text-[#999] text-xs md:text-base">
-                                            <span className="">
+                                        <div className="text-[#999] text-xs md:text-base">
+                                            <span>
                                                 Dụng lượng file tối đa 1 MB
                                             </span>
-                                            <span className="">
-                                                {" "}
-                                                Định dạng:.JPEG, .PNG
-                                            </span>
+                                            <span> Định dạng:.JPEG, .PNG</span>
                                         </div>
                                     </div>
-                                </Form.Item>{" "}
+                                </Form.Item>
                             </div>
                         </div>
-
                         <div className="w-full lg:w-[85%] ml-auto  ">
                             <button className="px-5 py-2 border border-transparent bg-blue-500 text-white rounded hover:bg-white hover:text-blue-500 hover:border-blue-500 duration-300 transition  ">
                                 Cập nhật
