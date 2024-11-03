@@ -4,6 +4,7 @@ import {
   deleteBlog,
   getAllBlogs,
   getBlogBySlug,
+  getBlogDetail,
   updateBlog,
 } from "../controllers/blogController";
 
@@ -15,7 +16,7 @@ router.get("/blogs", getAllBlogs);
 
 // Lấy một bài viết theo slug
 router.get("/blogs/:slug", getBlogBySlug);
-
+router.get("/blogs/:id", getBlogDetail);
 // Cập nhật bài viết theo slug
 router.put("/blogs/:slug", updateBlog);
 

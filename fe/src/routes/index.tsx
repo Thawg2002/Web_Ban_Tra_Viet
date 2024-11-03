@@ -31,6 +31,7 @@ import ProductDetail from "@/pages/(website)/product/id/page";
 import PrivateRouter from "@/pages/PrivateRouter";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRouter from "./ProtectedRouter";
+import NewBlog from "@/pages/(dashboard)/blog/NewBlog";
 
 const Router = () => {
     return (
@@ -59,6 +60,7 @@ const Router = () => {
                         <Route path="user" element={<UserList />} />
                         <Route path="order" element={<OrderList />} />
                         <Route path="blog" element={<BlogList />} />
+                        <Route path="blog/add" element={<NewBlog />} />
                     </Route>
                 </Route>
 
