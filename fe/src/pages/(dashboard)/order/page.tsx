@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Table, Spin, Alert, Select, Button, message, Modal } from "antd";
 import instance from "@/configs/axios"; // axios config từ dự án của bạn
 import OrderFilter from "./component_/OrderFilter";
-import TextArea from "antd/es/input/TextArea";
 
 const { Option } = Select;
 
@@ -42,7 +41,7 @@ const OrderList = () => {
         fetchOrders();
     }, []);
 
-    const handleColumnVisibilityChange = (column) => {
+    const handleColumnVisibilityChange = (column:number) => {
         setVisibleColumns((prev) => ({
             ...prev,
             [column]: !prev[column],
@@ -297,7 +296,7 @@ const OrderList = () => {
             {selectedOrder && (
                 <Modal
                     title={`Chi tiết đơn hàng - ${selectedOrder.orderNumber}`}
-                    visible={!!selectedOrder}
+                    open={!!selectedOrder}
                     onCancel={handleModalClose}
                     footer={null}
                 >

@@ -13,6 +13,7 @@ import categoryRouter from "./routers/category";
 import productRouter from "./routers/product";
 // import logingoogle from "./routers/logingoogle";
 import PaymentRouter from "./routers/PaymentRouter";
+import bannerRouter from "./routers/banner";
 
 const app = express();
 dotenv.config();
@@ -33,6 +34,7 @@ app.use("/api/v1", cartRouter);
 app.use("/api/v1", orderRouter);
 app.use("/api", PaymentRouter);
 app.use("/api/v1", blogRouter);
+app.use("/api/v1", bannerRouter);
 // app.use("/api/v1", logingoogle);
 
 app.use(cookieParser());
