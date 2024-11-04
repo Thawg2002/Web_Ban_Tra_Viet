@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
-import mongoosePaginate, { paginate } from "mongoose-paginate-v2";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const BlogsSchema = new mongoose.Schema(
   {
-    user_id: {
-      type: mongoose.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     title: {
       type: String,
     },
@@ -17,8 +12,6 @@ const BlogsSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      unique: true,
-      index: true,
     },
     meta_title: {
       type: String,

@@ -7,7 +7,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
@@ -17,24 +17,17 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import instance from "@/configs/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { useEffect, useState } from "react";
+import { Button, message } from "antd";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
     AiOutlineCloudUpload,
     AiOutlineLoading3Quarters,
 } from "react-icons/ai";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { MdOutlineCalendarMonth } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 
 import { z } from "zod";
@@ -43,9 +36,10 @@ const NewBlog = () => {
         isSubmitted: false,
         isLoading: false,
     });
+    const [messageApi, contextHolder] = message.useMessage();
+
     const [previewUrl, setPreviewUrl] = useState("");
     const [content, setContent] = useState("");
-    const [tags, setTags] = useState([]);
     const navigate = useNavigate();
     const formSchema = z.object({
         title: z.string({
@@ -56,68 +50,82 @@ const NewBlog = () => {
             required_error: "Nội dung bài viết là bắt buộc",
             invalid_type_error: "Nội dung bài viết là một chuỗi",
         }),
-        published_at: z.date({
-            required_error: "Ngày đăng là bắt buộc",
-            invalid_type_error: "Ngày đăng không đúng định dạng",
-        }),
-        selected_tags: z
-            .array(
-                z.object({
-                    _id: z.string(),
-                    name: z.string(),
-                }),
-            )
-            .nonempty({
-                message: "Bạn chưa chọn nhãn",
-            }),
         thumbnail_url: z.string({ required_error: "Ảnh thu nhỏ là bắt buộc" }),
     });
-
+    console.log("previewUrl", previewUrl);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     });
-    // const handleAutoSave = async () => {
-    //     const data = form.getValues();
-    //     const payload = {
-    //         ...data,
-    //         selected_tags: data?.selected_tags?.map((tag) => tag?._id),
-    //     };
-    //     console.log(payload);
 
-    //     if (payload.title || payload.content) {
-    //         try {
-    //             setStatusLoading({ isSubmitted: true, isLoading: true });
-    //             // const { data } = await newBlogs(payload);
-    //             navigate(`/admin/blogs/${data?._id}/edit`);
-    //         } catch (error) {
-
-    //         } finally {
-    //             setStatusLoading({ isSubmitted: true, isLoading: false });
-    //         }
+    // const handleUploadFile = async (file: File) => {
+    //     const url = await uploadFileCloudinary(file);
+    //     console.log("url", url.url);
+    //     if (url) {
+    //         setPreviewUrl(url?.url);
+    //         // form.setValue({ avatar: url?.url }); // Optional: store URL in form data
     //     }
     // };
     const handleUploadFile = async (file: File) => {
-        const formdata = new FormData();
-        formdata.append("image", file);
-        const { data } = await uploadFileCloudinary(formdata as any);
-        setPreviewUrl(data.path);
-        return data.path;
+        try {
+            const response = await uploadFileCloudinary(file);
+            if (response?.url) {
+                return response.url;
+            } else {
+                throw new Error("Upload failed");
+            }
+        } catch (error) {
+            console.error("Upload failed:", error);
+            form.setError("thumbnail_url", {
+                type: "manual",
+                message: "Upload ảnh thất bại, vui lòng thử lại.",
+            });
+            return null;
+        }
+    };
+    const handleFileChange = async (event: any) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const preview = URL.createObjectURL(file);
+        setPreviewUrl(preview);
+
+        const uploadedUrl = await handleUploadFile(file);
+        if (uploadedUrl) {
+            form.setValue("thumbnail_url", uploadedUrl);
+            form.clearErrors("thumbnail_url");
+        }
+
+        URL.revokeObjectURL(preview);
     };
     const debouncedChangeHandler = useDebounce(() => {
         // handleAutoSave();
     }, 1000);
-
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    const newBlog = async (data: any) => {
+        try {
+            const response = await instance.post(`/blogs`, data, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            return response.data;
+        } catch (error) {}
+    };
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const payload = {
                 ...values,
-                selected_tags: values?.selected_tags?.map((tag) => tag?._id),
             };
-            // await newBlogs(payload);
-        } catch (error) {}
-    }
+            await newBlog(payload);
+            navigate("/admin/blog");
+            messageApi.success("Tạo bài viết thành công!");
+        } catch (error) {
+            console.log(error);
+            messageApi.error("Tạo bài viết thất bại?");
+        }
+    };
     return (
         <div className="">
+            {contextHolder}
             <div className="mb-3 flex justify-end">
                 <Link to="/admin/blogs">
                     <Button className="">
@@ -249,89 +257,13 @@ const NewBlog = () => {
                         <div className="flex flex-col space-y-5 order-1 md:order-none w-full min-w-72 md:max-w-72 *:rounded-xl">
                             <div className="w-full  order-1 md:order-none box-shadow">
                                 <div className=" bg-white box-shadow  rounded-lg ">
-                                    <h3 className="font-semibold text-base py-2 px-5 ">
-                                        Phát hành
-                                    </h3>
-                                    <div className="px-5 py-3 border-y border-gray-200">
-                                        <FormField
-                                            control={form.control}
-                                            name="published_at"
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col">
-                                                    <FormLabel>
-                                                        Ngày đăng
-                                                    </FormLabel>
-                                                    <Popover>
-                                                        <PopoverTrigger asChild>
-                                                            <FormControl>
-                                                                <Button
-                                                                    variant={
-                                                                        "outline"
-                                                                    }
-                                                                    className={cn(
-                                                                        "w-full flex justify-between items-center pl-3 text-left font-normal",
-                                                                        !field.value &&
-                                                                            "text-muted-foreground",
-                                                                    )}
-                                                                >
-                                                                    {field.value ? (
-                                                                        format(
-                                                                            field.value,
-                                                                            "PPP",
-                                                                            {
-                                                                                locale: vi,
-                                                                            },
-                                                                        )
-                                                                    ) : (
-                                                                        <span>
-                                                                            Chọn
-                                                                            ngày
-                                                                        </span>
-                                                                    )}
-                                                                    <MdOutlineCalendarMonth />
-                                                                </Button>
-                                                            </FormControl>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent
-                                                            className="w-auto p-0"
-                                                            align="start"
-                                                        >
-                                                            {/* <Calendar
-                                                                locale={vi}
-                                                                mode="single"
-                                                                selected={
-                                                                    field.value
-                                                                }
-                                                                onSelect={
-                                                                    field.onChange
-                                                                }
-                                                                disabled={(
-                                                                    date,
-                                                                ) =>
-                                                                    date <
-                                                                        new Date() ||
-                                                                    date <
-                                                                        new Date(
-                                                                            "1900-01-01",
-                                                                        )
-                                                                }
-                                                                initialFocus
-                                                            /> */}
-                                                        </PopoverContent>
-                                                    </Popover>
-
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
                                     <div className="flex items-center justify-end px-5 py-3">
-                                        <Button
+                                        <button
                                             type="submit"
                                             className="py-0.5 px-5 bg-blue-500 hover:bg-blue-500/80"
                                         >
                                             Đăng tải
-                                        </Button>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -353,7 +285,7 @@ const NewBlog = () => {
                                                     <Accordion
                                                         type="single"
                                                         collapsible
-                                                        className="w-full "
+                                                        className="w-full"
                                                     >
                                                         <AccordionItem
                                                             value="item-1"
@@ -365,108 +297,56 @@ const NewBlog = () => {
                                                                     nhỏ
                                                                 </FormLabel>
                                                             </AccordionTrigger>
-                                                            <AccordionContent className="px-5 ">
-                                                                <div className="w-full ">
+                                                            <AccordionContent className="px-5">
+                                                                <div className="w-full">
                                                                     <label
                                                                         htmlFor="file-upload"
                                                                         className={cn(
-                                                                            "w-full relative cursor-pointer  rounded-lg p-6",
+                                                                            "w-full relative cursor-pointer rounded-lg p-6",
+                                                                            !previewUrl &&
+                                                                                "flex flex-col justify-center items-center",
                                                                         )}
-                                                                        id=""
                                                                     >
-                                                                        <div
-                                                                            className={cn(
-                                                                                "flex flex-col justify-center items-center ",
-                                                                                previewUrl &&
-                                                                                    "hidden",
-                                                                            )}
-                                                                        >
-                                                                            <AiOutlineCloudUpload
-                                                                                size={
-                                                                                    50
-                                                                                }
-                                                                                strokeWidth={
-                                                                                    1
-                                                                                }
-                                                                            />
-                                                                            <h3 className="mt-2 text-sm font-medium text-gray-900">
-                                                                                <span>
+                                                                        {!previewUrl ? (
+                                                                            <>
+                                                                                <AiOutlineCloudUpload
+                                                                                    size={
+                                                                                        50
+                                                                                    }
+                                                                                    strokeWidth={
+                                                                                        1
+                                                                                    }
+                                                                                />
+                                                                                <h3 className="mt-2 text-sm font-medium text-gray-900">
                                                                                     Chọn
                                                                                     ảnh
-                                                                                </span>
-                                                                            </h3>
-                                                                            <p className="mt-1 text-xs text-gray-500">
-                                                                                PNG,
-                                                                                JPG,
-                                                                                GIF.
-                                                                            </p>
-                                                                        </div>
-                                                                        <img
-                                                                            src={
-                                                                                previewUrl
-                                                                            }
-                                                                            className={cn(
-                                                                                "w-full relative max-h-[180px] object-cover",
-                                                                                previewUrl
-                                                                                    ? ""
-                                                                                    : "hidden",
-                                                                            )}
-                                                                            id="preview"
-                                                                        />
+                                                                                </h3>
+                                                                                <p className="mt-1 text-xs text-gray-500">
+                                                                                    PNG,
+                                                                                    JPG,
+                                                                                    GIF
+                                                                                </p>
+                                                                            </>
+                                                                        ) : (
+                                                                            <img
+                                                                                src={
+                                                                                    previewUrl
+                                                                                }
+                                                                                className="w-full relative max-h-[180px] object-cover"
+                                                                                alt="Preview"
+                                                                            />
+                                                                        )}
                                                                     </label>
                                                                     <input
                                                                         type="file"
-                                                                        name=""
                                                                         id="file-upload"
-                                                                        onChange={(
-                                                                            event,
-                                                                        ) =>
-                                                                            field.onChange(
-                                                                                async () => {
-                                                                                    setPreviewUrl(
-                                                                                        URL.createObjectURL(
-                                                                                            (
-                                                                                                event?.target as HTMLInputElement
-                                                                                            )
-                                                                                                ?.files?.[0] as File,
-                                                                                        ),
-                                                                                    );
-                                                                                    form.setValue(
-                                                                                        "thumbnail_url",
-                                                                                        previewUrl,
-                                                                                    );
-                                                                                    form.clearErrors(
-                                                                                        "thumbnail_url",
-                                                                                    );
-                                                                                    const url =
-                                                                                        await handleUploadFile(
-                                                                                            (
-                                                                                                event?.target as HTMLInputElement
-                                                                                            )
-                                                                                                ?.files?.[0] as File,
-                                                                                        );
-                                                                                    form.setValue(
-                                                                                        "thumbnail_url",
-                                                                                        url,
-                                                                                    );
-
-                                                                                    URL.revokeObjectURL(
-                                                                                        previewUrl,
-                                                                                    );
-                                                                                },
-                                                                            )
+                                                                        onChange={
+                                                                            handleFileChange
                                                                         }
                                                                         hidden
-                                                                        className="hidden outline-none focus-visible:ring-0 "
                                                                     />
-                                                                    <Input
-                                                                        type="text"
-                                                                        placeholder="Hình ảnh thu nhỏ"
-                                                                        {...field}
-                                                                        className="hidden outline-none focus-visible:ring-0 "
-                                                                    />
+                                                                    <FormMessage />
                                                                 </div>
-                                                                <FormMessage />
                                                             </AccordionContent>
                                                         </AccordionItem>
                                                     </Accordion>

@@ -1,4 +1,3 @@
-import BlogList from "@/pages/(dashboard)/blog/page";
 import CategoryAdd from "@/pages/(dashboard)/category/add/page";
 import CategoryEdit from "@/pages/(dashboard)/category/edit/page";
 import CategoryList from "@/pages/(dashboard)/category/page";
@@ -26,12 +25,13 @@ import OrderSuccess from "@/pages/(website)/order-success/page";
 
 import CheckoutPage from "@/pages/(website)/order/page";
 // import CheckoutPage from "@/pages/(website)/order/page";
+import NewBlog from "@/pages/(dashboard)/blog/NewBlog";
 import ProductCategory from "@/pages/(website)/product/category/page";
 import ProductDetail from "@/pages/(website)/product/id/page";
 import PrivateRouter from "@/pages/PrivateRouter";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRouter from "./ProtectedRouter";
-import NewBlog from "@/pages/(dashboard)/blog/NewBlog";
+import BlogList from "@/pages/(dashboard)/blog/BlogList";
 
 const Router = () => {
     return (
@@ -81,7 +81,14 @@ const Router = () => {
                     <Route path="order-success" element={<OrderSuccess />} />
 
                     <Route path="checkout" element={<CheckoutPage />} />
-                    <Route path="account" element={<LayoutAccount />}>
+                    <Route
+                        path="account"
+                        element={
+                            <ProtectedRouter>
+                                <LayoutAccount />
+                            </ProtectedRouter>
+                        }
+                    >
                         <Route path="profile" element={<AccountIndex />} />
                         <Route path="purchase" element={<PurchaseIndex />} />
                     </Route>
