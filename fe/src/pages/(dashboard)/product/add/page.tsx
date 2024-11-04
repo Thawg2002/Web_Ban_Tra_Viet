@@ -71,7 +71,7 @@ const ProductAddPage = () => {
             });
         },
     });
-    const onSubmit = async (values: any) => {
+    const onSubmit = async (values: IProduct) => {
         console.log({
             ...values,
             gallery,
