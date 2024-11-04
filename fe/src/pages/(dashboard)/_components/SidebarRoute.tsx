@@ -1,15 +1,21 @@
 "use client";
 
-import { BarChart, List, User } from "lucide-react";
+import React from "react";
 import SidebarItem from "./SidebarItem";
-import { FaBox } from "react-icons/fa6";
-import { FaFileAlt } from "react-icons/fa";
-import { ShoppingOutlined } from "@ant-design/icons";
+import { FaBox, FaChartBar, FaImage, FaUser, FaFile } from "react-icons/fa6"; // Ensure the icons are imported correctly
 import { MdInventory } from "react-icons/md";
+import { List } from "lucide-react";
 
+interface SidebarItemProps {
+    icon: React.ElementType; // Allows passing any React component
+    label: string;
+    href: string;
+}
+
+// Define routes as an array of objects
 const routes = [
     {
-        icon: BarChart,
+        icon: FaChartBar,
         label: "Thống kê",
         href: "/admin",
     },
@@ -24,7 +30,7 @@ const routes = [
         href: "/admin/category",
     },
     {
-        icon: User,
+        icon: FaUser,
         label: "Tài khoản",
         href: "/admin/user",
     },
@@ -34,13 +40,19 @@ const routes = [
         href: "/admin/order",
     },
     {
-        icon: FaFileAlt,
+        icon: FaFile,
         label: "Bài viết",
         href: "/admin/blog",
     },
+    {
+        icon: FaImage,
+        label: "Banner",
+        href: "/admin/banner",
+    },
 ];
 
-const SidebarRoutes = () => {
+// SidebarRoutes functional component
+const SidebarRoutes: React.FC = () => {
     return (
         <div className="flex flex-col w-full">
             {routes.map((route) => (

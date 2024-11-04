@@ -2,12 +2,15 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 
-import {
-    banner_am_chen,
-    banner_banh_trung_thu_4,
-    banner_qua_tang_doanh_nghiep,
-} from "@/assets/img";
 import { Link } from "react-router-dom";
+import instance from "@/configs/axios";
+import { useQuery } from "@tanstack/react-query";
+import { Alert, Spin } from "antd";
+interface Banner {
+    imageBanner: string;
+    title: string;
+    description: string;
+}
 const Banner = () => {
     const settings = {
         dots: true,
@@ -18,50 +21,72 @@ const Banner = () => {
         slidesToShow: 1,
         slidesToScroll: 1,
     };
+
+    const {
+        data: banners,
+        isLoading,
+        isError,
+    } = useQuery({
+        queryKey: ["banners"],
+        queryFn: async () => {
+            try {
+                const response = await instance.get("banners", {});
+                return response.data;
+            } catch (error) {
+                throw new Error("Lỗi khi tải danh sách banner");
+            }
+        },
+    });
+
+    if (isLoading) {
+        return (
+            <div style={{ textAlign: "center", padding: "20px" }}>
+                <Spin size="large" tip="Đang tải dữ liệu..." />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div style={{ margin: "20px 0" }}>
+                <Alert
+                    message="Lỗi khi tải danh sách banner"
+                    type="error"
+                    showIcon
+                />
+            </div>
+        );
+    }
+
     return (
-        <div className="slider-container lg:-mt-[160px] ">
+        <div className="slider-container lg:-mt-[160px]">
             <Slider {...settings}>
-                <div className="relative">
-                    <img src={`${banner_am_chen}`} alt="" />
-                    <div className="absolute left-0 top-0 bottom-0 flex flex-col  px-[15px] lg:justify-center ">
-                        <h2 className="text-white text-[73px] mx-auto font-normall mt-0 mr-[10%] mb-[25px] ml-[15%] ">
-                            Trà của những bậc thầy
-                        </h2>
-                        <div className="mt-0 mr-[10%] mb-[25px] ml-[15%] ">
-                            <p className="text-white mb-[25px] ">
-                                Được chọn lựa bởi Champion of Tea Master Cup
-                                Vietnam
-                            </p>
-                        </div>
-                        <div className="mt-0 mr-[10%] mb-[25px] ml-[15%] ">
-                            <Link to={""}>
-                                <button className="bg-[#d82253] text-white py-[18px] px-[16px]  ">
-                                    KHÁM PHÁ TRÀ
-                                </button>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-                <div className="relative">
-                    <img src={`${banner_banh_trung_thu_4}`} alt="" />
-                    <div className="absolute right-0 top-0 bottom-0 flex flex-col px-[15px] lg:justify-center lg:items-end">
-                        <h2 className="text-[#000] text-[73px] mx-auto font-normall mt-0 mr-[10%] mb-[25px] ml-[15%] md:text-end">
-                            Bánh Trung Thu 2024
-                        </h2>
-                        <div className="mt-0 mr-[10%] mb-[25px] ml-[15%] ">
-                            <p className="text-[#000] mb-[25px] ">
-                                In logo thương hiệu , đăng ký miễn phí
-                            </p>
-                        </div>
-                        <div className="mt-0 mr-[10%] mb-[25px] ml-[15%] ">
-                            <Link to={""}>
-                                <button className="bg-[#d82253] text-white py-[18px] px-[16px]  ">
-                                    HIỂU THÊM
-                                </button>
-                            </Link>
+                {banners?.data?.map((banner: Banner, index: number) => (
+                    <div key={index} className="relative">
+                        <img
+                            src={banner.imageBanner}
+                            alt={banner.title}
+                            className="w-full h-auto"
+                        />
+                        <div className="absolute left-0 top-0 bottom-0 flex flex-col px-[15px] lg:justify-center">
+                            <h2 className="text-white text-[73px] mx-auto font-normal mt-0 mr-[10%] mb-[25px] ml-[15%]">
+                                {banner.title}
+                            </h2>
+                            <div className="mt-0 mr-[10%] mb-[25px] ml-[15%]">
+                                <p className="text-white mb-[25px]">
+                                    {banner.description}
+                                </p>
+                            </div>
+                            <div className="mt-0 mr-[10%] mb-[25px] ml-[15%]">
+                                <Link to={"/"}>
+                                    <button className="bg-[#d82253] text-white py-[18px] px-[16px]">
+                                        KHÁM PHÁ NGAY
+                                    </button>
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                </div>
+                ))}
             </Slider>
         </div>
     );

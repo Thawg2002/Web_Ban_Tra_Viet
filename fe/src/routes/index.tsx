@@ -31,6 +31,9 @@ import ProductDetail from "@/pages/(website)/product/id/page";
 import PrivateRouter from "@/pages/PrivateRouter";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRouter from "./ProtectedRouter";
+import BannerManagerPage from "@/pages/(dashboard)/banner/page";
+import BannerAddPage from "@/pages/(dashboard)/banner/add/page";
+import BannerUpdatePage from "@/pages/(dashboard)/banner/edit/page";
 
 const Router = () => {
     return (
@@ -59,6 +62,12 @@ const Router = () => {
                         <Route path="user" element={<UserList />} />
                         <Route path="order" element={<OrderList />} />
                         <Route path="blog" element={<BlogList />} />
+                        <Route path="banner" element={<BannerManagerPage />} />
+                        <Route path="banner/add" element={<BannerAddPage />} />
+                        <Route
+                            path="banner/:id/update"
+                            element={<BannerUpdatePage />}
+                        />
                     </Route>
                 </Route>
 
