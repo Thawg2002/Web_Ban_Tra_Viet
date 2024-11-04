@@ -1,22 +1,16 @@
 import Banner from "../models/banner.js";
 
-
 class BannerController {
   // Lấy danh sách banner
   async getBanners(req, res) {
     try {
-      const { page = 1, limit = 10, search, isDeleted } = req.query;
+      const { page = 1, limit = 10, search } = req.query;
 
       const query = {};
 
       // Tìm kiếm theo tiêu đề banner, không phân biệt chữ hoa thường
       if (search) {
         query.title = { $regex: search, $options: "i" };
-      }
-
-      // Lọc theo trạng thái xóa mềm
-      if (isDeleted !== undefined) {
-        query.isDeleted = isDeleted === "true";
       }
 
       // Truy vấn tìm banner và áp dụng phân trang
@@ -42,7 +36,7 @@ class BannerController {
   async getBannerDetail(req, res) {
     try {
       const { id } = req.params;
-      const banner = await Banner.findOne({ _id: id, isDeleted: false });
+      const banner = await Banner.findOne({ _id: id });
 
       if (!banner) {
         return res.status(404).json({ error: "Banner không tồn tại." });
@@ -59,7 +53,7 @@ class BannerController {
     try {
       const { title } = req.body;
 
-      const existingBanner = await Banner.findOne({ title, isDeleted: false });
+      const existingBanner = await Banner.findOne({ title });
 
       if (existingBanner) {
         return res.status(400).json({ error: "Title đã tồn tại." });
@@ -79,7 +73,7 @@ class BannerController {
       const { title } = req.body;
 
       // Kiểm tra xem banner có tồn tại hay không
-      const banner = await Banner.findOne({ _id: id, isDeleted: false });
+      const banner = await Banner.findOne({ _id: id });
       if (!banner) {
         return res.status(404).json({ error: "Banner không tồn tại." });
       }
@@ -89,7 +83,6 @@ class BannerController {
         const existingBanner = await Banner.findOne({
           title: title,
           _id: { $ne: id },
-          isDeleted: false,
         });
 
         if (existingBanner) {
@@ -106,25 +99,6 @@ class BannerController {
       res.status(200).json(updatedBanner);
     } catch (error) {
       res.status(500).json({ error: "Lỗi khi lấy cập nhật banner" });
-    }
-  }
-
-  // Xóa mềm banner
-  async softDeleteBanner(req, res) {
-    try {
-      const banner = await Banner.findByIdAndUpdate(req.params.id, {
-        isDeleted: true,
-      });
-
-      if (!banner) {
-        return res
-          .status(404)
-          .json({ error: "Banner không tồn tại hoặc đã bị xóa." });
-      }
-
-      res.status(200).json({ message: "Banner đã được xóa mềm." });
-    } catch (error) {
-      res.status(500).json({ error: "Lỗi khi xóa mềm banner" });
     }
   }
 
@@ -150,7 +124,7 @@ class BannerController {
       const { id } = req.params;
 
       // Tìm banner đã bị xóa mềm
-      const banner = await Banner.findOne({ _id: id, isDeleted: true });
+      const banner = await Banner.findOne({ _id: id });
       if (!banner) {
         return res
           .status(404)
@@ -158,7 +132,7 @@ class BannerController {
       }
 
       // Khôi phục banner
-      banner.isDeleted = false;
+
       await banner.save();
 
       res.status(200).json({ message: "Banner đã được khôi phục thành công." });
