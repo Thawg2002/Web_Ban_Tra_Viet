@@ -31,11 +31,17 @@ import ProductDetail from "@/pages/(website)/product/id/page";
 import PrivateRouter from "@/pages/PrivateRouter";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRouter from "./ProtectedRouter";
+<<<<<<< HEAD
 import BlogList from "@/pages/(dashboard)/blog/BlogList";
 import BlogEdit from "@/pages/(dashboard)/blog/BlogEdit";
 import BlogDetail from "@/pages/(dashboard)/blog/BlogDetail";
 import BlogIndex from "@/pages/(website)/Blogs/BlogIndex";
 import BlogDetailClient from "@/pages/(website)/Blogs/BlogDetail";
+=======
+import BannerManagerPage from "@/pages/(dashboard)/banner/page";
+import BannerAddPage from "@/pages/(dashboard)/banner/add/page";
+import BannerUpdatePage from "@/pages/(dashboard)/banner/edit/page";
+>>>>>>> main
 
 const Router = () => {
     return (
@@ -64,9 +70,18 @@ const Router = () => {
                         <Route path="user" element={<UserList />} />
                         <Route path="order" element={<OrderList />} />
                         <Route path="blog" element={<BlogList />} />
+<<<<<<< HEAD
                         <Route path="blog/add" element={<NewBlog />} />
                         <Route path="blog/edit/:id" element={<BlogEdit />} />
                         <Route path="blog/:id" element={<BlogDetail />} />
+=======
+                        <Route path="banner" element={<BannerManagerPage />} />
+                        <Route path="banner/add" element={<BannerAddPage />} />
+                        <Route
+                            path="banner/:id/update"
+                            element={<BannerUpdatePage />}
+                        />
+>>>>>>> main
                     </Route>
                 </Route>
 

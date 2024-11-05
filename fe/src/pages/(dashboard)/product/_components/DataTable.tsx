@@ -1,5 +1,4 @@
-import { flexRender } from "@tanstack/react-table";
-
+import { flexRender, Table as ReactTable } from "@tanstack/react-table";
 import {
     Table,
     TableBody,
@@ -9,37 +8,39 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-const DataTable = ({ table, columns }: any) => {
+interface DataTableProps<TData> {
+    table: ReactTable<TData>;
+    columns: Array<number>; 
+}
+
+const DataTable = <TData,>({ table, columns }: DataTableProps<TData>) => {
     return (
         <>
             <Table>
                 <TableHeader>
-                    {table.getHeaderGroups().map?.((headerGroup: any) => (
+                    {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
-                            {headerGroup.headers.map((header: any) => {
-                                return (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext(),
-                                              )}
-                                    </TableHead>
-                                );
-                            })}
+                            {headerGroup.headers.map((header) => (
+                                <TableHead key={header.id}>
+                                    {header.isPlaceholder
+                                        ? null
+                                        : flexRender(
+                                              header.column.columnDef.header,
+                                              header.getContext(),
+                                          )}
+                                </TableHead>
+                            ))}
                         </TableRow>
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row: any) => (
+                    {table.getRowModel().rows.length ? (
+                        table.getRowModel().rows.map((row) => (
                             <TableRow
                                 key={row.id}
                                 data-state={row.getIsSelected() && "selected"}
                             >
-                                {row.getVisibleCells().map((cell: any) => (
+                                {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>
                                         {flexRender(
                                             cell.column.columnDef.cell,
@@ -52,7 +53,7 @@ const DataTable = ({ table, columns }: any) => {
                     ) : (
                         <TableRow>
                             <TableCell
-                                colSpan={columns?.length}
+                                colSpan={columns.length}
                                 className="h-24 text-center"
                             >
                                 No results.

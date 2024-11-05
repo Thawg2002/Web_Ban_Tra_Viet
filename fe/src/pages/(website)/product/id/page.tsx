@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 import { getProductById, getRelatedProduct } from "@/services/product";
 import { useQuery } from "@tanstack/react-query";
 import SimilarProducts from "./similarProducts";
-import { IProduct } from "@/common/types/product";
 import useCart from "@/common/hooks/useCart";
 import { toast } from "@/components/ui/use-toast";
 import { getAllCategories } from "@/services/categories";
