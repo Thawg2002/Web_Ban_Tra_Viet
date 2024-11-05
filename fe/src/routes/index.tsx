@@ -34,6 +34,8 @@ import ProtectedRouter from "./ProtectedRouter";
 import BlogList from "@/pages/(dashboard)/blog/BlogList";
 import BlogEdit from "@/pages/(dashboard)/blog/BlogEdit";
 import BlogDetail from "@/pages/(dashboard)/blog/BlogDetail";
+import BlogIndex from "@/pages/(website)/Blogs/BlogIndex";
+import BlogDetailClient from "@/pages/(website)/Blogs/BlogDetail";
 
 const Router = () => {
     return (
@@ -83,6 +85,8 @@ const Router = () => {
                         }
                     />
                     <Route path="order-success" element={<OrderSuccess />} />
+                    <Route path="blog" element={<BlogIndex />} />
+                    <Route path="blog/:id" element={<BlogDetailClient />} />
 
                     <Route path="checkout" element={<CheckoutPage />} />
                     <Route

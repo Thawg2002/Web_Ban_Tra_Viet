@@ -200,6 +200,9 @@ const Header = () => {
                                 <Link to={"/about"}>
                                     <li className="mx-2">GIỚI THIỆU</li>
                                 </Link>
+                                <Link to={"/blog"}>
+                                    <li className="mx-2">Bài viết</li>
+                                </Link>
                                 <Link to={""}>
                                     <li className="mx-2">TIN TỨC</li>
                                 </Link>

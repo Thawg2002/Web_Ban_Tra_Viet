@@ -76,9 +76,9 @@ import Blog from "../models/blog";
 export const createBlog = async (req, res) => {
   try {
     const { title, content, thumbnail_url } = req.body;
-    const meta_title = title ? truncateSentence(title, 30) || "" : "";
+    const meta_title = title ? truncateSentence(title, 50) || "" : "";
     const meta_description = content
-      ? trunTextHtmlConvers(content, 70) || ""
+      ? trunTextHtmlConvers(content, 130) || ""
       : "";
     const newBlog = new Blog({
       title,

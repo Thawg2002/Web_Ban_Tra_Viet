@@ -29,7 +29,6 @@ const BlogList = () => {
     const handleGetBlogs = async () => {
         try {
             const { data } = await instance.get(`/blogs`);
-
             setBlogs(data);
             return data;
         } catch (error) {
@@ -69,7 +68,7 @@ const BlogList = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {blogs &&
                         blogs?.map((item: any, index: number) => (
-                            <div className="">
+                            <div className="" key={index}>
                                 <Link to={`/admin/blog/${item?._id}`}>
                                     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                                         <img
