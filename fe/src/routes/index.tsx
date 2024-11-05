@@ -32,6 +32,8 @@ import PrivateRouter from "@/pages/PrivateRouter";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRouter from "./ProtectedRouter";
 import BlogList from "@/pages/(dashboard)/blog/BlogList";
+import BlogEdit from "@/pages/(dashboard)/blog/BlogEdit";
+import BlogDetail from "@/pages/(dashboard)/blog/BlogDetail";
 
 const Router = () => {
     return (
@@ -61,6 +63,8 @@ const Router = () => {
                         <Route path="order" element={<OrderList />} />
                         <Route path="blog" element={<BlogList />} />
                         <Route path="blog/add" element={<NewBlog />} />
+                        <Route path="blog/edit/:id" element={<BlogEdit />} />
+                        <Route path="blog/:id" element={<BlogDetail />} />
                     </Route>
                 </Route>
 

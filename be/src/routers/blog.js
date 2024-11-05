@@ -15,11 +15,11 @@ router.post("/blogs", createBlog);
 router.get("/blogs", getAllBlogs);
 
 // Lấy một bài viết theo slug
-router.get("/blogs/:slug", getBlogBySlug);
+// router.get("/blogs/:slug", getBlogBySlug);
 router.get("/blogs/:id", getBlogDetail);
 // Cập nhật bài viết theo slug
-router.put("/blogs/:slug", updateBlog);
+router.put("/blogs/:id", updateBlog);
 
 // Xóa bài viết theo slug
-router.delete("/blogs/:slug", deleteBlog);
+router.delete("/blogs/:id", deleteBlog);
 export default router;

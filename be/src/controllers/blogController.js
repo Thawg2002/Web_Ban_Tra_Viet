@@ -133,11 +133,12 @@ export const deleteBlog = async (req, res) => {
       return res.status(400).json({
         message: "Bạn chưa chọn bài viết",
       });
-
+    console.log("id", id);
     const existingBlog = await Blog.findById(id);
     if (!existingBlog) {
       return res.status(404).json({ message: "Bài viết không tồn tại" });
     }
+    console.log("1s");
     await Blog.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Bạn đã xóa bài viết thành công!" });
@@ -172,6 +173,7 @@ export const getAllBlogs = async (req, res) => {
 export const getBlogDetail = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log("id", id);
     if (!id) {
       return res.status(400).json({ message: "Bạn chưa chọn bài viết" });
     }
@@ -181,6 +183,7 @@ export const getBlogDetail = async (req, res) => {
     }
     res.status(200).json({
       message: "Lấy bài viết thành công",
+      existingBlog,
     });
   } catch (error) {
     return res.status(500).json({

@@ -21,23 +21,23 @@ import { Textarea } from "@/components/ui/textarea";
 import instance from "@/configs/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, message } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
     AiOutlineCloudUpload,
     AiOutlineLoading3Quarters,
 } from "react-icons/ai";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { z } from "zod";
-const NewBlog = () => {
+const BlogEdit = () => {
     const [statusLoading, setStatusLoading] = useState({
         isSubmitted: false,
         isLoading: false,
     });
     const [messageApi, contextHolder] = message.useMessage();
-
+    const { id } = useParams();
     const [previewUrl, setPreviewUrl] = useState("");
     const [content, setContent] = useState("");
     const navigate = useNavigate();
@@ -52,19 +52,24 @@ const NewBlog = () => {
         }),
         thumbnail_url: z.string({ required_error: "Ảnh thu nhỏ là bắt buộc" }),
     });
-    console.log("previewUrl", previewUrl);
+    // console.log("previewUrl", previewUrl);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     });
-
-    // const handleUploadFile = async (file: File) => {
-    //     const url = await uploadFileCloudinary(file);
-    //     console.log("url", url.url);
-    //     if (url) {
-    //         setPreviewUrl(url?.url);
-    //         // form.setValue({ avatar: url?.url }); // Optional: store URL in form data
-    //     }
-    // };
+    console.log("content", content);
+    const handleFetchBlog = async (id: string) => {
+        try {
+            const { data } = await instance.get(`/blogs/${id}`);
+            form.reset(data?.existingBlog);
+            setPreviewUrl(data?.existingBlog?.thumbnail_url);
+            setContent(data?.existingBlog?.content);
+            console.log("data", data);
+            return data;
+        } catch (error) {}
+    };
+    useEffect(() => {
+        handleFetchBlog(id as string);
+    }, []);
     const handleUploadFile = async (file: File) => {
         try {
             const response = await uploadFileCloudinary(file);
@@ -100,22 +105,25 @@ const NewBlog = () => {
     const debouncedChangeHandler = useDebounce(() => {
         // handleAutoSave();
     }, 1000);
-    const newBlog = async (data: any) => {
+    console.log("id edit", id);
+    const handleEditBlog = async (data: any) => {
         try {
-            const response = await instance.post(`/blogs`, data, {
+            const response = await instance.put(`/blogs/${id}`, data, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
             return response.data;
-        } catch (error) {}
+        } catch (error) {
+            console.log(error);
+        }
     };
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const payload = {
                 ...values,
             };
-            await newBlog(payload);
+            await handleEditBlog(payload);
             navigate("/admin/blog");
             messageApi.success("Tạo bài viết thành công!");
         } catch (error) {
@@ -262,7 +270,7 @@ const NewBlog = () => {
                                             type="submit"
                                             className="py-2 text-white px-5 rounded-md bg-blue-500 hover:bg-blue-500/80"
                                         >
-                                            Đăng tải
+                                            Cập nhật
                                         </button>
                                     </div>
                                 </div>
@@ -364,4 +372,4 @@ const NewBlog = () => {
     );
 };
 
-export default NewBlog;
+export default BlogEdit;
