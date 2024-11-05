@@ -1,8 +1,7 @@
 // // controllers/blogController.js
 
+import { truncateSentence, trunTextHtmlConvers } from "../common/cutText";
 import Blog from "../models/blog";
-
-
 
 // import Blog from "../models/blog";
 
@@ -76,7 +75,18 @@ import Blog from "../models/blog";
 // Tạo hoặc cập nhật thông tin "About"
 export const createBlog = async (req, res) => {
   try {
-    const newBlog = new Blog(req.body);
+    const { title, content, thumbnail_url } = req.body;
+    const meta_title = title ? truncateSentence(title, 50) || "" : "";
+    const meta_description = content
+      ? trunTextHtmlConvers(content, 130) || ""
+      : "";
+    const newBlog = new Blog({
+      title,
+      content,
+      thumbnail_url,
+      meta_title,
+      meta_description,
+    });
     await newBlog.save();
     res.status(201).json(newBlog);
   } catch (error) {
@@ -87,18 +97,29 @@ export const createBlog = async (req, res) => {
 // Cập nhật Blog (PUT) - Tìm blog bằng `slug`
 export const updateBlog = async (req, res) => {
   try {
-    const updatedBlog = await Blog.findOneAndUpdate(
-      { slug: req.params.slug }, // Tìm blog theo slug
-      req.body, // Cập nhật theo dữ liệu từ request body
-      {
-        new: true, // Trả về bản ghi đã được cập nhật
-        runValidators: true, // Kiểm tra tính hợp lệ của dữ liệu
-      }
-    );
-    if (!updatedBlog) {
-      return res.status(404).json({ message: "Blog not found" });
+    const { id } = req.params;
+    const { title, content, thumbnail_url } = req.body;
+    if (!id) {
+      return res.status(400).json({ message: "Bạn chưa chọn bài viết" });
     }
-    res.status(200).json(updatedBlog);
+    const existingBlog = await Blog.findById(id);
+    if (!existingBlog) {
+      return res.status(404).json({ message: "Bài viết không tồn tại" });
+    }
+
+    const updatedBlog = await Blog.findOneAndUpdate(
+      existingBlog?._id,
+      {
+        title,
+        content,
+        thumbnail_url,
+      },
+      { new: true }
+    );
+    res.status(200).json({
+      message: "Cập nhật bài viết thành công!",
+      updatedBlog,
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -107,11 +128,20 @@ export const updateBlog = async (req, res) => {
 // Xóa Blog (DELETE) - Tìm blog bằng `slug`
 export const deleteBlog = async (req, res) => {
   try {
-    const deletedBlog = await Blog.findOneAndDelete({ slug: req.params.slug });
-    if (!deletedBlog) {
-      return res.status(404).json({ message: "Blog not found" });
+    const { id } = req.params;
+    if (!id)
+      return res.status(400).json({
+        message: "Bạn chưa chọn bài viết",
+      });
+    console.log("id", id);
+    const existingBlog = await Blog.findById(id);
+    if (!existingBlog) {
+      return res.status(404).json({ message: "Bài viết không tồn tại" });
     }
-    res.status(200).json({ message: "Blog deleted successfully" });
+    console.log("1s");
+    await Blog.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Bạn đã xóa bài viết thành công!" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -120,7 +150,19 @@ export const deleteBlog = async (req, res) => {
 // Lấy tất cả các Blog (GET)
 export const getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find(); // Lấy tất cả blog
+    const pageSize = req.body;
+    const {
+      limit = 10 || pageSize,
+      page = 1,
+      sort = "createAt",
+      order = "desc",
+    } = req.query;
+    const option = {
+      page: page,
+      limit,
+      sort: { [sort]: order === "desc" ? 1 : -1 },
+    };
+    const blogs = await Blog.find().select("-content"); // Lấy tất cả blog
     res.status(200).json(blogs);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -128,6 +170,27 @@ export const getAllBlogs = async (req, res) => {
 };
 
 // Lấy một Blog theo `slug` (GET)
+export const getBlogDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("id", id);
+    if (!id) {
+      return res.status(400).json({ message: "Bạn chưa chọn bài viết" });
+    }
+    const existingBlog = await Blog.findById(id);
+    if (!existingBlog) {
+      return res.status(404).json({ message: "Bài viết không tồn tại" });
+    }
+    res.status(200).json({
+      message: "Lấy bài viết thành công",
+      existingBlog,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 export const getBlogBySlug = async (req, res) => {
   try {
     const blog = await Blog.findOne({ slug: req.params.slug });

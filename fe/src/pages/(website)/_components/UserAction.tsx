@@ -36,6 +36,10 @@ const UserAction = () => {
             key: "0",
         },
         {
+            label: <Link to="/admin">Vào trang quản trị</Link>,
+            key: "0",
+        },
+        {
             label: <Link to="/account/purchase">Đơn mua</Link>,
             key: "0",
         },
