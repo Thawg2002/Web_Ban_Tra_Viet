@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { SigninUser } from "@/services/auth";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/common/hooks/useAuth";
 interface SignupFormData {
     name: string;
     email: string;
@@ -15,6 +16,7 @@ interface SignupFormData {
 const Signin = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
+    const { setAuthUser, setIsLoggedIn } = useAuth();
     const navigate = useNavigate();
     const {
         register,
@@ -22,33 +24,33 @@ const Signin = () => {
         formState: { errors },
     } = useForm();
     const { mutate, isPending } = useMutation({
-        mutationFn: async (user: SignupFormData) => {
-            return await SigninUser(user);
-        },
+        mutationFn: (user: SignupFormData) => SigninUser(user),
         onSuccess: (response: any) => {
-            // console.log("response", response);
             if (response) {
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify(response?.data.user),
-                );
-                localStorage.setItem("accessToken", response?.data.accessToken);
-                document.cookie = `refreshToken=${
-                    response?.data.refreshToken
-                }; path=/; secure; samesite=strict; expires=${new Date(
+                const { user, accessToken, refreshToken } = response.data;
+
+                setAuthUser?.(user);
+                setIsLoggedIn?.(true);
+
+                localStorage.setItem("user", JSON.stringify(user));
+                localStorage.setItem("accessToken", accessToken);
+
+                document.cookie = `refreshToken=${refreshToken}; path=/; secure; samesite=strict; expires=${new Date(
                     Date.now() + 7 * 24 * 60 * 60 * 1000,
                 ).toUTCString()}`;
-            }
 
-            messageApi.success("Đăng nhập thành công");
-            setTimeout(() => {
-                navigate("/");
-            }, 2000);
+                messageApi.success("Đăng nhập thành công");
+
+                setTimeout(() => {
+                    navigate("/");
+                }, 1000);
+            }
         },
         onError: () => {
             messageApi.error("Đăng nhập thất bại");
         },
     });
+
     const onSubmit = async (data: any) => {
         mutate(data);
     };
@@ -89,7 +91,7 @@ const Signin = () => {
                         />
                         {errors.email && (
                             <p className="text-red-500 text-xs mt-2">
-                                {errors.email.message}
+                                {errors.email.message as any}
                             </p>
                         )}
                     </div>
@@ -142,7 +144,7 @@ const Signin = () => {
                         </div>
                         {errors.password && (
                             <p className="text-red-500 text-xs mt-2">
-                                {errors.password.message}
+                                {errors.password.message as any}
                             </p>
                         )}
                     </div>

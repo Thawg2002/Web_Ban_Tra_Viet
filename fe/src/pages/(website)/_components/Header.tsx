@@ -1,7 +1,8 @@
-import { logo_traviet, logo_traviet_main, tra_o_long } from "@/assets/img";
+import { logo_traviet, logo_traviet_main } from "@/assets/img";
+import { useAuth } from "@/common/hooks/useAuth";
 import useCart from "@/common/hooks/useCart";
-import { Dropdown, MenuProps } from "antd";
-import { Space } from "lucide-react";
+import { Alert, MenuProps, Spin } from "antd";
+
 import { useEffect, useMemo, useState } from "react";
 import {
     AiFillCaretDown,
@@ -9,15 +10,38 @@ import {
     AiOutlineUserDelete,
 } from "react-icons/ai";
 import { CiMenuBurger, CiSearch } from "react-icons/ci";
-import { FaRegUserCircle, FaUser } from "react-icons/fa";
 import { IoCartOutline, IoCloseCircleSharp } from "react-icons/io5";
 import { useMediaQuery } from "react-responsive";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import UserAction from "./UserAction";
+import { getAllProducts } from "@/services/product";
+import { useQuery } from "@tanstack/react-query";
+import { IProduct } from "@/common/types/product";
 
 const Header = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [menuMoblie, setMenuMoblie] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const { isLoggedIn } = useAuth();
+
+    const [searchTerm, setSearchTerm] = useState(""); 
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const {
+        data: products,
+        isLoading,
+        isError,
+    } = useQuery({
+        queryKey: ["products"],
+        queryFn: () => getAllProducts({ _expand: "category" }),
+    });
+    useEffect(() => {
+        if (products) {
+            const filtered = products?.data.filter((product) =>
+                product.name.toLowerCase().includes(searchTerm.toLowerCase()),
+            );
+            setFilteredProducts(filtered);
+        }
+    }, [searchTerm, products]);
 
     // Hiệu ứng giỏ hàng
     const [isCartOpen, setIsCartOpen] = useState(false); // Ví dụ
@@ -132,7 +156,25 @@ const Header = () => {
         }, 0);
         return result;
     }, [listchecked]);
+    if (isLoading) {
+        return (
+            <div style={{ textAlign: "center", padding: "20px" }}>
+                <Spin size="large" tip="Đang tải dữ liệu..." />
+            </div>
+        );
+    }
 
+    if (isError) {
+        return (
+            <div style={{ margin: "20px 0" }}>
+                <Alert
+                    message="Lỗi khi tải danh sách sản phẩm"
+                    type="error"
+                    showIcon
+                />
+            </div>
+        );
+    }
     return (
         <header
             className={` ${isScrolled ? "bg-[#f6f6f6]" : "bg-transparent"} transition-colors duration-300`}
@@ -165,7 +207,9 @@ const Header = () => {
                                         CỬA HÀNG
                                         <ul className="absolute w-[250px] bg-white shadow-lg hidden group-hover:block p-3 text-[14px]">
                                             <li className=" px-4 py-2 hover:bg-gray-100 relative group/item">
-                                                <Link to={"/tra"}>TRÀ</Link>
+                                                <Link to={"/products"}>
+                                                    TRÀ
+                                                </Link>
                                                 <ul className="absolute left-full top-0 w-[250px] bg-white shadow-lg hidden group-hover/item:block font-normal ">
                                                     <li className="px-4 py-2 hover:bg-gray-100">
                                                         <Link to={"/products"}>
@@ -173,9 +217,7 @@ const Header = () => {
                                                         </Link>
                                                     </li>
                                                     <li className="px-4 py-2 hover:bg-gray-100">
-                                                        <Link
-                                                            to={"/tra-thao-moc"}
-                                                        >
+                                                        <Link to={"/products"}>
                                                             Trà thảo mộc
                                                         </Link>
                                                     </li>
@@ -198,6 +240,9 @@ const Header = () => {
                                 <Link to={"/about"}>
                                     <li className="mx-2">GIỚI THIỆU</li>
                                 </Link>
+                                <Link to={"/blog"}>
+                                    <li className="mx-2">Bài viết</li>
+                                </Link>
                                 <Link to={""}>
                                     <li className="mx-2">TIN TỨC</li>
                                 </Link>
@@ -208,18 +253,49 @@ const Header = () => {
                         </div>
                     </div>
                     {/* icon header */}
-                    <div className="flex flex-row text-[25px] items-center">
+                    <div className="flex items-center gap-3 lg:gap-5">
                         <div className="relative">
                             <input
-                                className="hidden lg:block border rounded-xl font-serif text-[16px] w-[200px] h-[40px] p-2 mr-2"
+                                className="border rounded-xl font-serif text-[16px] w-full max-w-[250px] h-[40px] p-2 pr-10 pl-4 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 ease-in-out"
                                 type="text"
                                 placeholder="Seach..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
-                            <CiSearch className="hidden lg:block absolute top-0 right-0 mr-5 mt-2" />
+                            <CiSearch className="absolute text-[24px] right-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                            {/* Hiển thị danh sách kết quả tìm kiếm */}
+                            {searchTerm && filteredProducts.length > 0 && (
+                                <div className="absolute left-0 z-10 w-full bg-white shadow-lg rounded-b-xl mt-1">
+                                    {filteredProducts.map(
+                                        (product: IProduct) => (
+                                            <Link
+                                                to={`/products/${product._id}`}
+                                                key={product._id}
+                                                onClick={() =>
+                                                    setSearchTerm("")
+                                                }
+                                            >
+                                                <div className="flex items-center p-3 hover:bg-gray-200 transition duration-200">
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        className="w-12 h-12 mr-2 rounded-md shadow-sm"
+                                                    />
+                                                    <span className="text-gray-800 font-medium">
+                                                        {product.name}
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        ),
+                                    )}
+                                </div>
+                            )}
                         </div>
+
                         <div className="relative">
                             <IoCartOutline
-                                className="ml-[20px] cursor-pointer"
+                                size={24}
+                                className=" cursor-pointer"
                                 onClick={handleCartClick}
                             />
                             {/* Cart Dropdown */}
@@ -233,7 +309,7 @@ const Header = () => {
                                 >
                                     {/* Hiển thị danh sách sản phẩm trong giỏ hàng */}
                                     {listchecked.length > 0 ? (
-                                        listchecked.map((product: any) => (
+                                        listchecked.map((product: IProduct) => (
                                             <div
                                                 key={product._id}
                                                 className="mb-4 flex items-center"
@@ -298,26 +374,23 @@ const Header = () => {
 
                         {/* Dropdown end  */}
 
-                        {user?._id ? (
-                            <>
-                                <Dropdown menu={{ items }}>
-                                    <a onClick={(e) => e.preventDefault()}>
-                                        <Link to="/login">
-                                            <FaRegUserCircle className="ml-[20px] cursor-pointer" />
-                                        </Link>
-                                    </a>
-                                </Dropdown>
-                            </>
-                        ) : (
-                            <Link to={"/login"}>
-                                <span className=" cursor-pointer">
-                                    <AiOutlineUserDelete />
-                                </span>{" "}
-                            </Link>
-                        )}
+                        <div className="">
+                            {user?._id ? (
+                                <>
+                                    <UserAction />
+                                </>
+                            ) : (
+                                <Link to={"/login"}>
+                                    <span className=" cursor-pointer">
+                                        <AiOutlineUserDelete size={24} />
+                                    </span>{" "}
+                                </Link>
+                            )}
+                        </div>
 
                         <CiMenuBurger
-                            className="ml-[20px] lg:hidden"
+                            size={24}
+                            className=" font-bold lg:hidden"
                             onClick={toggleMenu}
                         />
                     </div>

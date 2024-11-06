@@ -5,6 +5,10 @@ import instance from '@/configs/axios';
 
 // Kiểu dữ liệu cho Blog
 export interface Blog {
+    mission: any;
+    introduction: any;
+    introduction: any;
+    team: any;
     _id?: string;
     title: string;
     slug?: string;

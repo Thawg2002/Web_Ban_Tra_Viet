@@ -51,7 +51,7 @@ const PurchaseIndex = () => {
         queryKey: ["purchase"],
         queryFn: async () => {
             try {
-                const { data } = await fetchOrders(status);
+                const { data } = await fetchOrders(status as any);
                 // console.log("dadadadada00", data);
                 return data;
             } catch (error) {

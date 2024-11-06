@@ -13,7 +13,7 @@ interface SignupFormData {
     confirmPassword: string;
 }
 
-const Signup = (props: Props) => {
+const Signup = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 

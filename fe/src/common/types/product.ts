@@ -4,6 +4,7 @@ export interface IProduct {
     // category?: Array<string>;
     category?: Array<string>;
     regular_price: number;
+    price: number;
     quantity: number;
     image: string;
     gallery?: Array<string>;

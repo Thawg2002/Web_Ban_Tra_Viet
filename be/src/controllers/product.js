@@ -77,7 +77,8 @@ export const getAllProducts = async (req, res) => {
     _sort = "createdAt", // Field to sort by
     _order = "asc", // Sorting order (asc/desc)
     category, // Filter by category
-    priceRange, // Filter by price range (e.g., "100-500" -> min: 100, max: 500)
+    priceRange,
+    search, // Filter by price range (e.g., "100-500" -> min: 100, max: 500)
   } = req.query;
 
   const filters = {};
@@ -85,6 +86,9 @@ export const getAllProducts = async (req, res) => {
   // Filter by category if provided
   if (category) {
     filters.category = { $in: category.split(",") }; // Support multiple categories
+  }
+  if (search) {
+    filters.name = { $regex: search, $options: "i" }; // Case-insensitive search
   }
 
   // Filter by price range if provided

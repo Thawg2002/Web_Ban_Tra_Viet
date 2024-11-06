@@ -1,4 +1,3 @@
-import BlogList from "@/pages/(dashboard)/blog/page";
 import CategoryAdd from "@/pages/(dashboard)/category/add/page";
 import CategoryEdit from "@/pages/(dashboard)/category/edit/page";
 import CategoryList from "@/pages/(dashboard)/category/page";
@@ -11,6 +10,7 @@ import ProductManagement from "@/pages/(dashboard)/product/page";
 import UserList from "@/pages/(dashboard)/user/page";
 import NotFound from "@/pages/(website)/404/page";
 import AboutPage from "@/pages/(website)/about/page";
+import AccountIndex from "@/pages/(website)/account/AccountIndex";
 import LayoutAccount from "@/pages/(website)/account/layout";
 import PurchaseIndex from "@/pages/(website)/account/purchase/PurchaseIndex";
 import ShoppingCart from "@/pages/(website)/cart/page";
@@ -25,10 +25,23 @@ import OrderSuccess from "@/pages/(website)/order-success/page";
 
 import CheckoutPage from "@/pages/(website)/order/page";
 // import CheckoutPage from "@/pages/(website)/order/page";
+import NewBlog from "@/pages/(dashboard)/blog/NewBlog";
 import ProductCategory from "@/pages/(website)/product/category/page";
 import ProductDetail from "@/pages/(website)/product/id/page";
 import PrivateRouter from "@/pages/PrivateRouter";
 import { Route, Routes } from "react-router-dom";
+import ProtectedRouter from "./ProtectedRouter";
+<<<<<<< HEAD
+import BlogList from "@/pages/(dashboard)/blog/BlogList";
+import BlogEdit from "@/pages/(dashboard)/blog/BlogEdit";
+import BlogDetail from "@/pages/(dashboard)/blog/BlogDetail";
+import BlogIndex from "@/pages/(website)/Blogs/BlogIndex";
+import BlogDetailClient from "@/pages/(website)/Blogs/BlogDetail";
+=======
+import BannerManagerPage from "@/pages/(dashboard)/banner/page";
+import BannerAddPage from "@/pages/(dashboard)/banner/add/page";
+import BannerUpdatePage from "@/pages/(dashboard)/banner/edit/page";
+>>>>>>> main
 
 const Router = () => {
     return (
@@ -57,6 +70,18 @@ const Router = () => {
                         <Route path="user" element={<UserList />} />
                         <Route path="order" element={<OrderList />} />
                         <Route path="blog" element={<BlogList />} />
+<<<<<<< HEAD
+                        <Route path="blog/add" element={<NewBlog />} />
+                        <Route path="blog/edit/:id" element={<BlogEdit />} />
+                        <Route path="blog/:id" element={<BlogDetail />} />
+=======
+                        <Route path="banner" element={<BannerManagerPage />} />
+                        <Route path="banner/add" element={<BannerAddPage />} />
+                        <Route
+                            path="banner/:id/update"
+                            element={<BannerUpdatePage />}
+                        />
+>>>>>>> main
                     </Route>
                 </Route>
 
@@ -66,15 +91,29 @@ const Router = () => {
                     <Route path="products/:id" element={<ProductDetail />} />
                     <Route path="about" element={<AboutPage />} />
                     <Route path="login" element={<LoginPage />} />
-                    <Route path="cart" element={<ShoppingCart />} />
+                    <Route
+                        path="cart"
+                        element={
+                            <ProtectedRouter>
+                                <ShoppingCart />
+                            </ProtectedRouter>
+                        }
+                    />
                     <Route path="order-success" element={<OrderSuccess />} />
+                    <Route path="blog" element={<BlogIndex />} />
+                    <Route path="blog/:id" element={<BlogDetailClient />} />
 
                     <Route path="checkout" element={<CheckoutPage />} />
-                    <Route path="account" element={<LayoutAccount />}>
-                        <Route
-                            path="purchase"
-                            element={<PurchaseIndex />}
-                        />
+                    <Route
+                        path="account"
+                        element={
+                            <ProtectedRouter>
+                                <LayoutAccount />
+                            </ProtectedRouter>
+                        }
+                    >
+                        <Route path="profile" element={<AccountIndex />} />
+                        <Route path="purchase" element={<PurchaseIndex />} />
                     </Route>
                     <Route
                         path="forgot-password"

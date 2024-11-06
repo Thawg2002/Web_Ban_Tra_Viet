@@ -16,6 +16,12 @@ const userSchema = new Schema(
       minlength: 3,
       maxlength: 30,
     },
+    phone: {
+      type: Number,
+    },
+    birthDay: {
+      type: String,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -29,7 +35,6 @@ const userSchema = new Schema(
     }, // Thêm thời gian hết hạn của token
     avatar: {
       type: String,
-      default: "../upload/default-avatar.jpeg",
     },
   },
   { timestamps: true, versionKey: false }
