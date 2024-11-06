@@ -7,8 +7,13 @@ import { useQuery } from "@tanstack/react-query";
 import SimilarProducts from "./similarProducts";
 import useCart from "@/common/hooks/useCart";
 import { toast } from "@/components/ui/use-toast";
-import { getAllCategories } from "@/services/categories";
 import { Spin } from "antd";
+
+type MenuItem = {
+    index: number;
+    content: string;
+    name: string;
+};
 const ProductDetail = () => {
     const [isActive, setIsActive] = useState(1);
     const [content, setContent] = useState("Mô tả sản phẩm");
@@ -21,17 +26,24 @@ const ProductDetail = () => {
 
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ["getProductById", id],
-        queryFn: () => getProductById(id),
+        queryFn: () => {
+            if (id) {
+                return getProductById(id);
+            }
+            throw new Error("Mã sản phẩm bị thiếu.");
+        },
     });
     console.log(data);
     const { data: relatedProduct } = useQuery({
         queryKey: ["relatedProducts", id],
-        queryFn: () => getRelatedProduct(id),
+        queryFn: () => {
+            if (id) {
+                return getRelatedProduct(id);
+            }
+            throw new Error("Lỗi");
+        },
     });
-    const { data: category } = useQuery({
-        queryKey: ["categories"],
-        queryFn: getAllCategories,
-    });
+
     const { addItem } = useCart(user?._id);
 
     useEffect(() => {
@@ -61,7 +73,7 @@ const ProductDetail = () => {
                             title: "Thêm sản phẩm thành công.",
                         });
                     },
-                    onError: (error: any) => {
+                    onError: (error) => {
                         toast({
                             variant: "error",
                             title: "Đã xảy ra lỗi khi thêm sản phẩm.",
@@ -94,7 +106,7 @@ const ProductDetail = () => {
             content: "Đánh giá sản phẩm",
         },
     ];
-    const handleClickMenu = (item: any) => {
+    const handleClickMenu = (item: MenuItem) => {
         setIsActive(item.index);
         setContent(item.content);
     };
@@ -270,7 +282,7 @@ const ProductDetail = () => {
                 {/*  */}
                 <div className="pt-28">
                     <div className="flex gap-10 justify-center">
-                        {menuList.map((item: any) => (
+                        {menuList.map((item: MenuItem) => (
                             <span
                                 onClick={() => handleClickMenu(item)}
                                 key={item.index}

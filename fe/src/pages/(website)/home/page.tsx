@@ -6,17 +6,11 @@ import {
     banner_qua_tet_scaled,
     hop_tri_an_open,
     hop_tri_ki_open,
-    kinh_doanh_tra_viet,
     loai_hat_dinh_duong,
-    logo_amazon,
-    logo_bo_cong_thuong,
-    logo_lazada,
-    logo_shoppe,
     tra_tuyet_zoom,
     zalo_image,
 } from "@/assets/img";
 import { Link } from "react-router-dom";
-import Footer from "../_components/Footer";
 import { getAllProducts } from "@/services/product";
 import { useQuery } from "@tanstack/react-query";
 import { Spin } from "antd";
@@ -32,18 +26,25 @@ const HomePage = () => {
         queryFn: async () => getAllProducts(),
     });
 
- if (isLoading) {
-     return (
-         <div className="flex items-center justify-center min-h-screen bg-gray-100">
-             <Spin tip="Đang tải..." size="large" className="text-blue-500" />
-         </div>
-     );
- }
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <Spin
+                    tip="Đang tải..."
+                    size="large"
+                    className="text-blue-500"
+                />
+            </div>
+        );
+    }
     if (isError) return <p>Error: {error.message}</p>;
 
     // Sắp xếp sản phẩm theo ngày tạo giảm dần (sản phẩm mới nhất trước)
     const sortedProducts = [...data?.data]
-        .sort((a, b) => new Date(b.createdAt) as any - (new Date(a.createdAt) as any))
+        .sort(
+            (a, b) =>
+                (new Date(b.createdAt) as any) - (new Date(a.createdAt) as any),
+        )
         .slice(0, 4);
 
     if (isLoading) return <div>Loading...</div>;
@@ -104,68 +105,77 @@ const HomePage = () => {
                     <div className="container">
                         {/* list */}
                         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-                            {sortedProducts && sortedProducts.map((product) => (
-                                <div key={product._id} className="">
-                                    <a href={`products/${product._id}`}>
-                                        {" "}
-                                        <div className="relative group">
-                                            <img
-                                                src={product.image || ""} // Sử dụng giá trị mặc định nếu không có hình ảnh
-                                                alt={product.name || "Sản phẩm"}
-                                                className="max-w-[100%] max-h-[100%] object-contain"
-                                            />
-                                            <img
-                                                src={product.gallery[0]} // Sử dụng giá trị mặc định nếu không có hình ảnh
-                                                alt={product.name || "Sản phẩm"}
-                                                className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                            />
-                                        </div>
-                                    </a>
+                            {sortedProducts &&
+                                sortedProducts.map((product) => (
+                                    <div key={product._id} className="">
+                                        <a href={`products/${product._id}`}>
+                                            {" "}
+                                            <div className="relative group">
+                                                <img
+                                                    src={product.image || ""} // Sử dụng giá trị mặc định nếu không có hình ảnh
+                                                    alt={
+                                                        product.name ||
+                                                        "Sản phẩm"
+                                                    }
+                                                    className="max-w-[100%] max-h-[100%] object-contain"
+                                                />
+                                                <img
+                                                    src={product.gallery[0]} // Sử dụng giá trị mặc định nếu không có hình ảnh
+                                                    alt={
+                                                        product.name ||
+                                                        "Sản phẩm"
+                                                    }
+                                                    className="max-w-[100%] max-h-[100%] object-contain absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                                />
+                                            </div>
+                                        </a>
 
-                                    <div className="">
-                                        <h2 className="text-[#424242] pt-[17px] capitalize">
-                                            {product.name || "Tên sản phẩm"}
-                                        </h2>
+                                        <div className="">
+                                            <h2 className="text-[#424242] pt-[17px] capitalize">
+                                                {product.name || "Tên sản phẩm"}
+                                            </h2>
 
-                                        <span className="pt-[5px] w-auto flex flex-wrap">
-                                            {product.discount ? (
-                                                <>
-                                                    <del className="mr-2 text-[#6d6d6d]">
-                                                        <span className="">
+                                            <span className="pt-[5px] w-auto flex flex-wrap">
+                                                {product.discount ? (
+                                                    <>
+                                                        <del className="mr-2 text-[#6d6d6d]">
+                                                            <span className="">
+                                                                {Number(
+                                                                    product.regular_price,
+                                                                ).toLocaleString()}
+                                                                đ
+                                                            </span>
+                                                        </del>
+                                                        <span className="text-[#302e2e] ">
                                                             {Number(
-                                                                product.regular_price,
-                                                            ).toLocaleString()}
+                                                                product.regular_price *
+                                                                    (1 -
+                                                                        product.discount /
+                                                                            100),
+                                                            ).toLocaleString()}{" "}
                                                             đ
                                                         </span>
-                                                    </del>
+                                                    </>
+                                                ) : (
                                                     <span className="text-[#302e2e] ">
                                                         {Number(
-                                                            product.regular_price *
-                                                            (1 -
-                                                                product.discount /
-                                                                100),
-                                                        ).toLocaleString()}{" "}
+                                                            product.regular_price,
+                                                        ).toLocaleString()}
                                                         đ
                                                     </span>
-                                                </>
-                                            ) : (
-                                                <span className="text-[#302e2e] ">
-                                                    {Number(
-                                                        product.regular_price,
-                                                    ).toLocaleString()}
-                                                    đ
-                                                </span>
-                                            )}
-                                        </span>
+                                                )}
+                                            </span>
 
-                                        <Link to={`products/${product._id}`}>
-                                            <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
-                                                Xem chi tiết
-                                            </p>
-                                        </Link>
+                                            <Link
+                                                to={`products/${product._id}`}
+                                            >
+                                                <p className="text-[#d82253] font-medium text-[16px] md:text-[17px]">
+                                                    Xem chi tiết
+                                                </p>
+                                            </Link>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </div>

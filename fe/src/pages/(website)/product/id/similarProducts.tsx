@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { IProduct } from "@/common/types/product";
-import { Spin } from "antd";
 
 type Props = {
     products?: any;
@@ -9,7 +9,6 @@ type Props = {
 
 const SimilarProducts: React.FC<Props> = ({ products }) => {
     const location = useLocation();
-    const navigate = useNavigate();
 
     const [category, setCategory] = useState<string | null>(null);
     const [priceRange, setPriceRange] = useState<string | null>(null);
@@ -24,25 +23,6 @@ const SimilarProducts: React.FC<Props> = ({ products }) => {
         if (priceParam) setPriceRange(priceParam);
     }, [location.search]);
 
-    // Function to handle filter changes and update the URL with new filters
-    const handleFilterChange = (newCategory: string, newPriceRange: string) => {
-        const params = new URLSearchParams();
-
-        if (newCategory) {
-            params.set("category", newCategory);
-        }
-
-        if (newPriceRange) {
-            params.set("priceRange", newPriceRange);
-        }
-
-        // Navigate to the new URL with the updated query parameters
-        navigate({
-            search: params.toString(),
-        });
-    };
-
-    // Filter products based on the selected category and price range
     let filteredProducts = products?.data ?? [];
 
     if (category) {
