@@ -8,6 +8,7 @@ import { getAllProducts } from "@/services/product";
 import Breadcrumbs from "../_components/breadcrumbs";
 import { Link } from "react-router-dom";
 import { Spin } from "antd";
+import { IProduct } from "@/common/types/product";
 
 const ProductCategory = () => {
     const toggleDropdown = () => {
@@ -99,30 +100,29 @@ const ProductCategory = () => {
         staleTime: 5 * 60 * 60,
     });
 
-    const filteredProducts = products?.data
-        .filter((product: any) => {
-            return (
-                (!categoryFilter ||
-                    product.category.includes(categoryFilter)) &&
-                (price === 0 || product.regular_price <= price)
-            );
-        })
-        .sort((a: any, b: any) => {
-            if (sortOption === "newest") {
-                return (
-                    new Date(b.createdAt).getTime() -
-                    new Date(a.createdAt).getTime()
-                );
-            } else if (sortOption === "lowToHigh") {
-                return a.regular_price - b.regular_price;
-            } else if (sortOption === "highToLow") {
-                return b.regular_price - a.regular_price;
-            } else if (sortOption === "bestRating") {
-                return b.rating - a.rating; // Assuming there's a 'rating' field
-            } else {
-                return 0; // Default sorting (no sorting)
-            }
-        });
+  const filteredProducts: IProduct[] = products?.data
+      .filter((product: IProduct) => {
+          return (
+              (!categoryFilter || product.category.includes(categoryFilter)) &&
+              (price === 0 || product.regular_price <= price)
+          );
+      })
+      .sort((a: IProduct, b: IProduct) => {
+          if (sortOption === "newest") {
+              return (
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+              );
+          } else if (sortOption === "lowToHigh") {
+              return a.regular_price - b.regular_price;
+          } else if (sortOption === "highToLow") {
+              return b.regular_price - a.regular_price;
+          } else if (sortOption === "bestRating") {
+              return (b.rating ?? 0) - (a.rating ?? 0); // Use nullish coalescing to handle undefined ratings
+          } else {
+              return 0;
+          }
+      });
 
     if (isLoading || isLoadingCategory) {
         return (
@@ -253,7 +253,7 @@ const ProductCategory = () => {
                             ref={productListRef}
                             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 mb-8 px-4"
                         >
-                            {filteredProducts?.map((product: any) => (
+                            {filteredProducts?.map((product: IProduct) => (
                                 <div
                                     key={product._id}
                                     className="text-center group"
@@ -269,7 +269,12 @@ const ProductCategory = () => {
                                                 className="w-full h-auto transition-opacity duration-300 opacity-100 group-hover:opacity-0"
                                             />
                                             <img
-                                                src={product.gallery[0]}
+                                                src={
+                                                    product.gallery &&
+                                                    product.gallery.length > 0
+                                                        ? product.gallery[0]
+                                                        : "default-image-url"
+                                                }
                                                 alt={`${product.name} Hover`}
                                                 className="absolute inset-0 w-full h-auto transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                                             />

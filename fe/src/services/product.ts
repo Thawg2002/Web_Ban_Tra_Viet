@@ -49,7 +49,7 @@ export const addProduct = async (product: IProduct) => {
         console.log(error);
     }
 };
-export const removeProduct = async (id: any) => {
+export const removeProduct = async (id: string) => {
     try {
         const response = await instance.delete(`/products/${id}`, {
             // headers: {

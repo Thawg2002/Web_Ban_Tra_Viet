@@ -2,7 +2,9 @@ export interface IProduct {
     _id?: number | string;
     name: string;
     // category?: Array<string>;
-    category?: Array<string>;
+    category: string[];
+    createdAt: string;
+    rating?: number;
     regular_price: number;
     price: number;
     quantity: number;
