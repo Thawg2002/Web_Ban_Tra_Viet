@@ -9,12 +9,13 @@ import authRouter from "./routers/auth";
 import cartRouter from "./routers/cart";
 import orderRouter from "./routers/order";
 import blogRouter from "./routers/blog";
+import postRouter from "./routers/post";
 import categoryRouter from "./routers/category";
 import productRouter from "./routers/product";
 // import logingoogle from "./routers/logingoogle";
 import PaymentRouter from "./routers/PaymentRouter";
 import bannerRouter from "./routers/banner";
-
+import statisticsRouter from "./routers/statistics";
 const app = express();
 dotenv.config();
 // middleware
@@ -35,8 +36,9 @@ app.use("/api/v1", orderRouter);
 app.use("/api", PaymentRouter);
 app.use("/api/v1", blogRouter);
 app.use("/api/v1", bannerRouter);
+app.use("/api/v1", postRouter);
 // app.use("/api/v1", logingoogle);
-
+app.use("/api/v1", statisticsRouter);
 app.use(cookieParser());
 // app.use("/api/v1", router);
 

@@ -2,7 +2,7 @@
 
 import React from "react";
 import SidebarItem from "./SidebarItem";
-import { FaBox, FaChartBar, FaImage, FaUser, FaFile } from "react-icons/fa6"; // Ensure the icons are imported correctly
+import { FaBox, FaChartBar, FaImage, FaUser, FaFile, FaNewspaper } from "react-icons/fa6"; // Ensure the icons are imported correctly
 import { MdInventory } from "react-icons/md";
 import { List } from "lucide-react";
 
@@ -48,6 +48,11 @@ const routes = [
         icon: FaImage,
         label: "Banner",
         href: "/admin/banner",
+    },
+    {
+        icon: FaNewspaper,
+        label: "Tin tức",
+        href: "/admin/post",
     },
 ];
 

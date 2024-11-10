@@ -253,3 +253,62 @@ export const mergeOrders = async (req, res) => {
       .json({ error: error.message });
   }
 };
+
+// Thống kê đơn hàng
+// Thống kê đơn hàng
+export const getOrderStats = async (req, res) => {
+  try {
+    // Lấy các thông tin thống kê
+    const totalOrders = await Order.countDocuments(); // Tổng số đơn hàng
+    const totalRevenue = await Order.aggregate([
+      { $match: { status: { $ne: "đã hủy" } } }, // Không tính đơn đã hủy
+      { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" } } }
+    ]);
+
+    const statusCounts = await Order.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]); // Số lượng đơn hàng theo từng trạng thái
+
+    const productSales = await Order.aggregate([
+      { $unwind: "$items" },
+      { $group: { _id: "$items.productId", totalSold: { $sum: "$items.quantity" } } },
+      { $lookup: {
+          from: "products", // Dự kiến "products" là tên collection sản phẩm
+          localField: "_id",
+          foreignField: "_id",
+          as: "productInfo"
+        }
+      },
+      { $project: { product: { $arrayElemAt: ["$productInfo.name", 0] }, totalSold: 1 } }
+    ]); // Số lượng sản phẩm đã bán
+
+    // Thống kê người mua hàng nhiều nhất
+    const frequentBuyers = await Order.aggregate([
+      { $group: { _id: "$userId", totalOrders: { $sum: 1 } } },
+      { $sort: { totalOrders: -1 } },
+      { $limit: 5 }, // Top 5 người mua nhiều nhất
+      { $lookup: {
+          from: "users", // Dự kiến "users" là tên collection người dùng
+          localField: "_id",
+          foreignField: "_id",
+          as: "userInfo"
+        }
+      },
+      { $project: { userId: "$_id", totalOrders: 1, userInfo: { $arrayElemAt: ["$userInfo", 0] } } }
+    ]);
+
+    return res.status(StatusCodes.OK).json({
+      totalOrders,
+      totalRevenue: totalRevenue[0] ? totalRevenue[0].totalRevenue : 0,
+      statusCounts,
+      productSales,
+      frequentBuyers
+    });
+  } catch (error) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: "Lỗi khi lấy thống kê đơn hàng: " + error.message });
+  }
+};
+
+
