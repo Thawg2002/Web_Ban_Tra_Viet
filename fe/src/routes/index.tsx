@@ -39,6 +39,9 @@ import BlogDetailClient from "@/pages/(website)/Blogs/BlogDetail";
 import BannerManagerPage from "@/pages/(dashboard)/banner/page";
 import BannerAddPage from "@/pages/(dashboard)/banner/add/page";
 import BannerUpdatePage from "@/pages/(dashboard)/banner/edit/page";
+import PostManagerPage from "@/pages/(dashboard)/post/page";
+import StatisticsDashboard from "@/pages/(dashboard)/statistics/StatisticsPage";
+
 
 const Router = () => {
     return (
@@ -46,6 +49,7 @@ const Router = () => {
             <Routes>
                 <Route element={<PrivateRouter />}>
                     <Route path="admin" element={<LayoutAdmin />}>
+                        <Route index element={<StatisticsDashboard />} />
                         <Route
                             path="products"
                             element={<ProductManagement />}
@@ -76,6 +80,7 @@ const Router = () => {
                             path="banner/:id/update"
                             element={<BannerUpdatePage />}
                         />
+                        <Route path="post" element={<PostManagerPage />} />
                     </Route>
                 </Route>
 
@@ -98,6 +103,7 @@ const Router = () => {
                     <Route path="blog/:id" element={<BlogDetailClient />} />
 
                     <Route path="checkout" element={<CheckoutPage />} />
+
                     <Route
                         path="account"
                         element={

@@ -4,6 +4,7 @@ import {
   deleteProductById,
   getAllProducts,
   getProductById,
+  getProductStats,
   getRelatedProducts,
   updateProductById,
 } from "../controllers/product";
@@ -16,4 +17,5 @@ router.get("/products/:productId/related", getRelatedProducts);
 router.delete("/products/:id", deleteProductById);
 router.put("/products/:id", updateProductById);
 router.post("/products", create);
+// router.get("/statistics", getProductStats);
 export default router;

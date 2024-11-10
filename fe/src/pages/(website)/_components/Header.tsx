@@ -24,7 +24,7 @@ const Header = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const { isLoggedIn } = useAuth();
 
-    const [searchTerm, setSearchTerm] = useState(""); 
+    const [searchTerm, setSearchTerm] = useState("");
     const [filteredProducts, setFilteredProducts] = useState([]);
     const {
         data: products,
@@ -353,11 +353,6 @@ const Header = () => {
                                             </span>
                                         </div>
 
-                                        {/* <Link to={`/checkout`}>
-                                            <button className="w-full mt-3 bg-white text-red-600 font-medium text-sm py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-50">
-                                                Thanh Toán
-                                            </button>
-                                        </Link> */}
                                         <Link to={`/cart`}>
                                             <button className="w-full mt-2 text-white font-medium text-base py-2 px-4 rounded-lg transition duration-300 ease-in-out hover:bg-red-500">
                                                 Xem Giỏ Hàng
