@@ -109,7 +109,6 @@ const HomePage = () => {
                                 sortedProducts.map((product) => (
                                     <div key={product._id} className="">
                                         <a href={`products/${product._id}`}>
-                                            {" "}
                                             <div className="relative group">
                                                 <img
                                                     src={product.image || ""} // Sử dụng giá trị mặc định nếu không có hình ảnh
@@ -152,7 +151,7 @@ const HomePage = () => {
                                                                     (1 -
                                                                         product.discount /
                                                                             100),
-                                                            ).toLocaleString()}{" "}
+                                                            ).toLocaleString()}
                                                             đ
                                                         </span>
                                                     </>
@@ -207,7 +206,7 @@ const HomePage = () => {
                                 <button className="bg-[#fff] absolute top-[20px] left-[30px] py-[10px] px-[15px] font-medium text-[#4b4b4b]">
                                     Trà
                                 </button>
-                            </div>{" "}
+                            </div>
                             <div>
                                 <div className="relative mt-5">
                                     <img
@@ -218,7 +217,7 @@ const HomePage = () => {
                                     <button className="bg-[#fff] absolute top-[20px] left-[30px] py-[10px] px-[15px] font-medium text-[#4b4b4b]">
                                         Bộ ấm chén
                                     </button>
-                                </div>{" "}
+                                </div>
                                 <div className="relative mt-5">
                                     <img
                                         src={loai_hat_dinh_duong}
@@ -228,7 +227,7 @@ const HomePage = () => {
                                     <button className="bg-[#fff]  absolute top-[20px] left-[30px] py-[10px] px-[15px] font-medium text-[#4b4b4b]">
                                         Hạt điều dưỡng
                                     </button>
-                                </div>{" "}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -319,7 +318,7 @@ const HomePage = () => {
                                         Thêm vào giỏ hàng
                                     </p>
                                 </div>
-                            </div>{" "}
+                            </div>
                             <div className="">
                                 <div className="relative group">
                                     <img
@@ -352,7 +351,7 @@ const HomePage = () => {
                                         Thêm vào giỏ hàng
                                     </p>
                                 </div>
-                            </div>{" "}
+                            </div>
                             <div className="">
                                 <div className="relative group">
                                     <img
@@ -385,7 +384,7 @@ const HomePage = () => {
                                         Thêm vào giỏ hàng
                                     </p>
                                 </div>
-                            </div>{" "}
+                            </div>
                         </div>
                     </div>
                 </div>
