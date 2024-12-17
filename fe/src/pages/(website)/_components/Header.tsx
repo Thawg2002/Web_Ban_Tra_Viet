@@ -224,12 +224,12 @@ const Header = () => {
                                                 </ul>
                                             </li>
                                             <li className="px-4 py-2 hover:bg-gray-100">
-                                                <Link to={"/am-tra"}>
+                                                <Link to={"/products"}>
                                                     ẤM TRÀ
                                                 </Link>
                                             </li>
                                             <li className="px-4 py-2 hover:bg-gray-100">
-                                                <Link to={"/qua-tang"}>
+                                                <Link to={"/products"}>
                                                     QUÀ TẶNG
                                                 </Link>
                                             </li>
@@ -241,7 +241,7 @@ const Header = () => {
                                     <li className="mx-2">GIỚI THIỆU</li>
                                 </Link>
                                 <Link to={"/blog"}>
-                                    <li className="mx-2">Bài viết</li>
+                                    <li className="mx-2">BÀI VIẾT</li>
                                 </Link>
                                 <Link to={""}>
                                     <li className="mx-2">TIN TỨC</li>
@@ -419,7 +419,7 @@ const Header = () => {
                                 {menuMoblie ? (
                                     <ul className="text-[13px]  cursor-pointer ml-2 *:mt-5">
                                         <li>
-                                            <Link to={"/tra"}>TRÀ</Link>
+                                            <Link to={"/products"}>TRÀ</Link>
                                             <ul className=" *:mt-2 font-normal">
                                                 <li>
                                                     <Link to={"/products"}>
@@ -427,17 +427,17 @@ const Header = () => {
                                                     </Link>
                                                 </li>
                                                 <li>
-                                                    <Link to={"/tra-thao-moc"}>
+                                                    <Link to={"/products"}>
                                                         Trà thảo mộc
                                                     </Link>
                                                 </li>
                                             </ul>
                                         </li>
                                         <li>
-                                            <Link to={"/am-tra"}>ẤM TRÀ</Link>
+                                            <Link to={"/products"}>ẤM TRÀ</Link>
                                         </li>
                                         <li>
-                                            <Link to={"/qua-tang"}>
+                                            <Link to={"/products"}>
                                                 QUÀ TẶNG
                                             </Link>
                                         </li>

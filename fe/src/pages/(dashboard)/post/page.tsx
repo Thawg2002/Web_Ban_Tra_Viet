@@ -186,429 +186,428 @@ const PostList = () => {
 
             <Table className="mt-5" dataSource={data} columns={columns} />
 
-    <Modal
-title={editingPost ? "Cập nhật bài viết" : "Thêm bài viết"}
-open={isModalVisible}
-onOk={handleAddPost}
-onCancel={() => {
-setIsModalVisible(false);
-setEditingPost(null);
-setImages([]);
-form.resetFields();
-}}
-width={800}
->
-<Form form={form} layout="vertical">
-<Form.Item
-label="Tiêu đề"
-name="title"
-rules={[
-{
-required: true,
-message: "Vui lòng nhập tiêu đề!",
-},
-]}
->
-<Input />
-</Form.Item>
-
-
-                <Form.Item label="Upload Ảnh">
-                    <Upload
-                        name="images"
-                        listType="picture-card"
-                        fileList={images.map((url, index) => ({
-                            uid: `-${index}`,
-                            name: url.split("/").pop() || "",
-                            status: "done",
-                            url: url,
-                        }))}
-                        multiple
-                        customRequest={({ file, onSuccess }) => {
-                            handleUploadChange({ file });
-                            setTimeout(() => {
-                                onSuccess?.("ok");
-                            }, 0);
-                        }}
-                        onRemove={(file) =>
-                            handleRemoveImage(file.url || "")
-                        }
+            <Modal
+                title={editingPost ? "Cập nhật bài viết" : "Thêm bài viết"}
+                open={isModalVisible}
+                onOk={handleAddPost}
+                onCancel={() => {
+                    setIsModalVisible(false);
+                    setEditingPost(null);
+                    setImages([]);
+                    form.resetFields();
+                }}
+                width={800}
+            >
+                <Form form={form} layout="vertical">
+                    <Form.Item
+                        label="Tiêu đề"
+                        name="title"
+                        rules={[
+                            {
+                                required: true,
+                                message: "Vui lòng nhập tiêu đề!",
+                            },
+                        ]}
                     >
-                        <Button icon={<UploadOutlined />}></Button>
-                    </Upload>
-                </Form.Item>
+                        <Input />
+                    </Form.Item>
 
-                {images.length > 0 && (
-                    <div
-                        style={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: "10px",
-                        }}
+                    <Form.Item label="Upload Ảnh">
+                        <Upload
+                            name="images"
+                            listType="picture-card"
+                            fileList={images.map((url, index) => ({
+                                uid: `-${index}`,
+                                name: url.split("/").pop() || "",
+                                status: "done",
+                                url: url,
+                            }))}
+                            multiple
+                            customRequest={({ file, onSuccess }) => {
+                                handleUploadChange({ file });
+                                setTimeout(() => {
+                                    onSuccess?.("ok");
+                                }, 0);
+                            }}
+                            onRemove={(file) =>
+                                handleRemoveImage(file.url || "")
+                            }
+                        >
+                            <Button icon={<UploadOutlined />}></Button>
+                        </Upload>
+                    </Form.Item>
+
+                    {images.length > 0 && (
+                        <div
+                            style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: "10px",
+                            }}
+                        >
+                            {images.map((imgUrl, index) => (
+                                <img
+                                    key={index}
+                                    src={imgUrl}
+                                    alt={`Uploaded ${index + 1}`}
+                                    style={{
+                                        width: "200px",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Phần giới thiệu */}
+                    <Form.Item
+                        label="Tiêu đề phần giới thiệu"
+                        name={["introduction", "heading"]}
+                        rules={[
+                            {
+                                required: true,
+                                message:
+                                    "Vui lòng nhập tiêu đề phần giới thiệu!",
+                            },
+                        ]}
                     >
-                        {images.map((imgUrl, index) => (
-                            <img
-                                key={index}
-                                src={imgUrl}
-                                alt={`Uploaded ${index + 1}`}
-                                style={{
-                                    width: "200px",
-                                    objectFit: "cover",
-                                }}
-                            />
-                        ))}
-                    </div>
-                )}
+                        <Input />
+                    </Form.Item>
 
-                {/* Phần giới thiệu */}
-                <Form.Item
-                    label="Tiêu đề phần giới thiệu"
-                    name={["introduction", "heading"]}
-                    rules={[
-                        {
-                            required: true,
-                            message:
-                                "Vui lòng nhập tiêu đề phần giới thiệu!",
-                        },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.List name={["introduction", "paragraphs"]}>
-                    {(fields, { add, remove }) => (
-                        <>
-                            <Button
-                                type="dashed"
-                                onClick={() => add()}
-                                block
-                            >
-                                Thêm đoạn văn giới thiệu
-                            </Button>
-                            {fields.map((field, index) => (
-                                <Space
-                                    key={field.key}
-                                    style={{
-                                        display: "flex",
-                                        marginBottom: 8,
-                                    }}
-                                    align="start"
+                    <Form.List name={["introduction", "paragraphs"]}>
+                        {(fields, { add, remove }) => (
+                            <>
+                                <Button
+                                    type="dashed"
+                                    onClick={() => add()}
+                                    block
                                 >
-                                    <Form.Item
-                                        {...field}
-                                        name={[field.name, "paragraph"]}
-                                        label={`Đoạn văn ${index + 1}`}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message:
-                                                    "Vui lòng nhập đoạn văn!",
-                                            },
-                                        ]}
+                                    Thêm đoạn văn giới thiệu
+                                </Button>
+                                {fields.map((field, index) => (
+                                    <Space
+                                        key={field.key}
+                                        style={{
+                                            display: "flex",
+                                            marginBottom: 8,
+                                        }}
+                                        align="start"
                                     >
-                                        <Input.TextArea />
-                                    </Form.Item>
-                                    <Button
-                                        danger
-                                        onClick={() => remove(field.name)}
-                                    >
-                                        Xóa
-                                    </Button>
-                                </Space>
-                            ))}
-                        </>
-                    )}
-                </Form.List>
-
-                {/* Sứ mệnh */}
-                <Form.Item
-                    label="Tiêu đề sứ mệnh"
-                    name={["mission", "heading"]}
-                    rules={[
-                        {
-                            required: true,
-                            message: "Vui lòng nhập tiêu đề sứ mệnh!",
-                        },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.Item
-                    label="Tiêu đề chính của sứ mệnh"
-                    name={["mission", "title"]}
-                    rules={[
-                        {
-                            required: true,
-                            message:
-                                "Vui lòng nhập tiêu đề chính của sứ mệnh!",
-                        },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.List name={["mission", "content"]}>
-                    {(fields, { add, remove }) => (
-                        <>
-                            <Button
-                                type="dashed"
-                                onClick={() => add()}
-                                block
-                            >
-                                Thêm nội dung sứ mệnh
-                            </Button>
-                            {fields.map((field, index) => (
-                                <Space
-                                    key={field.key}
-                                    style={{
-                                        display: "flex",
-                                        marginBottom: 8,
-                                    }}
-                                    align="start"
-                                >
-                                    <Form.Item
-                                        {...field}
-                                        name={[field.name, "title"]}
-                                        label={`Tiêu đề nội dung ${index + 1}`}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message:
-                                                    "Vui lòng nhập tiêu đề nội dung!",
-                                            },
-                                        ]}
-                                    >
-                                        <Input />
-                                    </Form.Item>
-
-                                    <Form.List
-                                        name={[field.name, "paragraphs"]}
-                                    >
-                                        {(
-                                            subFields,
-                                            {
-                                                add: addSub,
-                                                remove: removeSub,
-                                            },
-                                        ) => (
-                                            <>
-                                                <Button
-                                                    type="dashed"
-                                                    onClick={() => addSub()}
-                                                    block
-                                                >
-                                                    Thêm đoạn văn
-                                                </Button>
-                                                {subFields.map(
-                                                    (
-                                                        subField,
-                                                        subIndex,
-                                                    ) => (
-                                                        <Space
-                                                            key={
-                                                                subField.key
-                                                            }
-                                                            style={{
-                                                                display:
-                                                                    "flex",
-                                                                marginBottom: 8,
-                                                            }}
-                                                            align="start"
-                                                        >
-                                                            <Form.Item
-                                                                {...subField}
-                                                                name={[
-                                                                    subField.name,
-                                                                    "paragraph",
-                                                                ]}
-                                                                label={`Đoạn văn ${subIndex + 1}`}
-                                                                rules={[
-                                                                    {
-                                                                        required:
-                                                                            true,
-                                                                        message:
-                                                                            "Vui lòng nhập đoạn văn!",
-                                                                    },
-                                                                ]}
-                                                            >
-                                                                <Input.TextArea />
-                                                            </Form.Item>
-                                                            <Button
-                                                                danger
-                                                                onClick={() =>
-                                                                    removeSub(
-                                                                        subField.name,
-                                                                    )
-                                                                }
-                                                            >
-                                                                Xóa
-                                                            </Button>
-                                                        </Space>
-                                                    ),
-                                                )}
-                                            </>
-                                        )}
-                                    </Form.List>
-                                    <Button
-                                        danger
-                                        onClick={() => remove(field.name)}
-                                    >
-                                        Xóa nội dung
-                                    </Button>
-                                </Space>
-                            ))}
-                        </>
-                    )}
-                </Form.List>
-                {/* Thành viên trong đội ngũ */}
-                <Form.List name="team">
-                    {(fields, { add, remove }) => (
-                        <>
-                            <Button
-                                type="dashed"
-                                onClick={() => add()}
-                                block
-                            >
-                                Thêm thành viên đội ngũ
-                            </Button>
-                            {fields.map((field, index) => (
-                                <Space
-                                    key={field.key}
-                                    style={{
-                                        display: "flex",
-                                        marginBottom: 8,
-                                    }}
-                                    align="start"
-                                >
-                                    {/* Tên thành viên */}
-                                    <Form.Item
-                                        {...field}
-                                        name={[field.name, "name"]}
-                                        label="Tên thành viên"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message:
-                                                    "Vui lòng nhập tên thành viên!",
-                                            },
-                                        ]}
-                                    >
-                                        <Input />
-                                    </Form.Item>
-
-                                    {/* Chức vụ */}
-                                    <Form.Item
-                                        {...field}
-                                        name={[field.name, "title"]}
-                                        label="Chức vụ"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message:
-                                                    "Vui lòng nhập chức vụ!",
-                                            },
-                                        ]}
-                                    >
-                                        <Input />
-                                    </Form.Item>
-
-                                    {/* Câu nói trích dẫn */}
-                                    <Form.Item
-                                        {...field}
-                                        name={[field.name, "quote"]}
-                                        label="Câu nói trích dẫn"
-                                    >
-                                        <Input.TextArea />
-                                    </Form.Item>
-
-                                    {/* Upload ảnh */}
-                                    <Form.Item
-                                        {...field}
-                                        name={[field.name, "gallery"]}
-                                        label="Thư viện ảnh"
-                                    >
-                                        <Upload
-                                            name="file"
-                                            listType="picture"
-                                            maxCount={1}
-                                            customRequest={async ({
-                                                file,
-                                                onSuccess,
-                                            }) => {
-                                                const uploadedImageUrl =
-                                                    await uploadFileCloudinary(
-                                                        file,
-                                                    );
-                                                form.setFieldsValue({
-                                                    team: form
-                                                        .getFieldValue(
-                                                            "team",
-                                                        )
-                                                        .map(
-                                                            (
-                                                                member: any,
-                                                                idx: number,
-                                                            ) => {
-                                                                if (
-                                                                    idx ===
-                                                                    index
-                                                                ) {
-                                                                    return {
-                                                                        ...member,
-                                                                        gallery:
-                                                                            uploadedImageUrl, // Save uploaded image URL to gallery field
-                                                                    };
-                                                                }
-                                                                return member;
-                                                            },
-                                                        ),
-                                                });
-                                                setTimeout(() => {
-                                                    onSuccess("ok");
-                                                }, 0);
-                                            }}
+                                        <Form.Item
+                                            {...field}
+                                            name={[field.name, "paragraph"]}
+                                            label={`Đoạn văn ${index + 1}`}
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message:
+                                                        "Vui lòng nhập đoạn văn!",
+                                                },
+                                            ]}
                                         >
-                                            <Button
-                                                icon={<UploadOutlined />}
-                                            >
-                                                Chọn ảnh
-                                            </Button>
-                                        </Upload>
-                                        {form.getFieldValue([
-                                            "team",
-                                            index,
-                                            "gallery",
-                                        ]) && (
-                                            <img
-                                                src={form.getFieldValue([
-                                                    "team",
-                                                    index,
-                                                    "gallery",
-                                                ])}
-                                                alt={`Gallery item ${index}`}
-                                                style={{
-                                                    width: "100%",
-                                                    height: "auto",
-                                                }}
-                                            />
-                                        )}
-                                    </Form.Item>
+                                            <Input.TextArea />
+                                        </Form.Item>
+                                        <Button
+                                            danger
+                                            onClick={() => remove(field.name)}
+                                        >
+                                            Xóa
+                                        </Button>
+                                    </Space>
+                                ))}
+                            </>
+                        )}
+                    </Form.List>
 
-                                    {/* Xóa thành viên */}
-                                    <Button
-                                        danger
-                                        onClick={() => remove(field.name)}
+                    {/* Sứ mệnh */}
+                    <Form.Item
+                        label="Tiêu đề sứ mệnh"
+                        name={["mission", "heading"]}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Vui lòng nhập tiêu đề sứ mệnh!",
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Tiêu đề chính của sứ mệnh"
+                        name={["mission", "title"]}
+                        rules={[
+                            {
+                                required: true,
+                                message:
+                                    "Vui lòng nhập tiêu đề chính của sứ mệnh!",
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.List name={["mission", "content"]}>
+                        {(fields, { add, remove }) => (
+                            <>
+                                <Button
+                                    type="dashed"
+                                    onClick={() => add()}
+                                    block
+                                >
+                                    Thêm nội dung sứ mệnh
+                                </Button>
+                                {fields.map((field, index) => (
+                                    <Space
+                                        key={field.key}
+                                        style={{
+                                            display: "flex",
+                                            marginBottom: 8,
+                                        }}
+                                        align="start"
                                     >
-                                        Xóa thành viên
-                                    </Button>
-                                </Space>
-                            ))}
-                        </>
-                    )}
-                </Form.List>
-            </Form>
-        </Modal>
+                                        <Form.Item
+                                            {...field}
+                                            name={[field.name, "title"]}
+                                            label={`Tiêu đề nội dung ${index + 1}`}
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message:
+                                                        "Vui lòng nhập tiêu đề nội dung!",
+                                                },
+                                            ]}
+                                        >
+                                            <Input />
+                                        </Form.Item>
+
+                                        <Form.List
+                                            name={[field.name, "paragraphs"]}
+                                        >
+                                            {(
+                                                subFields,
+                                                {
+                                                    add: addSub,
+                                                    remove: removeSub,
+                                                },
+                                            ) => (
+                                                <>
+                                                    <Button
+                                                        type="dashed"
+                                                        onClick={() => addSub()}
+                                                        block
+                                                    >
+                                                        Thêm đoạn văn
+                                                    </Button>
+                                                    {subFields.map(
+                                                        (
+                                                            subField,
+                                                            subIndex,
+                                                        ) => (
+                                                            <Space
+                                                                key={
+                                                                    subField.key
+                                                                }
+                                                                style={{
+                                                                    display:
+                                                                        "flex",
+                                                                    marginBottom: 8,
+                                                                }}
+                                                                align="start"
+                                                            >
+                                                                <Form.Item
+                                                                    {...subField}
+                                                                    name={[
+                                                                        subField.name,
+                                                                        "paragraph",
+                                                                    ]}
+                                                                    label={`Đoạn văn ${subIndex + 1}`}
+                                                                    rules={[
+                                                                        {
+                                                                            required:
+                                                                                true,
+                                                                            message:
+                                                                                "Vui lòng nhập đoạn văn!",
+                                                                        },
+                                                                    ]}
+                                                                >
+                                                                    <Input.TextArea />
+                                                                </Form.Item>
+                                                                <Button
+                                                                    danger
+                                                                    onClick={() =>
+                                                                        removeSub(
+                                                                            subField.name,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Xóa
+                                                                </Button>
+                                                            </Space>
+                                                        ),
+                                                    )}
+                                                </>
+                                            )}
+                                        </Form.List>
+                                        <Button
+                                            danger
+                                            onClick={() => remove(field.name)}
+                                        >
+                                            Xóa nội dung
+                                        </Button>
+                                    </Space>
+                                ))}
+                            </>
+                        )}
+                    </Form.List>
+                    {/* Thành viên trong đội ngũ */}
+                    <Form.List name="team">
+                        {(fields, { add, remove }) => (
+                            <>
+                                <Button
+                                    type="dashed"
+                                    onClick={() => add()}
+                                    block
+                                >
+                                    Thêm thành viên đội ngũ
+                                </Button>
+                                {fields.map((field, index) => (
+                                    <Space
+                                        key={field.key}
+                                        style={{
+                                            display: "flex",
+                                            marginBottom: 8,
+                                        }}
+                                        align="start"
+                                    >
+                                        {/* Tên thành viên */}
+                                        <Form.Item
+                                            {...field}
+                                            name={[field.name, "name"]}
+                                            label="Tên thành viên"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message:
+                                                        "Vui lòng nhập tên thành viên!",
+                                                },
+                                            ]}
+                                        >
+                                            <Input />
+                                        </Form.Item>
+
+                                        {/* Chức vụ */}
+                                        <Form.Item
+                                            {...field}
+                                            name={[field.name, "title"]}
+                                            label="Chức vụ"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message:
+                                                        "Vui lòng nhập chức vụ!",
+                                                },
+                                            ]}
+                                        >
+                                            <Input />
+                                        </Form.Item>
+
+                                        {/* Câu nói trích dẫn */}
+                                        <Form.Item
+                                            {...field}
+                                            name={[field.name, "quote"]}
+                                            label="Câu nói trích dẫn"
+                                        >
+                                            <Input.TextArea />
+                                        </Form.Item>
+
+                                        {/* Upload ảnh */}
+                                        <Form.Item
+                                            {...field}
+                                            name={[field.name, "gallery"]}
+                                            label="Thư viện ảnh"
+                                        >
+                                            <Upload
+                                                name="file"
+                                                listType="picture"
+                                                maxCount={1}
+                                                customRequest={async ({
+                                                    file,
+                                                    onSuccess,
+                                                }) => {
+                                                    const uploadedImageUrl =
+                                                        await uploadFileCloudinary(
+                                                            file,
+                                                        );
+                                                    form.setFieldsValue({
+                                                        team: form
+                                                            .getFieldValue(
+                                                                "team",
+                                                            )
+                                                            .map(
+                                                                (
+                                                                    member: any,
+                                                                    idx: number,
+                                                                ) => {
+                                                                    if (
+                                                                        idx ===
+                                                                        index
+                                                                    ) {
+                                                                        return {
+                                                                            ...member,
+                                                                            gallery:
+                                                                                uploadedImageUrl, // Save uploaded image URL to gallery field
+                                                                        };
+                                                                    }
+                                                                    return member;
+                                                                },
+                                                            ),
+                                                    });
+                                                    setTimeout(() => {
+                                                        onSuccess("ok");
+                                                    }, 0);
+                                                }}
+                                            >
+                                                <Button
+                                                    icon={<UploadOutlined />}
+                                                >
+                                                    Chọn ảnh
+                                                </Button>
+                                            </Upload>
+                                            {form.getFieldValue([
+                                                "team",
+                                                index,
+                                                "gallery",
+                                            ]) && (
+                                                <img
+                                                    src={form.getFieldValue([
+                                                        "team",
+                                                        index,
+                                                        "gallery",
+                                                    ])}
+                                                    alt={`Gallery item ${index}`}
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "auto",
+                                                    }}
+                                                />
+                                            )}
+                                        </Form.Item>
+
+                                        {/* Xóa thành viên */}
+                                        <Button
+                                            danger
+                                            onClick={() => remove(field.name)}
+                                        >
+                                            Xóa thành viên
+                                        </Button>
+                                    </Space>
+                                ))}
+                            </>
+                        )}
+                    </Form.List>
+                </Form>
+            </Modal>
         </div>
     );
 };

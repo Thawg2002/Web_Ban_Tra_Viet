@@ -192,7 +192,11 @@ const BannerUpdatePage: React.FC = () => {
                         />
                     </Form.Item>
                     <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                        <Button type="primary" htmlType="submit">
+                        <Button
+                            className="bg-green-600"
+                            type="primary"
+                            htmlType="submit"
+                        >
                             Cập nhật
                         </Button>
                     </Form.Item>

@@ -12,45 +12,41 @@ import { toast } from "@/components/ui/use-toast";
 import { removeProduct } from "@/services/product";
 import { useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
+import { Modal, notification } from "antd";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
-// XÓA SẢN PHẨM
-// const queryClient = useQueryClient();
-// const onhandleDelete = async (row: any) => {
-//     // console.log("row", row.original._id);
-//     if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-//         try {
-//             await removeProduct(row.original._id);
-//             toast({
-//                 title: "Xóa sản phẩm thành công",
-//                 typeof: "success",
-//             });
-//             queryClient.invalidateQueries({
-//                 queryKey: ["products"],
-//             });
-//         } catch (error) {
-//             console.log(error);
-//         }
-//     }
-// };
+const showSuccessNotification = (message: string) => {
+    notification.success({
+        message: "Thành công",
+        description: message,
+        placement: "topRight",
+        duration: 3,
+        style: {
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        },
+    });
+};
 const useDeleteProduct = () => {
     const queryClient = useQueryClient();
 
     const handleDelete = async (row: any) => {
-        if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-            try {
-                await removeProduct(row.original._id);
-                toast({
-                    title: "Xóa sản phẩm thành công",
-                    typeof: "success",
-                });
-                queryClient.invalidateQueries({
-                    queryKey: ["products"],
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
+        Modal.confirm({
+            title: "Bạn có chắc chắn muốn xóa sản phẩm này?",
+            content: "Hành động này không thể hoàn tác.",
+            okText: "Xóa",
+            okType: "danger",
+            cancelText: "Hủy",
+            onOk: async () => {
+                try {
+                    await removeProduct(row.original._id);
+                    showSuccessNotification("Xóa sản phẩm thành công");
+                    queryClient.invalidateQueries({ queryKey: ["products"] });
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+        });
     };
 
     return handleDelete;
@@ -80,6 +76,11 @@ export const columns: ColumnDef<IProduct>[] = [
         enableSorting: false,
         enableHiding: false,
     },
+
+    {
+        accessorKey: "name",
+        header: "Tên sản phẩm",
+    },
     {
         accessorKey: "featured_image",
         header: "Ảnh sản phẩm",
@@ -88,33 +89,29 @@ export const columns: ColumnDef<IProduct>[] = [
             return <img src={image} alt="image" width={50} />;
         },
     },
-    {
-        accessorKey: "name",
-        header: "Tên sản phẩm",
-    },
-    {
-        accessorKey: "category",
-        header: "Danh mục",
-        cell: ({ row }: { row: any }) => {
-            // Log dữ liệu của hàng để kiểm tra
-            // console.log("row.original", row.original);
+    // {
+    //     accessorKey: "category",
+    //     header: "Danh mục",
+    //     cell: ({ row }: { row: any }) => {
+    //         // Log dữ liệu của hàng để kiểm tra
+    //         // console.log("row.original", row.original);
 
-            // Giả sử row.original.category là một mảng các ID danh mục
-            const NameCategory = row.original.category
-                .map((item: any) => {
-                    return item.name;
-                })
-                .join(", ");
-            // console.log("NameCategory", NameCategory);
-            // const x = NameCategory.join(", ");
-            // console.log("x", x);
-            // // Hiển thị các tên danh mục trong ô
-            return <span>{NameCategory}</span>;
-        },
-    },
+    //         // Giả sử row.original.category là một mảng các ID danh mục
+    //         const NameCategory = row.original.category
+    //             .map((item: any) => {
+    //                 return item.name;
+    //             })
+    //             .join(", ");
+    //         // console.log("NameCategory", NameCategory);
+    //         // const x = NameCategory.join(", ");
+    //         // console.log("x", x);
+    //         // // Hiển thị các tên danh mục trong ô
+    //         return <span>{NameCategory}</span>;
+    //     },
+    // },
     {
         accessorKey: "regular_price",
-        header: "Gía",
+        header: "Giá sản phẩm",
     },
 
     {

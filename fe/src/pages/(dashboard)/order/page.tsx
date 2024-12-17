@@ -344,8 +344,8 @@ const OrderList = () => {
                                 className="flex items-center mb-4"
                             >
                                 <img
-                                    src={item.productId.image}
-                                    alt={item.productId.name}
+                                    src={item.productId?.image}
+                                    alt={item.productId?.name}
                                     style={{
                                         width: "80px",
                                         marginRight: "20px",

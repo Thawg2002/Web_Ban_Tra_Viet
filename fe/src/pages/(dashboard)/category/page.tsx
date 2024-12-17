@@ -130,8 +130,8 @@ const CategoryList = () => {
                         <Button className="mx-2">Sửa</Button>
                     </Link>
                     <Popconfirm
-                        title="Delete the category"
-                        description="Are you sure to delete this category?"
+                        title="Xóa danh mục !"
+                        description="Bạn chắc chắn muốn xóa danh mục này ?"
                         onConfirm={() => mutate(category)}
                         okText="Yes"
                         cancelText="No"
